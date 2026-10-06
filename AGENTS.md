@@ -78,7 +78,8 @@ It runs: `compile --warnings-as-errors`, `format --check-formatted`,
 `check:exports` (publint + arethetypeswrong), and the scope gate
 (`scripts/check-boundary.mjs`, see below). It also requires the npm production
 security audit, release checks, and a minimal consumer of the built Hex tarball
-with no optional dependencies. It therefore requires Node + pnpm on
+with no optional dependencies. It also checks DocShell source for direct network
+asset references. It therefore requires Node + pnpm on
 PATH. Config lives in `.check.exs`, `.doctor.exs`, `coveralls.json`, `.credo.exs`,
 `biome.json`, `knip.json`.
 

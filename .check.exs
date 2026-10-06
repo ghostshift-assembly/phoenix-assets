@@ -35,6 +35,8 @@
     {:hex_consumer, command: "node scripts/release.mjs smoke-hex"},
     {:release_contract, command: "pnpm check:release", deps: [:pnpm_install]},
     {:svelte_filenames, command: "pnpm check:svelte-filenames"},
+    {:doc_shell_offline,
+     command: "pnpm --filter @phoenix-assets/doc-shell check:offline", deps: [:pnpm_install]},
 
     ## Scope gate: no consuming platform's name or vocabulary in lib/ or npm/.
     ## Needs no install -- plain Node, like the doc-shell offline guard.
