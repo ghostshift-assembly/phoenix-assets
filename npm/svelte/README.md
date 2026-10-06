@@ -12,7 +12,7 @@ pnpm add -D @phoenix-assets/svelte
 ```
 
 Peers: `svelte` (`^5.7.0`) and `@electric-sql/client` (`^1.5.27`). The
-`@tanstack/electric-db-collection` (`^0.4.7`) and `@tanstack/svelte-db` (`^0.3.7`)
+`@tanstack/electric-db-collection` (`^0.5.5`) and `@tanstack/svelte-db` (`^0.5.4`)
 peers are optional and only needed for the `/collection` subpath. This frontend
 is qualified with the PostgreSQL 18.6 / Electric 1.8.1 stack; the host owns its
 server deployment and Phoenix.Sync dependency.

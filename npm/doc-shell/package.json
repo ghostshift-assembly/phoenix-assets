@@ -48,15 +48,15 @@
     "svelte": "^5.7.0"
   },
   "dependencies": {
-    "@shikijs/langs": "^4.4.3",
-    "@shikijs/themes": "^4.4.3",
+    "@shikijs/langs": "^4.5.0",
+    "@shikijs/themes": "^4.5.0",
     "mermaid": "^11.17.2",
-    "shiki": "^4.4.3"
+    "shiki": "^4.5.0"
   },
   "devDependencies": {
+    "@storybook/svelte-vite": "10.6.0",
     "@sveltejs/package": "catalog:",
     "@sveltejs/vite-plugin-svelte": "catalog:",
-    "@storybook/svelte-vite": "10.6.0",
     "@vitest/coverage-v8": "catalog:",
     "happy-dom": "catalog:",
     "pagefind": "1.5.2",

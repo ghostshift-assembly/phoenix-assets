@@ -105,8 +105,8 @@ cd assets && pnpm add -D --save-exact @phoenix-assets/vite@1.1.0 @phoenix-assets
 
 ### PostgreSQL 18 and Electric
 
-The frontend is qualified with `@electric-sql/client` 1.5.27,
-`@tanstack/electric-db-collection` 0.4.7 and `@tanstack/svelte-db` 0.3.7.
+The frontend is qualified with `@electric-sql/client` 1.5.28,
+`@tanstack/electric-db-collection` 0.5.5 and `@tanstack/svelte-db` 0.5.4.
 Install the TanStack peers when using the `/collection` entry point.
 
 Your application owns the sync backend. For the qualified PostgreSQL 18.6 /

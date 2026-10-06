@@ -17,8 +17,9 @@ a build step that writes JSON. Each produces the same `DocShellPresentation`.
 
 The package contains no app aliases. Customize its neutral defaults using the
 `DocShellTheme` prop or the documented `--doc-*` CSS custom properties. Search
-uses Fuse.js by default and accepts a replacement callback for graph/vector
-search. Navigation is similarly host-controlled through a `navigate` callback.
+matches the supplied records with the built-in deterministic matcher. The
+exported `Search` component accepts a replacement `search` callback. Navigation
+uses the host's `navigate` callback when supplied.
 
 The recursive AST renderer handles all fourteen directives plus Shiki and
 Mermaid code fences. `ApiReference` renders tag-grouped OpenAPI operations,
@@ -26,8 +27,23 @@ recursive schemas and examples, and a collapsible try-it panel with a lazy JSON
 viewer. Dynamic links reject executable and unknown URL schemes. Try-it paths
 cannot replace the configured API origin; a cross-origin `baseUrl` also needs an
 exact `allowedOrigins` entry and an on-screen confirmation before sending.
-Browser cookies remain same-origin-only. All assets are bundled; `pnpm
-check:offline` rejects CDN references.
+Browser cookies remain same-origin-only. `pnpm check:offline` checks package
+source for direct network asset references.
+
+Mermaid 11 still requires KaTeX 0.16. npm consumers should override it to
+`0.18.7`, which includes the
+[settings security fix](https://github.com/advisories/GHSA-238p-pmpm-9mq7):
+
+```json
+{
+  "overrides": {
+    "katex": "0.18.7"
+  }
+}
+```
+
+For pnpm, put the same `katex` entry under `overrides` in
+`pnpm-workspace.yaml`, as this workspace does.
 
 Shiki grammars are loaded explicitly rather than through its full bundle. See
 `supportedLanguages` for the set, which covers a Phoenix + SvelteKit codebase and

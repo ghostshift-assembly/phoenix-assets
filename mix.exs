@@ -61,7 +61,7 @@ defmodule PhoenixAssets.MixProject do
       {:nimble_options, "~> 1.1"},
       {:phoenix_live_view, "~> 1.1", optional: true},
       doc_shell_dependency(),
-      {:ash, "~> 3.33", optional: true},
+      {:ash, "~> 3.34 and >= 3.34.3", optional: true},
       # Ash TypeScript remains an optional generator integration. The host owns
       # its sync backend; qualification must not impose a production backend pin.
       {:ash_typescript, "~> 0.17", optional: true},
@@ -73,7 +73,7 @@ defmodule PhoenixAssets.MixProject do
       {:tidewave, "~> 0.5", optional: true},
       {:igniter, "~> 0.6", optional: true},
       {:git_ops, "~> 2.6", only: [:dev], runtime: false},
-      {:ex_check, "~> 0.16", only: [:dev], runtime: false},
+      {:ex_check, "~> 0.17", only: [:dev], runtime: false},
       {:ex_doc, "~> 0.40", only: :dev, runtime: false},
       {:credo, "~> 1.7", only: [:dev, :test], runtime: false},
       {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},

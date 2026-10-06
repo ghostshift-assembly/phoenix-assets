@@ -159,8 +159,8 @@ Hex requirement on either package. For PostgreSQL 18.6, use the qualified
 Phoenix.Sync revision documented in the README and Electric 1.8.1 (with the
 host's explicit override when embedding). Preserve sandbox transaction isolation
 in tests. The frontend peers require `@electric-sql/client` >=1.5.27 within 1.x,
-`@tanstack/electric-db-collection` >=0.4.7 within 0.4.x, and
-`@tanstack/svelte-db` >=0.3.7 within 0.3.x. TanStack remains optional outside the
+`@tanstack/electric-db-collection` >=0.5.5 within 0.5.x, and
+`@tanstack/svelte-db` >=0.5.4 within 0.5.x. TanStack remains optional outside the
 `/collection` entry point. Artifact and schema contracts retain their versions.
 
 ## Frontend packages
