@@ -28,10 +28,26 @@ const results = $derived(
       : [],
 )
 $effect(() => {
-  if (search && query.length >= 2)
-    void Promise.resolve(search(query, entries)).then((value) => {
-      external = value
-    })
+  const runSearch = search
+  const currentQuery = query
+  const currentEntries = entries
+  external = []
+  if (!runSearch || currentQuery.length < 2) return
+
+  let active = true
+  void Promise.resolve()
+    .then(() => runSearch(currentQuery, currentEntries))
+    .then(
+      (value) => {
+        if (active) external = value
+      },
+      () => {
+        if (active) external = []
+      },
+    )
+  return () => {
+    active = false
+  }
 })
 const close = () => {
   open = false

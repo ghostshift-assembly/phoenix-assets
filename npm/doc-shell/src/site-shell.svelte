@@ -1,5 +1,4 @@
 <script lang="ts">
-import { onMount } from "svelte"
 import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import Search from "./search.svelte"
@@ -14,9 +13,10 @@ let {
 const page = $derived(site.pages[pageId])
 let shellRoot = $state<HTMLElement>()
 
-onMount(() => {
-  if (!shellRoot) return
-  const controller = mountBrowserCore(shellRoot)
+$effect(() => {
+  const root = shellRoot
+  if (!root) return
+  const controller = mountBrowserCore(root)
   return () => controller.destroy()
 })
 </script>
@@ -55,7 +55,7 @@ onMount(() => {
           {#if page.description}<p>{page.description}</p>{/if}
           <div class="badges">{#if page.status}<span class="pa-status">{page.status}</span>{/if}{#each page.tags as tag}<span class="pa-status">{tag}</span>{/each}</div>
         </header>
-        <article><AstRenderer nodes={page.content} /></article>
+        <article><AstRenderer nodes={page.content} legacyHeadingIds={false} /></article>
         <nav aria-label="Continue reading" class="reading-flow">
           {#if page.previous}<a rel="prev" href={page.previous.path}>← {page.previous.title}</a>{/if}
           {#if page.next}<a rel="next" href={page.next.path}>{page.next.title} →</a>{/if}

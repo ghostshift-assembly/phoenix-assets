@@ -15,7 +15,7 @@ export const headingId = (content?: DocAstNode[] | string): string =>
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-|-$/g, "")
 
-const SAFE_ID = /^[A-Za-z][A-Za-z0-9_.:-]*$/
+const SAFE_ID = /^[\p{L}\p{N}][\p{L}\p{N}_.:-]*(?![\s\S])/u
 const ATTRIBUTES = new Set(["id", "title", "class", "colspan", "rowspan", "scope", "start"])
 
 export const projectedHeadingId = (node: DocAstElement): string | undefined => {

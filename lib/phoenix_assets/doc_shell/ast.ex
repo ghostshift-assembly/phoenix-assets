@@ -15,7 +15,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     @directives ~w(accordion badge callout card card-grid code-group frame response-fields
                    snippet step steps tabs tree update)
     @attributes ~w(id title class colspan rowspan scope start)
-    @id ~r/\A[A-Za-z][A-Za-z0-9_.:-]*\z/
+    @id ~r/\A[\p{L}\p{N}][\p{L}\p{N}_.:-]*\z/u
 
     @typedoc "A Phoenix HTML-safe value produced from DocShell AST."
     @type safe :: {:safe, iodata()}

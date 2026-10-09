@@ -1,0 +1,203 @@
+{
+  "base_path": "/docs/",
+  "cohort_digest": "sha256:5c0b0df55cf793ed12135850188d34917758b005a86bd43e828fc4450f7e91df",
+  "default_locale": "en",
+  "generation_id": "anchor-site-generation",
+  "locales": ["en"],
+  "metadata": {},
+  "navigation": [
+    {
+      "children": [],
+      "id": "anchors:guide",
+      "kind": "guide",
+      "meta": {},
+      "path": "/docs/guide/",
+      "title": "Projected anchors"
+    }
+  ],
+  "pages": {
+    "anchors:guide": {
+      "audience": null,
+      "banner": null,
+      "breadcrumbs": [
+        {
+          "path": "/docs/guide/",
+          "title": "Projected anchors"
+        }
+      ],
+      "canonical_url": "https://docs.example.test/docs/guide/",
+      "collection_id": "anchors",
+      "content": [
+        {
+          "attrs": {
+            "id": "2026-setup"
+          },
+          "content": ["2026 Setup"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {
+            "id": "中文"
+          },
+          "content": ["中文"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {
+            "id": "中文-2"
+          },
+          "content": ["中文"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {
+            "id": "章節.2026"
+          },
+          "content": ["Supplied anchor"],
+          "meta": {},
+          "tag": "h2"
+        }
+      ],
+      "content_digest": "sha256:2685f56e1081fb24591922992ca0f5896395fc8f4f66db02d031df0e2ab00ad6",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": null,
+      "headings": [
+        {
+          "id": "2026-setup",
+          "level": 2,
+          "title": "2026 Setup"
+        },
+        {
+          "id": "中文",
+          "level": 2,
+          "title": "中文"
+        },
+        {
+          "id": "中文-2",
+          "level": 2,
+          "title": "中文"
+        },
+        {
+          "id": "章節.2026",
+          "level": 2,
+          "title": "Supplied anchor"
+        }
+      ],
+      "hero": null,
+      "id": "anchors:guide",
+      "kind": "guide",
+      "last_modified": null,
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": null,
+      "package_version": "1.0.0",
+      "previous": null,
+      "requirements": [
+        {
+          "acceptable_states": ["fallback"],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "doc-shell/html/v1"
+        }
+      ],
+      "route": "/docs/guide/",
+      "search?": true,
+      "source_path": null,
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/anchors",
+      "status": "stable",
+      "tags": [],
+      "template": "document",
+      "title": "Projected anchors"
+    }
+  },
+  "profile": "public",
+  "redirects": {},
+  "routes": {
+    "/docs/guide/": "anchors:guide"
+  },
+  "schema_version": "doc-shell-site/v1",
+  "search": [
+    {
+      "audience": null,
+      "collection": "anchors",
+      "id": "anchors:guide",
+      "kind": "guide",
+      "locale": "en",
+      "page_id": "anchors:guide",
+      "route": "/docs/guide/",
+      "section": null,
+      "status": "stable",
+      "tags": [],
+      "text": "2026 Setup\n中文\n中文\nSupplied anchor",
+      "title": "Projected anchors",
+      "version": "1.0.0"
+    },
+    {
+      "audience": null,
+      "collection": "anchors",
+      "id": "anchors:guide#2026-setup",
+      "kind": "guide",
+      "locale": "en",
+      "page_id": "anchors:guide",
+      "route": "/docs/guide/#2026-setup",
+      "section": "2026 Setup",
+      "status": "stable",
+      "tags": [],
+      "text": "2026 Setup",
+      "title": "Projected anchors",
+      "version": "1.0.0"
+    },
+    {
+      "audience": null,
+      "collection": "anchors",
+      "id": "anchors:guide#中文",
+      "kind": "guide",
+      "locale": "en",
+      "page_id": "anchors:guide",
+      "route": "/docs/guide/#中文",
+      "section": "中文",
+      "status": "stable",
+      "tags": [],
+      "text": "中文",
+      "title": "Projected anchors",
+      "version": "1.0.0"
+    },
+    {
+      "audience": null,
+      "collection": "anchors",
+      "id": "anchors:guide#中文-2",
+      "kind": "guide",
+      "locale": "en",
+      "page_id": "anchors:guide",
+      "route": "/docs/guide/#中文-2",
+      "section": "中文",
+      "status": "stable",
+      "tags": [],
+      "text": "中文",
+      "title": "Projected anchors",
+      "version": "1.0.0"
+    },
+    {
+      "audience": null,
+      "collection": "anchors",
+      "id": "anchors:guide#章節.2026",
+      "kind": "guide",
+      "locale": "en",
+      "page_id": "anchors:guide",
+      "route": "/docs/guide/#章節.2026",
+      "section": "Supplied anchor",
+      "status": "stable",
+      "tags": [],
+      "text": "Supplied anchor",
+      "title": "Projected anchors",
+      "version": "1.0.0"
+    }
+  ],
+  "title": "Projected anchor fixture"
+}
