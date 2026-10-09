@@ -5,10 +5,10 @@
   "author": "Tobias Bohwalli <hi@futhr.io>",
   "type": "module",
   "license": "MIT",
-  "homepage": "https://github.com/futhr/phoenix-assets",
+  "homepage": "https://github.com/ghostshift-assembly/phoenix-assets",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/futhr/phoenix-assets.git",
+    "url": "git+https://github.com/ghostshift-assembly/phoenix-assets.git",
     "directory": "npm/doc-shell"
   },
   "files": [

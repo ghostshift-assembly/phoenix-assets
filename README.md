@@ -4,9 +4,8 @@
 
 [![Hex.pm](https://img.shields.io/hexpm/v/phoenix_assets.svg)](https://hex.pm/packages/phoenix_assets)
 [![Docs](https://img.shields.io/badge/docs-hexdocs-blue.svg)](https://hexdocs.pm/phoenix_assets)
-[![CI](https://github.com/futhr/phoenix-assets/actions/workflows/ci.yml/badge.svg)](https://github.com/futhr/phoenix-assets/actions/workflows/ci.yml)
-[![Coverage](https://codecov.io/gh/futhr/phoenix-assets/branch/main/graph/badge.svg)](https://codecov.io/gh/futhr/phoenix-assets)
-[![License](https://img.shields.io/github/license/futhr/phoenix-assets.svg)](https://github.com/futhr/phoenix-assets/blob/main/LICENSE)
+[![CI](https://github.com/ghostshift-assembly/phoenix-assets/actions/workflows/ci.yml/badge.svg)](https://github.com/ghostshift-assembly/phoenix-assets/actions/workflows/ci.yml)
+[![License](https://img.shields.io/github/license/ghostshift-assembly/phoenix-assets.svg)](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/LICENSE)
 
 Phoenix applications with a JavaScript frontend have two build systems and one
 shared contract. Without a clear owner, route types get copied by hand,
@@ -271,7 +270,7 @@ module.
 
 ## Contributing
 
-See [CONTRIBUTING.md](https://github.com/futhr/phoenix-assets/blob/main/CONTRIBUTING.md)
+See [CONTRIBUTING.md](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/CONTRIBUTING.md)
 for setup, conventions, and quality gates.
 The coordinated Hex/npm release process is documented in [RELEASING.md](RELEASING.md).
 
@@ -283,4 +282,4 @@ consumer `override:` pin is updated in the same change.
 
 ## License
 
-Phoenix Assets is released under the MIT License. See [LICENSE](https://github.com/futhr/phoenix-assets/blob/main/LICENSE) for details.
+Phoenix Assets is released under the MIT License. See [LICENSE](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/LICENSE) for details.

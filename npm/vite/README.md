@@ -1,6 +1,6 @@
 # @phoenix-assets/vite
 
-The Vite package for [`phoenix_assets`](https://github.com/futhr/phoenix-assets).
+The Vite package for [`phoenix_assets`](https://github.com/ghostshift-assembly/phoenix-assets).
 It exposes Elixir-generated contracts as `$phoenix/*` virtual modules, reloads
 regenerated contracts through HMR, loads gettext `.po` files, and emits the
 asset graph that Phoenix validates.

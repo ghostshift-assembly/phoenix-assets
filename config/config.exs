@@ -22,7 +22,7 @@ if config_env() == :dev do
   config :git_ops,
     mix_project: Mix.Project.get!(),
     changelog_file: "CHANGELOG.md",
-    repository_url: "https://github.com/futhr/phoenix-assets",
+    repository_url: "https://github.com/ghostshift-assembly/phoenix-assets",
     version_tag_prefix: "v",
     manage_mix_version?: true,
     manage_readme_version: false,

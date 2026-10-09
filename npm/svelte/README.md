@@ -1,6 +1,6 @@
 # @phoenix-assets/svelte
 
-The Svelte 5 runtime for [`phoenix_assets`](https://github.com/futhr/phoenix-assets).
+The Svelte 5 runtime for [`phoenix_assets`](https://github.com/ghostshift-assembly/phoenix-assets).
 Elixir generates the types and route strings. This package supplies the runtime
 used by that output: shape and command clients, locale resolution, event
 modifiers, and the portable report renderer.

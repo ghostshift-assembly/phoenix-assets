@@ -21,9 +21,9 @@ function fixture(options = {}) {
   writeFileSync(join(root, "mix.exs"), `@version "${options.mixVersion ?? "1.2.3"}"\n`)
   writeFileSync(
     join(root, "config/config.exs"),
-    'repository_url: "https://github.com/futhr/phoenix-assets"\n',
+    'repository_url: "https://github.com/ghostshift-assembly/phoenix-assets"\n',
   )
-  writeFileSync(join(root, "README.md"), "https://github.com/futhr/phoenix-assets\n")
+  writeFileSync(join(root, "README.md"), "https://github.com/ghostshift-assembly/phoenix-assets\n")
   writeFileSync(join(root, "CHANGELOG.md"), "https://github.com/futhr/phoenix-assets\n")
 
   for (const name of packages) {
@@ -35,10 +35,10 @@ function fixture(options = {}) {
         {
           name: `@phoenix-assets/${name}`,
           version: options.npmVersions?.[name] ?? "1.2.3",
-          homepage: "https://github.com/futhr/phoenix-assets",
+          homepage: "https://github.com/ghostshift-assembly/phoenix-assets",
           repository: {
             type: "git",
-            url: "git+https://github.com/futhr/phoenix-assets.git",
+            url: "git+https://github.com/ghostshift-assembly/phoenix-assets.git",
             directory,
           },
           publishConfig: { access: "public" },
@@ -107,20 +107,46 @@ test("rejects noncanonical repository metadata", () => {
   })
 })
 
+test("rejects former repository owner metadata", () => {
+  withFixture({}, (root) => {
+    const manifestPath = join(root, "npm/vite/package.json")
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"))
+    manifest.homepage = "https://github.com/futhr/phoenix-assets"
+    manifest.repository.url = "git+https://github.com/futhr/phoenix-assets.git"
+    writeFileSync(manifestPath, `${JSON.stringify(manifest)}\n`)
+
+    const errors = collectReleaseErrors(root, { checkGit: false, tag: "v1.2.3" })
+    assert.ok(
+      errors.includes(
+        "@phoenix-assets/vite homepage must be https://github.com/ghostshift-assembly/phoenix-assets",
+      ),
+    )
+    assert.ok(
+      errors.includes(
+        "@phoenix-assets/vite repository URL must be git+https://github.com/ghostshift-assembly/phoenix-assets.git",
+      ),
+    )
+  })
+})
+
 test("accepts canonical GitHub checkout remotes and rejects lookalikes", () => {
   for (const remote of [
-    "https://github.com/futhr/phoenix-assets",
-    "https://github.com/futhr/phoenix-assets.git",
-    "git@github.com:futhr/phoenix-assets.git",
-    "ssh://git@github.com/futhr/phoenix-assets.git",
+    "https://github.com/ghostshift-assembly/phoenix-assets",
+    "https://github.com/ghostshift-assembly/phoenix-assets.git",
+    "git@github.com:ghostshift-assembly/phoenix-assets.git",
+    "ssh://git@github.com/ghostshift-assembly/phoenix-assets.git",
   ]) {
     assert.equal(isCanonicalRepositoryRemote(remote), true)
   }
 
   for (const remote of [
-    "https://github.com/futhr/phoenix-assets-fork.git",
-    "https://github.com/attacker/futhr/phoenix-assets.git",
-    "git@github.example:futhr/phoenix-assets.git",
+    "https://github.com/ghostshift-assembly/phoenix-assets-fork.git",
+    "https://github.com/attacker/ghostshift-assembly/phoenix-assets.git",
+    "git@github.example:ghostshift-assembly/phoenix-assets.git",
+    "https://github.com/futhr/phoenix-assets",
+    "https://github.com/futhr/phoenix-assets.git",
+    "git@github.com:futhr/phoenix-assets.git",
+    "ssh://git@github.com/futhr/phoenix-assets.git",
   ]) {
     assert.equal(isCanonicalRepositoryRemote(remote), false)
   }
@@ -173,7 +199,7 @@ function withArtifacts(callback) {
       schema_version: "phoenix-assets/release/v1",
       version: "1.2.3",
       source_sha: sourceSha,
-      source_repository: "https://github.com/futhr/phoenix-assets",
+      source_repository: "https://github.com/ghostshift-assembly/phoenix-assets",
       source_dirty: false,
       artifacts,
     }
@@ -210,6 +236,14 @@ for (const field of ["name", "ecosystem"]) {
 test("rejects a changed source repository", () => {
   withArtifacts(({ manifest, save, verify }) => {
     manifest.source_repository = "https://example.test/other"
+    save()
+    assert.throws(verify, /repository does not match/)
+  })
+})
+
+test("rejects the former source repository", () => {
+  withArtifacts(({ manifest, save, verify }) => {
+    manifest.source_repository = "https://github.com/futhr/phoenix-assets"
     save()
     assert.throws(verify, /repository does not match/)
   })

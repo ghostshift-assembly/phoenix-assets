@@ -4,7 +4,7 @@ defmodule PhoenixAssets.MixProject do
   use Mix.Project
 
   @version "1.1.1"
-  @source_url "https://github.com/futhr/phoenix-assets"
+  @source_url "https://github.com/ghostshift-assembly/phoenix-assets"
 
   def project do
     [

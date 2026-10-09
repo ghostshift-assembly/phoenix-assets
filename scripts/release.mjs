@@ -14,7 +14,7 @@ import { tmpdir } from "node:os"
 import { basename, dirname, join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
 
-const REPOSITORY = "futhr/phoenix-assets"
+const REPOSITORY = "ghostshift-assembly/phoenix-assets"
 const STALE_REPOSITORY = "futhr/phoenix" + "_assets"
 const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
 const NPM_REPOSITORY_URL = `git+${REPOSITORY_URL}.git`
@@ -424,7 +424,11 @@ end
 end
 `,
     )
-    const consumerOptions = { cwd: consumer, env: { ...process.env, MIX_ENV: "prod" } }
+    const consumerEnv = { ...publishedDependenciesEnv(), MIX_ENV: "prod" }
+    for (const variable of ["MIX_BUILD_PATH", "MIX_BUILD_ROOT", "MIX_DEPS_PATH", "MIX_LOCKFILE"]) {
+      delete consumerEnv[variable]
+    }
+    const consumerOptions = { cwd: consumer, env: consumerEnv }
     run("mix", ["deps.get"], consumerOptions)
     run("mix", ["compile", "--warnings-as-errors"], consumerOptions)
     run("mix", ["format", "--check-formatted", "lib/consumer.ex"], consumerOptions)
