@@ -5,6 +5,37 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.2.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.1.1...v1.2.0) (2026-10-10)
+
+
+
+
+### Features:
+
+* add portable documentation renderers by Tobias Bohwalli
+
+### Bug Fixes:
+
+* require DocShell 0.5 for the presentation renderers
+
+* avoid recursive Svelte declaration name conflicts by futhr
+
+* release: align package provenance and isolate Hex consumers by futhr
+
+* deps: require patched Ash and refresh development locks by futhr
+
+* doc-shell: preserve projected anchors and component lifecycle by futhr
+
+* tooling: distinguish remote assets from documentation links by futhr
+
+* release: skip registry preflight for untagged dry runs by Tobias Bohwalli
+
+* ci: install Pagefind for floor tests by Tobias Bohwalli
+
+* deps: update Ash and Mint past security advisories by Tobias Bohwalli
+
+* ci: exclude candidate checkouts from Biome by Tobias Bohwalli
+
 ## [v1.1.1](https://github.com/futhr/phoenix-assets/compare/v1.1.0...v1.1.1) (2026-09-16)
 
 

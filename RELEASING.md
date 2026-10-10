@@ -16,6 +16,13 @@ mise exec -- pnpm install --frozen-lockfile
 mise exec -- mix check --no-retry
 ```
 
+The DocShell renderer requires `doc_shell ~> 0.5`. Publish DocShell 0.5.0
+before Phoenix Assets 1.2.0. While preparing both releases, set
+`DOC_SHELL_CANDIDATE` to the DocShell checkout for dependency installation and
+qualification. Artifact builds remove that override and retain the public Hex
+requirement. Use separate build directories when switching between the registry
+dependency and a candidate checkout.
+
 Also run warnings-as-errors compilation and ExUnit on Elixir 1.18 / OTP 27,
 and the complete gate on Elixir 1.20 / OTP 29. Keep each toolchain's build and
 PLT caches separate. The full gate includes both coverage floors, dependency

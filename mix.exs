@@ -3,7 +3,7 @@ defmodule PhoenixAssets.MixProject do
 
   use Mix.Project
 
-  @version "1.1.1"
+  @version "1.2.0"
   @source_url "https://github.com/ghostshift-assembly/phoenix-assets"
 
   def project do
@@ -95,7 +95,7 @@ defmodule PhoenixAssets.MixProject do
         {:doc_shell, path: Path.expand(path), optional: true, override: true}
 
       _ ->
-        {:doc_shell, "~> 0.4", optional: true}
+        {:doc_shell, "~> 0.5", optional: true}
     end
   end
 

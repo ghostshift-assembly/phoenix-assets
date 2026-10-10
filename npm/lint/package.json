@@ -1,6 +1,6 @@
 {
   "name": "@phoenix-assets/lint",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Shared Biome, Svelte 5 structure, and Tailwind v4 lint tooling for phoenix_assets host apps.",
   "author": "Tobias Bohwalli <hi@futhr.io>",
   "type": "module",

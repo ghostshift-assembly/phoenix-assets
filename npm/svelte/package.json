@@ -1,6 +1,6 @@
 {
   "name": "@phoenix-assets/svelte",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Typed Electric, PubSub, localization, and portable reporting helpers for phoenix_assets on Svelte 5.",
   "author": "Tobias Bohwalli <hi@futhr.io>",
   "type": "module",
