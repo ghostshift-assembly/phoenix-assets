@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v1.2.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.2.0...v1.2.1) (2026-10-10)
+
+
+
+
+### Bug Fixes:
+
+* release: lock the published DocShell dependency by futhr
+
 ## [v1.2.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.1.1...v1.2.0) (2026-10-10)
 
 
