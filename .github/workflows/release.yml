@@ -46,7 +46,7 @@ jobs:
           node-version: "24"
           package-manager-cache: false
 
-      - run: mix deps.get
+      - run: mix deps.get --check-locked
       - run: pnpm install --frozen-lockfile
 
       - name: Validate tagged release identity and metadata links
@@ -134,7 +134,7 @@ jobs:
         env:
           HEX_API_KEY: ${{ secrets.HEX_API_KEY }}
         run: |
-          mix deps.get
+          mix deps.get --check-locked
           mix hex.publish docs --yes
 
       - name: Create immutable release record
