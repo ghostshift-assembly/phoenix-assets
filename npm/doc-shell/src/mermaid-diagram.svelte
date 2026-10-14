@@ -10,7 +10,13 @@ let error = $state("")
 onMount(async () => {
   try {
     const mermaid = (await import("mermaid")).default
-    mermaid.initialize({ startOnLoad: false, securityLevel: "strict" })
+    mermaid.initialize({
+      startOnLoad: false,
+      securityLevel: "strict",
+      layout: "dagre",
+      theme: "default",
+      look: "classic",
+    })
     svg = (await mermaid.render(`doc-shell-${crypto.randomUUID()}`, code)).svg
   } catch (reason) {
     error = reason instanceof Error ? reason.message : String(reason)

@@ -30,20 +30,11 @@ exact `allowedOrigins` entry and an on-screen confirmation before sending.
 Browser cookies remain same-origin-only. `pnpm check:offline` checks package
 source for direct network asset references.
 
-Mermaid 11 still requires KaTeX 0.16. npm consumers should override it to
-`0.18.7`, which includes the
-[settings security fix](https://github.com/advisories/GHSA-238p-pmpm-9mq7):
-
-```json
-{
-  "overrides": {
-    "katex": "0.18.7"
-  }
-}
-```
-
-For pnpm, put the same `katex` entry under `overrides` in
-`pnpm-workspace.yaml`, as this workspace does.
+Mermaid 12 requires Node 22.12 or newer and browsers supporting ES2024
+(Safari 17.4 or newer). The renderer explicitly keeps the Dagre layout,
+default theme, and classic look used before the upgrade. Diagram front matter
+can override those defaults. Failed rendering keeps the diagram source visible.
+The workspace resolves KaTeX 0.19, including its settings security fixes.
 
 Shiki grammars are loaded explicitly rather than through its full bundle. See
 `supportedLanguages` for the set, which covers a Phoenix + SvelteKit codebase and

@@ -8,14 +8,14 @@ packages:
 # resolved range automatically.
 catalog:
   "@electric-sql/client": ^1.5.28
-  "@sveltejs/package": ^2.5.8
+  "@sveltejs/package": ^3.0.0
   "@sveltejs/vite-plugin-svelte": ^7.3.1
-  "@tanstack/electric-db-collection": ^0.5.5
-  "@tanstack/svelte-db": ^0.5.4
-  "@types/node": ^24.19.1
-  "@vitest/coverage-v8": ^5.0.3
-  happy-dom: ^20.14.5
-  svelte: ^5.57.1
+  "@tanstack/electric-db-collection": ^0.6.0
+  "@tanstack/svelte-db": ^0.5.9
+  "@types/node": ^24.19.2
+  "@vitest/coverage-v8": ^5.0.4
+  happy-dom: ^21.0.1
+  svelte: ^5.57.2
   svelte-check: ^4.7.6
   tailwindcss: ^4.3.3
   tsup: ^8.5.1
@@ -23,15 +23,23 @@ catalog:
   # the JavaScript compiler API. Keep the newest compatible major until both
   # tools support TypeScript 7; an unsupported override would break host tooling.
   typescript: ^6.0.3
-  vite: ^8.3.3
-  vitest: ^5.0.3
+  vite: ^8.3.4
+  vitest: ^5.0.4
 
-# pnpm 10's home for the build-script allowlist (moved out of package.json's
-# "pnpm" field). Only these packages may run install/build scripts.
-onlyBuiltDependencies:
-  - esbuild
+# Only esbuild may run its dependency install/build script.
+allowBuilds:
+  esbuild: true
 
 overrides:
+  # Svelte's hydratable server renderer uses Devalue 5's uneval replacer API.
   devalue: 5.9.4
   esbuild: 0.28.2
-  katex: 0.18.7
+  katex: 0.19.0
+
+minimumReleaseAgeExclude:
+  - "@tanstack/db-ivm@0.2.0"
+  - "@tanstack/db@0.14.0"
+  - "@tanstack/electric-db-collection@0.6.0"
+  - "@tanstack/svelte-db@0.5.9"
+  - layerchart@2.8.0
+  - mermaid@12.2.0
