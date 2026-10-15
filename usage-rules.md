@@ -175,6 +175,10 @@ in tests. The frontend peers require `@electric-sql/client` >=1.5.27 within 1.x,
   shape clients at your app's token key. `createShapeCollection` (TanStack DB)
   lives behind the `@phoenix-assets/svelte/collection` subpath so the main
   barrel stays free of the optional `@tanstack/*` peers.
+  HTTP/Channels-only hosts use `PhoenixAssets.Presets.SvelteHttp` and the
+  `/core` runtime entrypoint for commands, locales and event helpers. Electric
+  is an optional peer at installation and remains required by the legacy root
+  barrel and Electric entrypoints. `/socket` needs only the Phoenix peer.
 - `@phoenix-assets/svelte/reporting`: strict portable-report decoding, the
   closed LayerChart-backed compiler/components, evidence states, and accessible
   table twins. Pass only the renderer-neutral contract. Product code supplies

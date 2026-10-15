@@ -4,7 +4,7 @@ defmodule PhoenixAssets.Commands do
 
   Reads the commands declared in the module passed as `commands:` (see
   `PhoenixAssets.Commands.Definitions`) and emits `commands.ts` -- one function
-  per command, built on `runCommand/2` from `@phoenix-assets/svelte`.
+  per command, built on `runCommand/2` from `@phoenix-assets/svelte/core`.
 
   Where `PhoenixAssets.Electric` generates the read half of the boundary, this
   generates the write half, and it carries the part a URL builder cannot: the
@@ -91,8 +91,8 @@ defmodule PhoenixAssets.Commands do
 
     [
       TS.header(),
-      ~s|\nimport { runCommand } from "@phoenix-assets/svelte"\n|,
-      ~s|import type { CommandOptions, CommandResult } from "@phoenix-assets/svelte"\n|,
+      ~s|\nimport { runCommand } from "@phoenix-assets/svelte/core"\n|,
+      ~s|import type { CommandOptions, CommandResult } from "@phoenix-assets/svelte/core"\n|,
       TS.type_import(referenced_types(sorted)),
       Enum.map(sorted, &render_declarations/1),
       "\nexport const commands = {\n",

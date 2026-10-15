@@ -159,7 +159,9 @@ Two recurring failure modes need review:
 - Sync qualification. Phoenix.Sync is a dev/test dependency at an immutable
   qualified revision. It must not appear in the published Hex requirements.
   Hosts select their backend; embedded hosts also own their Electric dependency.
-  The Svelte peers require the qualified Electric/TanStack package floors.
+  Electric/TanStack entrypoints require their qualified peer floors. Keep those
+  peers optional so HTTP/Channels-only consumers can use `/core` and `/socket`
+  without installing a sync client.
 - Optional dependency isolation. `types.ex` gates Ash generation and
   `walker.ex` guards its public entry points. Narrow compiler annotations cover
   references to optional modules only when those modules are absent. The

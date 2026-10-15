@@ -375,7 +375,77 @@ export default defineConfig({
   }
 }
 
-function smokeHexArtifact(sourceRoot, output, manifest) {
+function smokeCoreArtifact(sourceRoot, archive) {
+  const root = mkdtempSync(join(tmpdir(), "phoenix-assets-http-smoke-"))
+  try {
+    const runtime = readJson(join(sourceRoot, "npm/svelte/package.json"))
+    writeFileSync(
+      join(root, "package.json"),
+      `${JSON.stringify(
+        {
+          private: true,
+          type: "module",
+          dependencies: {
+            "@phoenix-assets/svelte": `file:${archive}`,
+            svelte: runtime.peerDependencies.svelte,
+          },
+        },
+        null,
+        2,
+      )}\n`,
+    )
+    run(
+      "npm",
+      [
+        "install",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+        "--package-lock=false",
+        "--omit=optional",
+      ],
+      { cwd: root },
+    )
+    writeFileSync(
+      join(root, "consumer.mjs"),
+      `
+import assert from "node:assert/strict"
+import { existsSync } from "node:fs"
+import { runCommand, configureShapeAuth, resolveLocale, matchEvent } from "@phoenix-assets/svelte/core"
+for (const name of ["@electric-sql/client", "@tanstack/electric-db-collection", "@tanstack/svelte-db", "phoenix"]) {
+  assert.equal(existsSync("node_modules/" + name), false, name + " unexpectedly installed")
+}
+configureShapeAuth({ readToken: () => "synthetic", headers: () => ({ "X-Scope": "one" }) })
+const success = await runCommand({ path: "/records/:id", params: { id: "one" }, method: "POST", body: { value: 1 },
+  fetch: async (url, init) => {
+    assert.equal(url, "/records/one")
+    assert.equal(init.headers.get("Authorization"), "Bearer synthetic")
+    assert.equal(init.headers.get("X-Scope"), "one")
+    assert.equal(init.body, JSON.stringify({ value: 1 }))
+    return new Response(JSON.stringify({ saved: true }), { status: 200 })
+  }
+}, ["denied"])
+assert.deepEqual(success, { ok: true, data: { saved: true } })
+const denied = await runCommand({ path: "/records", method: "POST",
+  fetch: async () => new Response(JSON.stringify({ error: "denied" }), { status: 403 })
+}, ["denied"])
+assert.deepEqual(denied, { ok: false, error: "denied", status: 403 })
+assert.deepEqual(await runCommand({ path: "/records", method: "POST", fetch: async () => { throw new Error("lost") } }),
+  { ok: false, error: "unknown_error", status: 0 })
+assert.equal(resolveLocale("sv-SE", ["en", "sv"], "en"), "sv")
+let matched = false
+matchEvent({ type: "changed", payload: 1 }, { changed: () => { matched = true } })
+assert.equal(matched, true)
+console.log("Packed HTTP runtime verified without Electric, TanStack or Phoenix peers.")
+`,
+    )
+    run("node", ["consumer.mjs"], { cwd: root })
+  } finally {
+    rmSync(root, { force: true, recursive: true })
+  }
+}
+
+function smokeHexArtifact(sourceRoot, output, manifest, legacyDocShell = false) {
   const artifact = manifest.artifacts.find(({ ecosystem }) => ecosystem === "hex")
   if (!artifact) throw new Error("Hex artifact is missing")
   const root = mkdtempSync(join(tmpdir(), "phoenix-assets-hex-smoke-"))
@@ -409,7 +479,7 @@ function smokeHexArtifact(sourceRoot, output, manifest) {
       `
 defmodule Consumer.MixProject do
   use Mix.Project
-  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}]]
+  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${legacyDocShell ? ', {:doc_shell, "== 0.4.0"}, {:phoenix_live_view, "~> 1.1"}' : ""}]]
 end
 `,
     )
@@ -421,6 +491,13 @@ end
   use PhoenixAssets.Electric.Shapes
 
   shape :item, route: "/shapes/items", type: "Item"
+end
+
+defmodule Consumer.Commands do
+  @moduledoc false
+  use PhoenixAssets.Commands.Definitions
+
+  command :save_item, route: "/items/:id", params: [id: :string], body: [name: :string]
 end
 `,
     )
@@ -438,7 +515,7 @@ end
         "run",
         "-e",
         `
-      for app <- [:ash, :igniter, :phoenix_live_view, :gettext, :phoenix_sync, :tidewave, :ash_typescript] do
+      for app <- ${legacyDocShell ? "[:ash, :igniter, :gettext, :phoenix_sync, :tidewave, :ash_typescript]" : "[:ash, :igniter, :phoenix_live_view, :gettext, :phoenix_sync, :tidewave, :ash_typescript]"} do
         if Application.spec(app), do: raise("unexpected optional dependency: #{app}")
       end
       Code.compiler_options(ignore_module_conflict: true)
@@ -449,7 +526,29 @@ end
         result -> raise("package compilation produced diagnostics: #{inspect(result)}")
       end
       unless Code.ensure_loaded?(PhoenixAssets), do: raise("runtime module missing")
+      ${
+        legacyDocShell
+          ? `
+      true = Code.ensure_loaded?(PhoenixAssets.DocShell.Ast)
+      false = Code.ensure_loaded?(DocShell.Presentation.Site)
+      for module <- [PhoenixAssets.DocShell.Components, PhoenixAssets.DocShell.ApiReference,
+                     PhoenixAssets.DocShell.StaticRenderer, PhoenixAssets.DocShell.Assets,
+                     PhoenixAssets.DocShell.Pagefind] do
+        false = Code.ensure_loaded?(module)
+      end
+      `
+          : ""
+      }
       [_] = Consumer.__phoenix_assets_shapes__()
+      config = PhoenixAssets.Config.load!(otp_app: :consumer,
+        preset: PhoenixAssets.Presets.SvelteHttp, stack: [commands: Consumer.Commands])
+      ctx = PhoenixAssets.Context.new(config, plugins: PhoenixAssets.Config.preset_plugins(config))
+      {:ok, initialized} = PhoenixAssets.Engine.init_plugins(ctx)
+      false = Enum.any?(initialized, fn {module, _, _} -> module == PhoenixAssets.Electric end)
+      files = PhoenixAssets.Engine.collect(ctx, initialized, :generated_files)
+      [commands] = Enum.filter(files, &(&1.kind == :commands))
+      true = IO.iodata_to_binary(commands.contents) =~ ~s|from "@phoenix-assets/svelte/core"|
+      false = Enum.any?(files, &(&1.kind == :electric))
       try do
         PhoenixAssets.Types.Walker.render([])
         raise "unguarded Ash walker"
@@ -464,11 +563,15 @@ end
   } finally {
     rmSync(root, { force: true, recursive: true })
   }
+  if (!legacyDocShell) smokeHexArtifact(sourceRoot, output, manifest, true)
 }
 
 function smokeArtifacts(root, output, options) {
   const manifest = verifyArtifacts(root, output, options)
   smokeNpmArtifacts(root, output, manifest)
+  const runtime = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
+  if (!runtime) throw new Error("Svelte runtime artifact is missing")
+  smokeCoreArtifact(root, join(output, runtime.file))
   smokeHexArtifact(root, output, manifest)
 }
 
@@ -587,11 +690,26 @@ async function main() {
       }
       break
     }
+    case "smoke-core": {
+      const temporary = mkdtempSync(join(tmpdir(), "phoenix-assets-core-check-"))
+      try {
+        run("pnpm", ["--filter", "@phoenix-assets/svelte", "build"], { cwd: root })
+        run("pnpm", ["pack", "--pack-destination", temporary], { cwd: join(root, "npm/svelte") })
+        const archives = readdirSync(temporary).filter((name) => name.endsWith(".tgz"))
+        if (archives.length !== 1) throw new Error("Expected exactly one runtime archive")
+        smokeCoreArtifact(root, join(temporary, archives[0]))
+      } finally {
+        rmSync(temporary, { force: true, recursive: true })
+      }
+      break
+    }
     case "publish":
       await publishArtifacts(root, output, { ...releaseOptions, dryRun: options.dryRun })
       break
     default:
-      throw new Error("usage: release.mjs <check|build|verify|smoke|smoke-hex|publish> [options]")
+      throw new Error(
+        "usage: release.mjs <check|build|verify|smoke|smoke-hex|smoke-core|publish> [options]",
+      )
   }
 }
 

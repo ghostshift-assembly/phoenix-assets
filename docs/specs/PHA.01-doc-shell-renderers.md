@@ -45,6 +45,12 @@ namespace is conditionally compiled. A consumer that omits those optional
 dependencies must compile without warnings and must not resolve frontend-only
 dependencies.
 
+The asset substrate also accepts DocShell 0.4 for hosts using its extraction
+contract. Site presentation adapters compile only when their required 0.5
+presentation modules exist; accepting 0.4 does not advertise those newer APIs.
+The packaged compatibility consumer must compile with 0.4 and LiveView while
+the existing complete renderer tests qualify the 0.5 integration.
+
 No host application name, route, brand, source taxonomy, or authorization rule
 may appear under `lib/phoenix_assets/doc_shell/` or `npm/doc-shell/src/`.
 
@@ -274,7 +280,7 @@ documentation sites:
 
 | ID | Evidence |
 | --- | --- |
-| PHA-V01 | The Hex package compiles with no optional dependencies; installing DocShell plus LiveView exposes every adapter module. |
+| PHA-V01 | The Hex package compiles with no optional dependencies; installing DocShell 0.5 plus LiveView exposes every adapter module. DocShell 0.4 plus LiveView exposes the AST adapter while 0.5 presentation adapters remain absent. |
 | PHA-V02 | Importing `@phoenix-assets/doc-shell/browser` resolves no Svelte module and passes DOM lifecycle tests. |
 | PHA-V03 | Svelte and LiveView render every DocShell conformance page with equal visible text, headings, links, navigation and accessible names. |
 | PHA-V04 | Static and LiveView HEEx output share page/cohort digests and normalized document semantics. |

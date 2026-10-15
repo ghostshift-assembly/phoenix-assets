@@ -87,8 +87,10 @@ defmodule PhoenixAssets.CommandsTest do
   test "imports the command runtime and only the types that must resolve" do
     out = render()
 
-    assert out =~ ~s|import { runCommand } from "@phoenix-assets/svelte"|
-    assert out =~ ~s|import type { CommandOptions, CommandResult } from "@phoenix-assets/svelte"|
+    assert out =~ ~s|import { runCommand } from "@phoenix-assets/svelte/core"|
+
+    assert out =~
+             ~s|import type { CommandOptions, CommandResult } from "@phoenix-assets/svelte/core"|
 
     # ArticleRow/ImportPayload/ImportReceipt come from $phoenix/types; an inline
     # body renders its own interface and must not be imported.
@@ -130,7 +132,7 @@ defmodule PhoenixAssets.CommandsTest do
         File.write!(
           Path.join(root, "runtime.d.ts"),
           ~S"""
-          declare module "@phoenix-assets/svelte" {
+          declare module "@phoenix-assets/svelte/core" {
             export interface CommandOptions { signal?: AbortSignal }
             export type CommandResult<TData, TError extends string> =
               | { ok: true; data: TData }

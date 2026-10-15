@@ -17,6 +17,10 @@
     "LICENSE"
   ],
   "exports": {
+    "./core": {
+      "types": "./dist/core.d.ts",
+      "import": "./dist/core.js"
+    },
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
@@ -57,6 +61,9 @@
     "svelte": "^5.7.0"
   },
   "peerDependenciesMeta": {
+    "@electric-sql/client": {
+      "optional": true
+    },
     "@tanstack/electric-db-collection": {
       "optional": true
     },

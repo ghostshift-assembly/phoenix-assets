@@ -11,13 +11,29 @@ modifiers, and the portable report renderer.
 pnpm add -D @phoenix-assets/svelte
 ```
 
-Peers: `svelte` (`^5.7.0`) and `@electric-sql/client` (`^1.5.27`). The
+Peer: `svelte` (`^5.7.0`). `@electric-sql/client` (`^1.5.27`) is optional and
+required only for Electric entrypoints. The
 `@tanstack/electric-db-collection` (`^0.6.0`) and `@tanstack/svelte-db` (`^0.5.9`)
 peers are optional and only needed for the `/collection` subpath. This frontend
 is qualified with the PostgreSQL 18.6 / Electric 1.8.1 stack; the host owns its
 server deployment and Phoenix.Sync dependency.
 
 ## Exports
+
+### `@phoenix-assets/svelte/core`
+
+This entrypoint and optional Electric peer metadata are unreleased additions.
+
+HTTP commands, their shared auth configuration, locale resolution, event
+modifiers and topic matching without Electric or TanStack imports:
+
+```ts
+import { runCommand, resolveLocale } from "@phoenix-assets/svelte/core"
+```
+
+Generated command clients use this subpath. The existing root barrel retains
+its Electric exports and needs the Electric peer when imported. `/socket`
+requires the optional Phoenix peer; it does not require Electric.
 
 ### `@phoenix-assets/svelte`
 

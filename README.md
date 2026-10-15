@@ -157,7 +157,21 @@ Sub-configs: `:dev`, `:build` (`vite_manifest`, `asset_graph`, `asset_url`,
 SvelteKit build that serves its own `index.html`. Set `:ssr` to render HTML from
 the Vite manifest through `PhoenixAssets.Components`.
 
-Tuning an integration is config, not a reason to write a preset:
+The HTTP profile below is an unreleased source addition; published 1.2.1 does
+not include its preset, runtime entrypoint or DocShell 0.4 compatibility.
+HTTP/Channels-only applications can select the maintained non-Electric preset:
+
+```elixir
+config :phoenix_assets, preset: PhoenixAssets.Presets.SvelteHttp, serve_mode: :spa
+```
+
+Use `@phoenix-assets/svelte/core` for commands/locales/events and `/socket` for
+Phoenix sockets. Electric and TanStack peers are optional; the legacy root
+runtime barrel still imports Electric helpers. DocShell 0.4 remains compatible
+with the asset substrate; its optional site renderer requires DocShell 0.5's
+presentation modules. Neither profile changes host authorization.
+
+Tuning an integration uses configuration:
 
 ```elixir
 config :phoenix_assets, :dev, storybook: [enabled: false]   # run it via `mix storybook`

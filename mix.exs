@@ -98,7 +98,7 @@ defmodule PhoenixAssets.MixProject do
         {:doc_shell, path: Path.expand(path), optional: true, override: true}
 
       _ ->
-        {:doc_shell, "~> 0.5", optional: true}
+        {:doc_shell, "~> 0.4.0 or ~> 0.5", optional: true}
     end
   end
 
@@ -164,7 +164,8 @@ defmodule PhoenixAssets.MixProject do
           PhoenixAssets.Engine
         ],
         Presets: [
-          PhoenixAssets.Presets.Svelte
+          PhoenixAssets.Presets.Svelte,
+          PhoenixAssets.Presets.SvelteHttp
         ],
         "Stack plugins": [
           PhoenixAssets.SvelteKit,

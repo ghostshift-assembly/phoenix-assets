@@ -33,6 +33,8 @@
     {:check_exports, command: "pnpm check:exports", deps: [:pnpm_install]},
     {:release_tests, command: "pnpm test:release", deps: [:pnpm_install]},
     {:hex_consumer, command: "node scripts/release.mjs smoke-hex"},
+    {:http_consumer,
+     command: "node scripts/release.mjs smoke-core", deps: [:pnpm_install, :check_exports]},
     {:release_contract, command: "pnpm check:release", deps: [:pnpm_install]},
     {:svelte_filenames, command: "pnpm check:svelte-filenames"},
     {:doc_shell_offline,
