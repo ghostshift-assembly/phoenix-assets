@@ -17,6 +17,9 @@ defmodule PhoenixAssets.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
+      # Temporary exception for the test-only Bandit HTTP fixture. Remove when
+      # a patched release clears this advisory; all other findings stay active.
+      hex: [ignore_advisories: ["EEF-CVE-2026-105659"]],
       deps: deps(),
       dialyzer: dialyzer(),
       package: package(),
