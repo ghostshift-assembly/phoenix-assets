@@ -47,13 +47,8 @@ Extracted Hex consumers compile without optional dependencies and with DocShell
 adapters remain absent. Existing renderer tests exercise the 0.5 integration;
 the broader renderer specification retains its partial implementation status.
 
-The temporary user-authorized exception remains limited to test-only Bandit
-1.12.5 and `EEF-CVE-2026-105659`. Hex still lists 1.12.5 as the latest stable
-release, and the [upstream advisory](https://github.com/mtrudel/bandit/security/advisories/GHSA-69m6-wcv4-rwcf)
-lists no patched release as of 2026-10-15. `mix hex.audit` remains active and
-reports this ID under `Ignored advisories`; all other advisory and retirement
-findings remain active. Remove the exception when a patched release clears the
-finding. The exception does not fix Bandit or qualify its production use.
+That qualification used a temporary user-authorized exception for test-only
+Bandit 1.12.5 and `EEF-CVE-2026-105659`. The dependency update below removes it.
 
 The same 414 backend checks and warnings-as-errors compilation also pass on
 Elixir 1.18.4 / OTP 27.3.4.15 using the locked registry dependencies and the
@@ -64,3 +59,18 @@ An untagged local build of all five artifacts also passes the complete
 reporting/collection/DocShell bundling, the isolated HTTP runtime and both Hex
 consumers. These archives represent the unreleased source tree; registry
 publication and actual host adoption require separate evidence.
+
+## Dependency update (2026-10-19)
+
+The test-only HTTP fixture now requires Bandit `~> 1.13.1` and locks 1.13.1 with
+Thousand Island 1.6.0. The
+[upstream changelog](https://github.com/mtrudel/bandit/blob/1.13.1/CHANGELOG.md)
+records fixes for `EEF-CVE-2026-105659` and `EEF-CVE-2026-105660` in 1.13.0;
+1.13.1 reverts a stale-connection check that broke Phoenix error rendering.
+The advisory exception is removed. Both dependency audits remain active.
+
+`mix check --no-retry --no-parallel` passes on Elixir 1.20.4 / OTP 29.0.4,
+Node 24.21.0 and pnpm 12.11.2: all 23 configured checks pass, including both
+dependency audits, Dialyzer and the extracted Hex and HTTP consumers. The run
+passes 414 backend checks with 89.9% line coverage, 290 frontend tests and 15
+release-script tests. Optional absent-package checks remain skipped.

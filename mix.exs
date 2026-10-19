@@ -17,9 +17,6 @@ defmodule PhoenixAssets.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
-      # Temporary exception for the test-only Bandit HTTP fixture. Remove when
-      # a patched release clears this advisory; all other findings stay active.
-      hex: [ignore_advisories: ["EEF-CVE-2026-105659"]],
       deps: deps(),
       dialyzer: dialyzer(),
       package: package(),
@@ -83,7 +80,7 @@ defmodule PhoenixAssets.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test, runtime: false},
       {:simple_sat, "~> 0.1", only: :test},
-      {:bandit, "~> 1.12.5", only: :test},
+      {:bandit, "~> 1.13.1", only: :test},
       # The install-task test drives igniter's Phoenix generator, which is only
       # compiled when phx_new resolves as a dependency -- a globally installed
       # archive does not satisfy it.
