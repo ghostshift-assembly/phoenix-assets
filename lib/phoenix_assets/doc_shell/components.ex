@@ -132,8 +132,22 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     end
 
     attr(:search, :map, required: true)
+    attr(:presentation, :atom, values: [:dialog, :inline], default: :dialog)
+    attr(:trigger, :boolean, default: true)
+    attr(:filter_values, :map, default: %{})
+    slot(:header)
+    slot(:controls)
 
-    @doc "Renders the progressively enhanced local search dialog and no-script page index."
+    @doc """
+    Renders local search as a modal dialog or an inline section.
+
+    Inline search leaves surrounding navigation available. A host can omit the
+    trigger and supply its own `data-doc-search-open` control within the same
+    browser-core root. The header and controls slots customize chrome without
+    replacing the query, filters or results. `filter_values` supplies admitted
+    facet values when records are omitted for a static search adapter; known
+    facets accept at most 256 distinct UTF-8 strings of 256 bytes each.
+    """
     @spec search(map()) :: Phoenix.LiveView.Rendered.t()
     def search(assigns) do
       records = Map.get(assigns.search, "records", [])
@@ -153,29 +167,37 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         |> assign(:records, records)
         |> assign(:encoded_records, encoded)
         |> assign(:encoded_contract, encoded_contract)
-        |> assign(:filters, search_filters(records))
+        |> assign(:filters, search_filters(records, assigns.filter_values))
 
       ~H"""
       <div class="doc-search" data-pagefind-ignore>
-        <button type="button" class="pa-button" data-doc-search-open aria-haspopup="dialog">Search documentation</button>
-        <dialog class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label="Search documentation">
-          <header><h2>Search documentation</h2><button type="button" class="pa-button" data-doc-search-close>Close</button></header>
+        <button :if={@trigger} type="button" class="pa-button" data-doc-search-open aria-haspopup={@presentation == :dialog && "dialog"}>Search documentation</button>
+        <section :if={@presentation == :inline} class="doc-search-inline" data-doc-search-dialog data-doc-search-presentation="inline" data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label="Search documentation"><.search_content {assigns} /></section>
+        <dialog :if={@presentation == :dialog} class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label="Search documentation"><.search_content {assigns} /></dialog>
+        <noscript>
+          <details><summary>Browse the page index</summary><ul><li :for={record <- @records}><a href={record.route}>{record.title}</a></li></ul></details>
+        </noscript>
+      </div>
+      """
+    end
+
+    defp search_content(assigns) do
+      ~H"""
+          <header :if={@header == []}><h2>Search documentation</h2><button type="button" class="pa-button" data-doc-search-close>Close</button></header>
+          {render_slot(@header)}
           <label for="doc-search-query">Search</label>
           <input id="doc-search-query" class="pa-field" type="search" role="combobox" autocomplete="off" aria-controls="doc-search-results" aria-expanded="true" data-doc-search-input />
-          <div class="doc-search-filters" aria-label="Search filters">
+          {render_slot(@controls)}
+          <details class="doc-search-filters"><summary>Filters</summary><div aria-label="Search filters">
             <label :for={{name, values} <- @filters}>
               {filter_label(name)}
               <select class="pa-select" data-doc-search-filter={name}>
                 <option value="">All</option><option :for={value <- values} value={value}>{value}</option>
               </select>
             </label>
-          </div>
+          </div></details>
+          <p role="status" data-doc-search-status></p>
           <ul id="doc-search-results" role="listbox" data-doc-search-results></ul>
-        </dialog>
-        <noscript>
-          <details><summary>Browse the page index</summary><ul><li :for={record <- @records}><a href={record.route}>{record.title}</a></li></ul></details>
-        </noscript>
-      </div>
       """
     end
 
@@ -304,12 +326,23 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       item.path == route or Enum.any?(item.children, &current_branch?(&1, route))
     end
 
-    defp search_filters(records) do
+    defp search_filters(records, explicit) do
       for field <- ~w(collection kind locale audience version tag status),
-          values = search_filter_values(records, field),
+          values = Map.get_lazy(explicit, field, fn -> search_filter_values(records, field) end),
+          values = bounded_filter_values(values),
           values != [],
           do: {field, values}
     end
+
+    defp bounded_filter_values(values) when is_list(values) do
+      values
+      |> Enum.filter(&(is_binary(&1) and byte_size(&1) in 1..256 and String.valid?(&1)))
+      |> Enum.uniq()
+      |> Enum.sort()
+      |> Enum.take(256)
+    end
+
+    defp bounded_filter_values(_), do: []
 
     defp search_filter_values(records, field) do
       key = if field == "tag", do: :tags, else: String.to_existing_atom(field)

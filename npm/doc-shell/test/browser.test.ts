@@ -70,6 +70,7 @@ const fixture = () => {
       <button data-doc-search-close>Close</button>
       <input data-doc-search-input>
       <select data-doc-search-filter="locale"><option value=""></option><option value="en">en</option></select>
+      <p role="status" data-doc-search-status></p>
       <ul data-doc-search-results></ul>
     </dialog>
     <div data-doc-code><button data-doc-copy="code">Copy</button><code id="code">mix test</code></div>
@@ -180,6 +181,65 @@ describe("deterministic browser search", () => {
 })
 
 describe("browser controller lifecycle", () => {
+  it("keeps inline navigation usable and scopes result keys to the query", () => {
+    const root = fixture()
+    const modal = root.querySelector("dialog")
+    if (!modal) throw new Error("missing search")
+    const surface = document.createElement("section")
+    surface.dataset.docSearchPresentation = "inline"
+    for (const attribute of modal.attributes) surface.setAttribute(attribute.name, attribute.value)
+    surface.append(...modal.childNodes)
+    modal.replaceWith(surface)
+    const showModal = vi.fn()
+    const close = vi.fn()
+    Object.assign(surface, { showModal, close })
+    const controller = mountSearch(root)
+    const trigger = root.querySelector<HTMLButtonElement>("[data-doc-search-open]")
+    const input = surface.querySelector<HTMLInputElement>("[data-doc-search-input]")
+    if (!input || !trigger) throw new Error("missing controls")
+
+    trigger.click()
+    expect(surface.hasAttribute("open")).toBe(true)
+    expect(document.activeElement).toBe(input)
+    expect(showModal).not.toHaveBeenCalled()
+    input.value = "portable"
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(surface.querySelector("[role=status]")?.textContent).toBe("1 result")
+
+    const link = surface.querySelector<HTMLAnchorElement>("[data-doc-search-results] a")
+    const click = vi.fn((event: Event) => event.preventDefault())
+    link?.addEventListener("click", click)
+    const outsideKey = new KeyboardEvent("keydown", {
+      key: "Enter",
+      bubbles: true,
+      cancelable: true,
+    })
+    trigger.dispatchEvent(outsideKey)
+    expect(outsideKey.defaultPrevented).toBe(false)
+    expect(click).not.toHaveBeenCalled()
+    const outsideArrow = new KeyboardEvent("keydown", {
+      key: "ArrowDown",
+      bubbles: true,
+      cancelable: true,
+    })
+    trigger.dispatchEvent(outsideArrow)
+    expect(outsideArrow.defaultPrevented).toBe(false)
+
+    input.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }))
+    expect(click).toHaveBeenCalledOnce()
+    expect(surface.hasAttribute("open")).toBe(false)
+    expect(document.activeElement).toBe(trigger)
+    expect(close).not.toHaveBeenCalled()
+
+    trigger.click()
+    input.value = "missing"
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(surface.querySelector("[role=status]")?.textContent).toBe("No results")
+    root.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
+    expect(surface.hasAttribute("open")).toBe(false)
+    controller.destroy()
+  })
+
   it("mounts search, navigation, copy, tabs, and theme below one explicit root", async () => {
     const writeText = vi.fn().mockResolvedValue(undefined)
     Object.defineProperty(navigator, "clipboard", { configurable: true, value: { writeText } })

@@ -96,8 +96,10 @@ export const mountSearch = (
   let generation = 0
 
   const dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
+  const inline = dialog?.dataset.docSearchPresentation === "inline"
   const input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
   const list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
+  const status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
   const records = dialog ? decodeRecords(dialog) : []
   const pagefind = dialog
     ? createContractPagefindSearch(decodeContract(dialog), loadPagefind)
@@ -145,6 +147,16 @@ export const mountSearch = (
       "aria-activedescendant",
       results[selected] ? `doc-search-result-${selected}` : "",
     )
+    if (status) {
+      status.textContent =
+        list.dataset.docSearchState === "error"
+          ? "Search unavailable. Try again."
+          : list.dataset.docSearchState === "ready"
+            ? results.length === 0
+              ? "No results"
+              : `${results.length} ${results.length === 1 ? "result" : "results"}`
+            : ""
+    }
   }
 
   const render = () => {
@@ -170,6 +182,7 @@ export const mountSearch = (
 
     list.dataset.docSearchState = "loading"
     list.setAttribute("aria-busy", "true")
+    if (status) status.textContent = "Searching…"
     void pagefind(query, filters())
       .then((found) => {
         if (generation !== current || controller.signal.aborted) return
@@ -190,13 +203,14 @@ export const mountSearch = (
   const open = (button?: HTMLElement) => {
     if (!dialog || !input) return
     trigger = button ?? trigger
-    if (typeof dialog.showModal === "function") dialog.showModal()
-    else dialog.setAttribute("open", "")
+    if (!inline && typeof dialog.showModal === "function") {
+      if (!dialog.open) dialog.showModal()
+    } else dialog.setAttribute("open", "")
     input.focus()
   }
   const close = () => {
     if (!dialog) return
-    if (typeof dialog.close === "function") dialog.close()
+    if (!inline && typeof dialog.close === "function") dialog.close()
     else dialog.removeAttribute("open")
     trigger?.focus()
   }
@@ -239,12 +253,16 @@ export const mountSearch = (
       if (event.key === "Escape") {
         event.preventDefault()
         close()
-      } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+        return
+      }
+      if (inline && event.target !== input) return
+      if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault()
         const offset = event.key === "ArrowDown" ? 1 : -1
         selected = Math.max(0, Math.min(results.length - 1, selected + offset))
         paint()
       } else if (event.key === "Enter" && results[selected]) {
+        event.preventDefault()
         const link = list?.children[selected]?.querySelector<HTMLAnchorElement>("a")
         link?.click()
       }

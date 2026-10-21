@@ -18,6 +18,38 @@ defmodule PhoenixAssets.DocShellTest do
   alias Phoenix.HTML
   alias PhoenixAssets.DocShell.{ApiReference, Assets, Ast, Components, Pagefind, StaticRenderer}
 
+  import Phoenix.LiveViewTest, only: [render_component: 2]
+
+  test "inline search composes with host chrome and bounded facets without an embedded corpus" do
+    html =
+      render_component(&Components.search/1,
+        search: %{"records" => []},
+        presentation: :inline,
+        trigger: false,
+        filter_values: %{
+          "kind" => ["guide", "api", "guide", "", String.duplicate("a", 257), <<255>>],
+          "locale" => Enum.map(1..300, &Integer.to_string/1),
+          "status" => :invalid,
+          "unknown" => ["ignored"]
+        }
+      )
+
+    assert html =~ ~s(<section class="doc-search-inline")
+    assert html =~ ~s(data-doc-search-presentation="inline")
+    assert html =~ ~s(data-doc-search-filter="kind")
+    assert html =~ ~s(<option value="api">api</option><option value="guide">guide</option>)
+    assert html =~ ~s(data-doc-search-status)
+    assert length(Regex.scan(~r/<option value="[^"]+">/, html)) == 258
+    refute html =~ "data-doc-search-open"
+    refute html =~ "<dialog"
+    refute html =~ ~s(data-doc-search-filter="unknown")
+    refute html =~ ~s(data-doc-search-filter="status")
+
+    default = render_component(&Components.search/1, search: %{"records" => []})
+    assert default =~ ~s(<dialog class="doc-search-dialog")
+    assert default =~ ~s(aria-haspopup="dialog")
+  end
+
   test "AST renderer escapes text, admits closed links, and visibly degrades unsafe input" do
     nodes = [
       node("h2", ["Safe <heading>"], %{"id" => "safe-heading", "onclick" => "bad()"}),

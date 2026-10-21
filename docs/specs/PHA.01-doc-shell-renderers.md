@@ -1,6 +1,6 @@
 # PHA.01: DocShell renderers for Svelte and LiveView
 
-Specification version: 0.2.1. Contract: accepted. Implementation status:
+Specification version: 0.3.0. Contract: accepted. Implementation status:
 partial.
 
 ## Purpose
@@ -121,7 +121,7 @@ for:
 - complete documentation page and shell;
 - header, brand slot, theme and locale controls;
 - desktop sidebar, mobile navigation, groups, badges and current-page state;
-- search button, dialog and results;
+- search button, dialog or inline section, filters and results;
 - breadcrumbs, page title, version/status context and announcement banner;
 - table of contents and anchored headings;
 - previous/next links, last-updated, source and edit links;
@@ -198,6 +198,21 @@ closes on Escape, supports arrow-key selection and Enter navigation, and
 restores focus to its trigger. Results show page, section, collection and
 version context. Locale, package, document kind, version, tag and status
 filters remain available when present.
+
+The HEEx search component also accepts `presentation: :inline`. It uses a
+non-modal section within the host's content layout, leaving surrounding links
+and controls available. Escape closes it and returns focus to the opening
+control; result arrows and Enter apply only while the query input has focus.
+Hosts may omit the default trigger and provide a labelled
+`data-doc-search-open` control within the same browser-core root. Header and
+controls slots accept host chrome while retaining the shared query, filter and
+result behavior. The default remains a modal dialog.
+
+When a static adapter omits embedded records, the host may pass admitted
+`filter_values` separately. Only the seven supported facet names are rendered;
+each accepts at most 256 unique, sorted, non-empty UTF-8 strings of at most
+256 bytes. Invalid values are omitted. Loading, empty, result-count and failed
+queries have a live status message in both presentations.
 
 The default search path is fully static and sends no query or telemetry to a
 service. A host may supply another `DocShell.Presentation.SearchAdapter`, but
