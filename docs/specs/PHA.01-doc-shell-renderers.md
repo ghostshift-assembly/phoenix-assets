@@ -1,6 +1,6 @@
 # PHA.01: DocShell renderers for Svelte and LiveView
 
-Specification version: 0.3.0. Contract: accepted. Implementation status:
+Specification version: 0.3.1. Contract: accepted. Implementation status:
 partial.
 
 ## Purpose
@@ -213,6 +213,10 @@ When a static adapter omits embedded records, the host may pass admitted
 each accepts at most 256 unique, sorted, non-empty UTF-8 strings of at most
 256 bytes. Invalid values are omitted. Loading, empty, result-count and failed
 queries have a live status message in both presentations.
+
+Result excerpts are bounded to 320 displayed characters. The browser renders
+their text safely and recognizes only inert `mark` highlighting; index text
+cannot create images, scripts or other HTML elements.
 
 The default search path is fully static and sends no query or telemetry to a
 service. A host may supply another `DocShell.Presentation.SearchAdapter`, but

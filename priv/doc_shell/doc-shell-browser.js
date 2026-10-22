@@ -1,4 +1,4 @@
-var N = /[\u0000-\u0020\u007f-\u009f]/g, O = /^([a-z][a-z\d+.-]*):/i, P = /&#(?:x([\da-f]+)|(\d+));?/gi;
+var R = /[\u0000-\u0020\u007f-\u009f]/g, O = /^([a-z][a-z\d+.-]*):/i, P = /&#(?:x([\da-f]+)|(\d+));?/gi;
 function _() {
   return typeof window > "u" ? "http://localhost/" : window.location.href;
 }
@@ -14,12 +14,12 @@ function D(e) {
   return r.replace(P, (n, a, o) => {
     const t = Number.parseInt(a ?? o ?? "0", a ? 16 : 10);
     return t <= 1114111 ? String.fromCodePoint(t) : "";
-  }).replace(/&colon;/gi, ":").replace(N, "");
+  }).replace(/&colon;/gi, ":").replace(R, "");
 }
 function U(e) {
   return e.startsWith("//") || e.startsWith("\\\\");
 }
-function I(e, r = _()) {
+function j(e, r = _()) {
   const n = e?.trim();
   if (!n || n.includes("\\")) return;
   const a = D(n);
@@ -48,12 +48,12 @@ function I(e, r = _()) {
       return;
     }
 }
-var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
+var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
   const n = Array.isArray(e.audience) ? e.audience : [e.audience];
   return (Array.isArray(r) ? r : [r]).every((a) => n.includes(a));
-}, j = (e, r) => Object.entries(r).every(([n, a]) => a === void 0 ? !0 : n === "tag" ? e.tags.includes(String(a)) : n === "audience" ? $(e, a) : e[n] === a), v = (e, r, n) => e && q(e).includes(r) ? n : 0, B = (e, r, n = {}, a = 20) => {
+}, $ = (e, r) => Object.entries(r).every(([n, a]) => a === void 0 ? !0 : n === "tag" ? e.tags.includes(String(a)) : n === "audience" ? I(e, a) : e[n] === a), v = (e, r, n) => e && q(e).includes(r) ? n : 0, B = (e, r, n = {}, a = 20) => {
   const o = q(r);
-  return e.filter((t) => j(t, n)).map((t) => ({
+  return e.filter((t) => $(t, n)).map((t) => ({
     record: t,
     score: o === "" ? 1 : v(t.title, o, 4) + v(t.section, o, 2) + v(t.text, o, 1)
   })).filter(({ score: t }) => t > 0).sort((t, i) => i.score - t.score || t.record.route.localeCompare(i.record.route) || t.record.id.localeCompare(i.record.id)).slice(0, a).map(({ record: t }) => t);
@@ -142,35 +142,47 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     tags: [],
     status: e.meta.status
   };
-}, Q = (e, r) => {
+}, Q = (e) => {
+  const r = document.createElement("p");
+  r.className = "doc-search-excerpt";
+  let n = r, a = 320;
+  for (const o of e.slice(0, 2048).split(/(<\/?mark>)/i)) if (o.toLowerCase() === "<mark>")
+    n = document.createElement("mark"), r.append(n);
+  else if (o.toLowerCase() === "</mark>") n = r;
+  else {
+    const t = Array.from(o), i = t.slice(0, a);
+    if (n.append(document.createTextNode(i.join(""))), a -= i.length, t.length > i.length && n.append("…"), a === 0) break;
+  }
+  return r;
+}, X = (e, r) => {
   const n = new AbortController();
   let a, o = 0, t = [], i = 0;
-  const s = e.querySelector("[data-doc-search-dialog]"), u = s?.dataset.docSearchPresentation === "inline", h = s?.querySelector("[data-doc-search-input]"), l = s?.querySelector("[data-doc-search-results]"), p = s?.querySelector("[data-doc-search-status]"), R = s ? V(s) : [], A = s ? F(Y(s), r) : void 0, C = () => Object.fromEntries(w(s ?? e, "[data-doc-search-filter]").map((c) => [c.dataset.docSearchFilter, c.value]).filter((c) => !!(c[0] && c[1]))), m = () => {
-    !h || !l || (o = Math.min(o, Math.max(0, t.length - 1)), l.replaceChildren(...t.map((c, d) => {
+  const s = e.querySelector("[data-doc-search-dialog]"), u = s?.dataset.docSearchPresentation === "inline", g = s?.querySelector("[data-doc-search-input]"), l = s?.querySelector("[data-doc-search-results]"), p = s?.querySelector("[data-doc-search-status]"), M = s ? V(s) : [], A = s ? F(Y(s), r) : void 0, C = () => Object.fromEntries(w(s ?? e, "[data-doc-search-filter]").map((c) => [c.dataset.docSearchFilter, c.value]).filter((c) => !!(c[0] && c[1]))), m = () => {
+    !g || !l || (o = Math.min(o, Math.max(0, t.length - 1)), l.replaceChildren(...t.map((c, d) => {
       const f = document.createElement("li");
       f.id = `doc-search-result-${d}`, f.setAttribute("role", "option"), f.setAttribute("aria-selected", String(d === o));
-      const y = I(c.route), g = document.createElement(y ? "a" : "span");
-      y && g instanceof HTMLAnchorElement && (g.href = y.href, y.external && (g.target = "_blank", g.rel = "noopener noreferrer"));
-      const k = [
+      const y = j(c.route), h = document.createElement(y ? "a" : "span");
+      y && h instanceof HTMLAnchorElement && (h.href = y.href, y.external && (h.target = "_blank", h.rel = "noopener noreferrer"));
+      const E = [
         c.section,
         c.collection,
         c.version
       ].filter(Boolean).join(" · ");
-      if (g.append(document.createTextNode(c.title)), k) {
+      if (h.append(document.createTextNode(c.title)), E) {
         const x = document.createElement("small");
-        x.textContent = k, g.append(x);
+        x.textContent = E, h.append(x);
       }
-      return f.append(g), f;
-    })), h.setAttribute("aria-activedescendant", t[o] ? `doc-search-result-${o}` : ""), p && (p.textContent = l.dataset.docSearchState === "error" ? "Search unavailable. Try again." : l.dataset.docSearchState === "ready" ? t.length === 0 ? "No results" : `${t.length} ${t.length === 1 ? "result" : "results"}` : ""));
+      return typeof c.text == "string" && c.text.trim() && h.append(Q(c.text)), f.append(h), f;
+    })), g.setAttribute("aria-activedescendant", t[o] ? `doc-search-result-${o}` : ""), p && (p.textContent = l.dataset.docSearchState === "error" ? "Search unavailable. Try again." : l.dataset.docSearchState === "ready" ? t.length === 0 ? "No results" : `${t.length} ${t.length === 1 ? "result" : "results"}` : ""));
   }, b = () => {
-    if (!h || !l) return;
-    const c = h.value.trim(), d = ++i;
+    if (!g || !l) return;
+    const c = g.value.trim(), d = ++i;
     if (c.length < 2) {
       t = [], l.dataset.docSearchState = "idle", l.removeAttribute("aria-busy"), m();
       return;
     }
     if (!A) {
-      t = B(R, c, C(), 20), l.dataset.docSearchState = "ready", l.removeAttribute("aria-busy"), m();
+      t = B(M, c, C(), 20), l.dataset.docSearchState = "ready", l.removeAttribute("aria-busy"), m();
       return;
     }
     l.dataset.docSearchState = "loading", l.setAttribute("aria-busy", "true"), p && (p.textContent = "Searching…"), A(c, C()).then((f) => {
@@ -178,21 +190,21 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     }).catch(() => {
       i !== d || n.signal.aborted || (t = [], l.dataset.docSearchState = "error", l.removeAttribute("aria-busy"), m());
     });
-  }, E = (c) => {
-    !s || !h || (a = c ?? a, !u && typeof s.showModal == "function" ? s.open || s.showModal() : s.setAttribute("open", ""), h.focus());
+  }, k = (c) => {
+    !s || !g || (a = c ?? a, !u && typeof s.showModal == "function" ? s.open || s.showModal() : s.setAttribute("open", ""), g.focus());
   }, S = () => {
     s && (!u && typeof s.close == "function" ? s.close() : s.removeAttribute("open"), a?.focus());
   };
   return e.addEventListener("click", (c) => {
     const d = c.target, f = d.closest("[data-doc-search-open]");
-    f && E(f), d.closest("[data-doc-search-close]") && S(), d.closest("[data-doc-search-results] a") && S();
+    f && k(f), d.closest("[data-doc-search-close]") && S(), d.closest("[data-doc-search-results] a") && S();
   }, { signal: n.signal }), e.addEventListener("input", (c) => {
     c.target.matches("[data-doc-search-input], [data-doc-search-filter]") && b();
   }, { signal: n.signal }), e.addEventListener("change", (c) => {
     c.target.matches("[data-doc-search-filter]") && b();
   }, { signal: n.signal }), e.addEventListener("keydown", (c) => {
     if ((c.metaKey || c.ctrlKey) && c.key.toLowerCase() === "k") {
-      c.preventDefault(), E(e.querySelector("[data-doc-search-open]") ?? void 0);
+      c.preventDefault(), k(e.querySelector("[data-doc-search-open]") ?? void 0);
       return;
     }
     if (s?.hasAttribute("open")) {
@@ -200,7 +212,7 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
         c.preventDefault(), S();
         return;
       }
-      if (!(u && c.target !== h))
+      if (!(u && c.target !== g))
         if (c.key === "ArrowDown" || c.key === "ArrowUp") {
           c.preventDefault();
           const d = c.key === "ArrowDown" ? 1 : -1;
@@ -211,7 +223,7 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     refresh: b,
     destroy: () => n.abort()
   };
-}, X = (e) => {
+}, Z = (e) => {
   const r = new AbortController();
   return e.addEventListener("click", async (n) => {
     const a = n.target.closest("[data-doc-copy]");
@@ -223,7 +235,7 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     },
     destroy: () => r.abort()
   };
-}, Z = (e) => {
+}, ee = (e) => {
   const r = new AbortController(), n = (a) => {
     const o = a.closest('[role="tablist"]');
     if (o)
@@ -260,41 +272,41 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     }),
     destroy: () => r.abort()
   };
-}, T = "phoenix-assets:doc-shell:theme", M = /* @__PURE__ */ new Set([
+}, T = "phoenix-assets:doc-shell:theme", N = /* @__PURE__ */ new Set([
   "system",
   "light",
   "dark",
   "contrast"
-]), ee = (e = localStorage) => {
+]), te = (e = localStorage) => {
   const r = e.getItem(T);
-  return r && M.has(r) ? r : "system";
+  return r && N.has(r) ? r : "system";
 }, L = (e, r) => {
   e.dataset.paTheme = r === "system" ? "" : r, e.dataset.docTheme = r;
-}, te = (e, r = localStorage) => {
-  const n = new AbortController(), a = () => L(e, ee(r));
+}, re = (e, r = localStorage) => {
+  const n = new AbortController(), a = () => L(e, te(r));
   return e.addEventListener("click", (o) => {
     const t = o.target.closest("[data-doc-theme-value]")?.dataset.docThemeValue;
-    !t || !M.has(t) || (r.setItem(T, t), L(e, t));
+    !t || !N.has(t) || (r.setItem(T, t), L(e, t));
   }, { signal: n.signal }), a(), {
     refresh: a,
     destroy: () => n.abort()
   };
-}, re = (e) => {
+}, ae = (e) => {
   const r = [
-    te(e),
+    re(e),
     J(e),
-    Q(e),
     X(e),
-    Z(e)
+    Z(e),
+    ee(e)
   ];
   return {
     refresh: () => r.forEach((n) => n.refresh()),
     destroy: () => r.splice(0).forEach((n) => n.destroy())
   };
-}, ae = (e = document.documentElement) => {
+}, ne = (e = document.documentElement) => {
   let r;
   const n = () => {
-    r ??= re(e);
+    r ??= ae(e);
   };
   return document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", n, { once: !0 }) : n(), {
     refresh: () => r?.refresh(),
@@ -303,4 +315,4 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
     }
   };
 };
-ae();
+ne();

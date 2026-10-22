@@ -85,6 +85,29 @@ const pagefindRecord = (result: PagefindResult): SearchRecord => {
   }
 }
 
+const searchExcerpt = (value: string): HTMLElement => {
+  const excerpt = document.createElement("p")
+  excerpt.className = "doc-search-excerpt"
+  let parent: HTMLElement = excerpt
+  let remaining = 320
+  for (const part of value.slice(0, 2048).split(/(<\/?mark>)/i)) {
+    if (part.toLowerCase() === "<mark>") {
+      parent = document.createElement("mark")
+      excerpt.append(parent)
+    } else if (part.toLowerCase() === "</mark>") {
+      parent = excerpt
+    } else {
+      const characters = Array.from(part)
+      const shown = characters.slice(0, remaining)
+      parent.append(document.createTextNode(shown.join("")))
+      remaining -= shown.length
+      if (characters.length > shown.length) parent.append("…")
+      if (remaining === 0) break
+    }
+  }
+  return excerpt
+}
+
 export const mountSearch = (
   root: HTMLElement,
   loadPagefind?: PagefindModuleLoader,
@@ -138,6 +161,9 @@ export const mountSearch = (
           const detail = document.createElement("small")
           detail.textContent = context
           link.append(detail)
+        }
+        if (typeof record.text === "string" && record.text.trim()) {
+          link.append(searchExcerpt(record.text))
         }
         item.append(link)
         return item

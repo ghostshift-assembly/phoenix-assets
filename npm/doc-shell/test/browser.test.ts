@@ -45,8 +45,8 @@ const records: SearchRecord[] = [
   },
 ]
 
-const encodedRecords = () => {
-  const bytes = new TextEncoder().encode(JSON.stringify(records))
+const encodedRecords = (value: SearchRecord[] = records) => {
+  const bytes = new TextEncoder().encode(JSON.stringify(value))
   let binary = ""
   for (const byte of bytes) binary += String.fromCharCode(byte)
   return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_")
@@ -181,6 +181,34 @@ describe("deterministic browser search", () => {
 })
 
 describe("browser controller lifecycle", () => {
+  it("bounds result excerpts and admits only inert mark highlighting", () => {
+    const root = fixture()
+    const surface = root.querySelector<HTMLElement>("[data-doc-search-dialog]")
+    if (!surface) throw new Error("missing search")
+    const record = records[0]
+    if (!record) throw new Error("missing fixture record")
+    surface.dataset.docSearchRecords = encodedRecords([
+      {
+        ...record,
+        text:
+          '<mark>static</mark> <img src="https://example.test/x" onerror="alert(1)"> ' +
+          "x".repeat(500),
+      },
+    ])
+    const controller = mountSearch(root)
+    const input = root.querySelector<HTMLInputElement>("[data-doc-search-input]")
+    if (!input) throw new Error("missing input")
+    input.value = "portable"
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    const excerpt = root.querySelector(".doc-search-excerpt")
+    expect(excerpt?.querySelector("mark")?.textContent).toBe("static")
+    expect(excerpt?.querySelector("img, script")).toBeNull()
+    expect(excerpt?.textContent).toContain('<img src="https://example.test/x"')
+    expect(excerpt?.textContent?.length).toBeLessThanOrEqual(321)
+    expect(excerpt?.textContent).toMatch(/…$/)
+    controller.destroy()
+  })
+
   it("keeps inline navigation usable and scopes result keys to the query", () => {
     const root = fixture()
     const modal = root.querySelector("dialog")
