@@ -1,8 +1,8 @@
-var R = /[\u0000-\u0020\u007f-\u009f]/g, O = /^([a-z][a-z\d+.-]*):/i, P = /&#(?:x([\da-f]+)|(\d+));?/gi;
-function _() {
+var O = /[\u0000-\u0020\u007f-\u009f]/g, P = /^([a-z][a-z\d+.-]*):/i, _ = /&#(?:x([\da-f]+)|(\d+));?/gi;
+function D() {
   return typeof window > "u" ? "http://localhost/" : window.location.href;
 }
-function D(e) {
+function U(e) {
   let r = e;
   for (let n = 0; n < 2; n += 1) try {
     const a = decodeURIComponent(r);
@@ -11,20 +11,20 @@ function D(e) {
   } catch {
     break;
   }
-  return r.replace(P, (n, a, o) => {
+  return r.replace(_, (n, a, o) => {
     const t = Number.parseInt(a ?? o ?? "0", a ? 16 : 10);
     return t <= 1114111 ? String.fromCodePoint(t) : "";
-  }).replace(/&colon;/gi, ":").replace(R, "");
+  }).replace(/&colon;/gi, ":").replace(O, "");
 }
-function U(e) {
+function j(e) {
   return e.startsWith("//") || e.startsWith("\\\\");
 }
-function j(e, r = _()) {
+function I(e, r = D()) {
   const n = e?.trim();
   if (!n || n.includes("\\")) return;
-  const a = D(n);
-  if (U(a)) return;
-  const o = a.match(O);
+  const a = U(n);
+  if (j(a)) return;
+  const o = a.match(P);
   if (!o) return {
     href: n,
     external: !1,
@@ -38,26 +38,26 @@ function j(e, r = _()) {
   };
   if (!(t !== "http" && t !== "https"))
     try {
-      const i = new URL(n), s = i.origin !== new URL(r).origin;
+      const i = new URL(n), l = i.origin !== new URL(r).origin;
       return {
         href: i.href,
-        external: s,
-        navigable: !s
+        external: l,
+        navigable: !l
       };
     } catch {
       return;
     }
 }
-var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
+var T = (e) => e.normalize("NFC").toLocaleLowerCase("und"), $ = (e, r) => {
   const n = Array.isArray(e.audience) ? e.audience : [e.audience];
   return (Array.isArray(r) ? r : [r]).every((a) => n.includes(a));
-}, $ = (e, r) => Object.entries(r).every(([n, a]) => a === void 0 ? !0 : n === "tag" ? e.tags.includes(String(a)) : n === "audience" ? I(e, a) : e[n] === a), v = (e, r, n) => e && q(e).includes(r) ? n : 0, B = (e, r, n = {}, a = 20) => {
-  const o = q(r);
-  return e.filter((t) => $(t, n)).map((t) => ({
+}, B = (e, r) => Object.entries(r).every(([n, a]) => a === void 0 ? !0 : n === "tag" ? e.tags.includes(String(a)) : n === "audience" ? $(e, a) : e[n] === a), w = (e, r, n) => e && T(e).includes(r) ? n : 0, z = (e, r, n = {}, a = 20) => {
+  const o = T(r);
+  return e.filter((t) => B(t, n)).map((t) => ({
     record: t,
-    score: o === "" ? 1 : v(t.title, o, 4) + v(t.section, o, 2) + v(t.text, o, 1)
+    score: o === "" ? 1 : w(t.title, o, 4) + w(t.section, o, 2) + w(t.text, o, 1)
   })).filter(({ score: t }) => t > 0).sort((t, i) => i.score - t.score || t.record.route.localeCompare(i.record.route) || t.record.id.localeCompare(i.record.id)).slice(0, a).map(({ record: t }) => t);
-}, z = (e) => typeof e == "object" && e !== null && typeof e.search == "function", H = (e, r = window.location.origin) => {
+}, H = (e) => typeof e == "object" && e !== null && typeof e.search == "function", W = (e, r = window.location.origin) => {
   if (typeof e != "object" || e === null || e.schema_version !== "doc-shell-search-query/v1" || e.algorithm !== "pagefind/v1") return;
   const n = e.path;
   if (!(typeof n != "string" || !n.startsWith("/") || n.startsWith("//"))) {
@@ -69,18 +69,18 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     }
     return e;
   }
-}, W = async (e) => import(
+}, F = async (e) => import(
   /* @vite-ignore */
   e
-), F = (e, r = W, n = window.location.origin) => {
-  const a = H(e, n);
+), K = (e, r = F, n = window.location.origin) => {
+  const a = W(e, n);
   if (a)
-    return K(async () => {
+    return J(async () => {
       const o = await r(a.path);
-      if (!z(o)) throw new Error("Invalid Pagefind browser module");
+      if (!H(o)) throw new Error("Invalid Pagefind browser module");
       return o;
     });
-}, K = (e) => {
+}, J = (e) => {
   let r;
   return async (n, a = {}) => {
     r ??= e();
@@ -91,8 +91,8 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
       url: t.meta.route ?? t.url
     }));
   };
-}, w = (e, r) => [...e.querySelectorAll(r)], J = (e) => {
-  const r = new AbortController(), n = () => w(e, "[data-doc-nav-toggle]").forEach((a) => {
+}, A = (e, r) => [...e.querySelectorAll(r)], V = (e) => {
+  const r = new AbortController(), n = () => A(e, "[data-doc-nav-toggle]").forEach((a) => {
     const o = a.getAttribute("aria-controls"), t = o ? e.querySelector(`#${CSS.escape(o)}`) : null;
     t && !t.dataset.docNavState && (t.dataset.docNavState = "closed");
   });
@@ -101,13 +101,13 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     if (!o) return;
     const t = o.getAttribute("aria-controls"), i = t ? e.querySelector(`#${CSS.escape(t)}`) : void 0;
     if (!i) return;
-    const s = o.getAttribute("aria-expanded") !== "true";
-    o.setAttribute("aria-expanded", String(s)), i.dataset.docNavState = s ? "open" : "closed";
+    const l = o.getAttribute("aria-expanded") !== "true";
+    o.setAttribute("aria-expanded", String(l)), i.dataset.docNavState = l ? "open" : "closed";
   }, { signal: r.signal }), n(), {
     refresh: n,
     destroy: () => r.abort()
   };
-}, V = (e) => {
+}, Y = (e) => {
   const r = e.dataset.docSearchRecords;
   if (!r) return [];
   try {
@@ -116,7 +116,7 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
   } catch {
     return [];
   }
-}, Y = (e) => {
+}, X = (e) => {
   const r = e.dataset.docSearchContract;
   if (r)
     try {
@@ -154,76 +154,79 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     if (n.append(document.createTextNode(i.join(""))), a -= i.length, t.length > i.length && n.append("…"), a === 0) break;
   }
   return r;
-}, X = (e, r) => {
+}, Z = (e, r) => {
   const n = new AbortController();
-  let a, o = 0, t = [], i = 0;
-  const s = e.querySelector("[data-doc-search-dialog]"), u = s?.dataset.docSearchPresentation === "inline", g = s?.querySelector("[data-doc-search-input]"), l = s?.querySelector("[data-doc-search-results]"), p = s?.querySelector("[data-doc-search-status]"), M = s ? V(s) : [], A = s ? F(Y(s), r) : void 0, C = () => Object.fromEntries(w(s ?? e, "[data-doc-search-filter]").map((c) => [c.dataset.docSearchFilter, c.value]).filter((c) => !!(c[0] && c[1]))), m = () => {
-    !g || !l || (o = Math.min(o, Math.max(0, t.length - 1)), l.replaceChildren(...t.map((c, d) => {
+  let a, o = 0, t = [], i = 0, l;
+  const s = e.querySelector("[data-doc-search-dialog]"), m = s?.dataset.docSearchPresentation === "inline", g = s?.querySelector("[data-doc-search-input]"), d = s?.querySelector("[data-doc-search-results]"), y = s?.querySelector("[data-doc-search-status]"), R = s ? Y(s) : [], C = s ? K(X(s), r) : void 0, k = () => Object.fromEntries(A(s ?? e, "[data-doc-search-filter]").map((c) => [c.dataset.docSearchFilter, c.value]).filter((c) => !!(c[0] && c[1]))), p = () => {
+    !g || !d || (o = Math.min(o, Math.max(0, t.length - 1)), d.replaceChildren(...t.map((c, u) => {
       const f = document.createElement("li");
-      f.id = `doc-search-result-${d}`, f.setAttribute("role", "option"), f.setAttribute("aria-selected", String(d === o));
-      const y = j(c.route), h = document.createElement(y ? "a" : "span");
-      y && h instanceof HTMLAnchorElement && (h.href = y.href, y.external && (h.target = "_blank", h.rel = "noopener noreferrer"));
-      const E = [
+      f.id = `doc-search-result-${u}`, f.setAttribute("role", "option"), f.setAttribute("aria-selected", String(u === o));
+      const b = I(c.route), h = document.createElement(b ? "a" : "span");
+      b && h instanceof HTMLAnchorElement && (h.href = b.href, b.external && (h.target = "_blank", h.rel = "noopener noreferrer"));
+      const x = [
         c.section,
         c.collection,
         c.version
       ].filter(Boolean).join(" · ");
-      if (h.append(document.createTextNode(c.title)), E) {
-        const x = document.createElement("small");
-        x.textContent = E, h.append(x);
+      if (h.append(document.createTextNode(c.title)), x) {
+        const L = document.createElement("small");
+        L.textContent = x, h.append(L);
       }
       return typeof c.text == "string" && c.text.trim() && h.append(Q(c.text)), f.append(h), f;
-    })), g.setAttribute("aria-activedescendant", t[o] ? `doc-search-result-${o}` : ""), p && (p.textContent = l.dataset.docSearchState === "error" ? "Search unavailable. Try again." : l.dataset.docSearchState === "ready" ? t.length === 0 ? "No results" : `${t.length} ${t.length === 1 ? "result" : "results"}` : ""));
-  }, b = () => {
-    if (!g || !l) return;
-    const c = g.value.trim(), d = ++i;
-    if (c.length < 2) {
-      t = [], l.dataset.docSearchState = "idle", l.removeAttribute("aria-busy"), m();
-      return;
-    }
-    if (!A) {
-      t = B(M, c, C(), 20), l.dataset.docSearchState = "ready", l.removeAttribute("aria-busy"), m();
-      return;
-    }
-    l.dataset.docSearchState = "loading", l.setAttribute("aria-busy", "true"), p && (p.textContent = "Searching…"), A(c, C()).then((f) => {
-      i !== d || n.signal.aborted || (t = f.slice(0, 20).map(G), l.dataset.docSearchState = "ready", l.removeAttribute("aria-busy"), m());
-    }).catch(() => {
-      i !== d || n.signal.aborted || (t = [], l.dataset.docSearchState = "error", l.removeAttribute("aria-busy"), m());
-    });
-  }, k = (c) => {
-    !s || !g || (a = c ?? a, !u && typeof s.showModal == "function" ? s.open || s.showModal() : s.setAttribute("open", ""), g.focus());
+    })), g.setAttribute("aria-activedescendant", t[o] ? `doc-search-result-${o}` : ""), y && (y.textContent = d.dataset.docSearchState === "error" ? "Search unavailable. Try again." : d.dataset.docSearchState === "ready" ? t.length === 0 ? "No results" : `${t.length} ${t.length === 1 ? "result" : "results"}` : ""));
   }, S = () => {
-    s && (!u && typeof s.close == "function" ? s.close() : s.removeAttribute("open"), a?.focus());
+    if (!g || !d) return;
+    const c = g.value.trim(), u = ++i;
+    if (c.length < 2) {
+      t = [], d.dataset.docSearchState = "idle", d.removeAttribute("aria-busy"), p();
+      return;
+    }
+    if (!C) {
+      t = z(R, c, k(), 20), d.dataset.docSearchState = "ready", d.removeAttribute("aria-busy"), p();
+      return;
+    }
+    d.dataset.docSearchState = "loading", d.setAttribute("aria-busy", "true"), y && (y.textContent = "Searching…"), C(c, k()).then((f) => {
+      i !== u || n.signal.aborted || (t = f.slice(0, 20).map(G), d.dataset.docSearchState = "ready", d.removeAttribute("aria-busy"), p());
+    }).catch(() => {
+      i !== u || n.signal.aborted || (t = [], d.dataset.docSearchState = "error", d.removeAttribute("aria-busy"), p());
+    });
+  }, E = (c) => {
+    !s || !g || (a = c ?? a, m && !s.hasAttribute("open") && (l = {
+      left: window.scrollX,
+      top: window.scrollY
+    }), !m && typeof s.showModal == "function" ? s.open || s.showModal() : s.setAttribute("open", ""), g.focus());
+  }, v = () => {
+    s && (!m && typeof s.close == "function" ? s.close() : s.removeAttribute("open"), a?.focus({ preventScroll: !!l }), l && (window.scrollTo(l), l = void 0));
   };
   return e.addEventListener("click", (c) => {
-    const d = c.target, f = d.closest("[data-doc-search-open]");
-    f && k(f), d.closest("[data-doc-search-close]") && S(), d.closest("[data-doc-search-results] a") && S();
+    const u = c.target, f = u.closest("[data-doc-search-open]");
+    f && E(f), u.closest("[data-doc-search-close]") && v(), u.closest("[data-doc-search-results] a") && v();
   }, { signal: n.signal }), e.addEventListener("input", (c) => {
-    c.target.matches("[data-doc-search-input], [data-doc-search-filter]") && b();
+    c.target.matches("[data-doc-search-input], [data-doc-search-filter]") && S();
   }, { signal: n.signal }), e.addEventListener("change", (c) => {
-    c.target.matches("[data-doc-search-filter]") && b();
+    c.target.matches("[data-doc-search-filter]") && S();
   }, { signal: n.signal }), e.addEventListener("keydown", (c) => {
     if ((c.metaKey || c.ctrlKey) && c.key.toLowerCase() === "k") {
-      c.preventDefault(), k(e.querySelector("[data-doc-search-open]") ?? void 0);
+      c.preventDefault(), E(e.querySelector("[data-doc-search-open]") ?? void 0);
       return;
     }
     if (s?.hasAttribute("open")) {
       if (c.key === "Escape") {
-        c.preventDefault(), S();
+        c.preventDefault(), v();
         return;
       }
-      if (!(u && c.target !== g))
+      if (!(m && c.target !== g))
         if (c.key === "ArrowDown" || c.key === "ArrowUp") {
           c.preventDefault();
-          const d = c.key === "ArrowDown" ? 1 : -1;
-          o = Math.max(0, Math.min(t.length - 1, o + d)), m();
-        } else c.key === "Enter" && t[o] && (c.preventDefault(), l?.children[o]?.querySelector("a")?.click());
+          const u = c.key === "ArrowDown" ? 1 : -1;
+          o = Math.max(0, Math.min(t.length - 1, o + u)), p();
+        } else c.key === "Enter" && t[o] && (c.preventDefault(), d?.children[o]?.querySelector("a")?.click());
     }
   }, { signal: n.signal }), {
-    refresh: b,
+    refresh: S,
     destroy: () => n.abort()
   };
-}, Z = (e) => {
+}, ee = (e) => {
   const r = new AbortController();
   return e.addEventListener("click", async (n) => {
     const a = n.target.closest("[data-doc-copy]");
@@ -235,17 +238,17 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     },
     destroy: () => r.abort()
   };
-}, ee = (e) => {
+}, te = (e) => {
   const r = new AbortController(), n = (a) => {
     const o = a.closest('[role="tablist"]');
     if (o)
       for (const t of o.querySelectorAll('[role="tab"]')) {
         const i = t === a;
         t.setAttribute("aria-selected", String(i)), t.tabIndex = i ? 0 : -1;
-        const s = t.getAttribute("aria-controls");
-        if (s) {
-          const u = e.querySelector(`#${CSS.escape(s)}`);
-          u && (u.hidden = !i);
+        const l = t.getAttribute("aria-controls");
+        if (l) {
+          const s = e.querySelector(`#${CSS.escape(l)}`);
+          s && (s.hidden = !i);
         }
       }
   };
@@ -256,57 +259,57 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     const o = a.target.closest('[role="tab"]');
     if (!o) return;
     const t = [...o.closest('[role="tablist"]')?.querySelectorAll('[role="tab"]:not([disabled])') ?? []], i = t.indexOf(o);
-    let s = i;
-    if (a.key === "ArrowRight" || a.key === "ArrowDown") s = (i + 1) % t.length;
-    else if (a.key === "ArrowLeft" || a.key === "ArrowUp") s = (i - 1 + t.length) % t.length;
-    else if (a.key === "Home") s = 0;
-    else if (a.key === "End") s = t.length - 1;
+    let l = i;
+    if (a.key === "ArrowRight" || a.key === "ArrowDown") l = (i + 1) % t.length;
+    else if (a.key === "ArrowLeft" || a.key === "ArrowUp") l = (i - 1 + t.length) % t.length;
+    else if (a.key === "Home") l = 0;
+    else if (a.key === "End") l = t.length - 1;
     else return;
     a.preventDefault();
-    const u = t[s];
-    u && (n(u), u.focus());
+    const s = t[l];
+    s && (n(s), s.focus());
   }, { signal: r.signal }), {
-    refresh: () => w(e, '[role="tablist"]').forEach((a) => {
+    refresh: () => A(e, '[role="tablist"]').forEach((a) => {
       const o = a.querySelector('[role="tab"][aria-selected="true"]') ?? a.querySelector('[role="tab"]');
       o && n(o);
     }),
     destroy: () => r.abort()
   };
-}, T = "phoenix-assets:doc-shell:theme", N = /* @__PURE__ */ new Set([
+}, N = "phoenix-assets:doc-shell:theme", M = /* @__PURE__ */ new Set([
   "system",
   "light",
   "dark",
   "contrast"
-]), te = (e = localStorage) => {
-  const r = e.getItem(T);
-  return r && N.has(r) ? r : "system";
-}, L = (e, r) => {
+]), re = (e = localStorage) => {
+  const r = e.getItem(N);
+  return r && M.has(r) ? r : "system";
+}, q = (e, r) => {
   e.dataset.paTheme = r === "system" ? "" : r, e.dataset.docTheme = r;
-}, re = (e, r = localStorage) => {
-  const n = new AbortController(), a = () => L(e, te(r));
+}, ae = (e, r = localStorage) => {
+  const n = new AbortController(), a = () => q(e, re(r));
   return e.addEventListener("click", (o) => {
     const t = o.target.closest("[data-doc-theme-value]")?.dataset.docThemeValue;
-    !t || !N.has(t) || (r.setItem(T, t), L(e, t));
+    !t || !M.has(t) || (r.setItem(N, t), q(e, t));
   }, { signal: n.signal }), a(), {
     refresh: a,
     destroy: () => n.abort()
   };
-}, ae = (e) => {
+}, ne = (e) => {
   const r = [
-    re(e),
-    J(e),
-    X(e),
+    ae(e),
+    V(e),
     Z(e),
-    ee(e)
+    ee(e),
+    te(e)
   ];
   return {
     refresh: () => r.forEach((n) => n.refresh()),
     destroy: () => r.splice(0).forEach((n) => n.destroy())
   };
-}, ne = (e = document.documentElement) => {
+}, oe = (e = document.documentElement) => {
   let r;
   const n = () => {
-    r ??= ae(e);
+    r ??= ne(e);
   };
   return document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", n, { once: !0 }) : n(), {
     refresh: () => r?.refresh(),
@@ -315,4 +318,4 @@ var q = (e) => e.normalize("NFC").toLocaleLowerCase("und"), I = (e, r) => {
     }
   };
 };
-ne();
+oe();

@@ -117,6 +117,7 @@ export const mountSearch = (
   let selected = 0
   let results: SearchRecord[] = []
   let generation = 0
+  let returnScroll: { left: number; top: number } | undefined
 
   const dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
   const inline = dialog?.dataset.docSearchPresentation === "inline"
@@ -229,6 +230,9 @@ export const mountSearch = (
   const open = (button?: HTMLElement) => {
     if (!dialog || !input) return
     trigger = button ?? trigger
+    if (inline && !dialog.hasAttribute("open")) {
+      returnScroll = { left: window.scrollX, top: window.scrollY }
+    }
     if (!inline && typeof dialog.showModal === "function") {
       if (!dialog.open) dialog.showModal()
     } else dialog.setAttribute("open", "")
@@ -238,7 +242,11 @@ export const mountSearch = (
     if (!dialog) return
     if (!inline && typeof dialog.close === "function") dialog.close()
     else dialog.removeAttribute("open")
-    trigger?.focus()
+    trigger?.focus({ preventScroll: Boolean(returnScroll) })
+    if (returnScroll) {
+      window.scrollTo(returnScroll)
+      returnScroll = undefined
+    }
   }
 
   root.addEventListener(

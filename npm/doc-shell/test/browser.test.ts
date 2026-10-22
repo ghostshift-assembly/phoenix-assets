@@ -220,6 +220,8 @@ describe("browser controller lifecycle", () => {
     modal.replaceWith(surface)
     const showModal = vi.fn()
     const close = vi.fn()
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {})
+    const scrollY = vi.spyOn(window, "scrollY", "get").mockReturnValue(270)
     Object.assign(surface, { showModal, close })
     const controller = mountSearch(root)
     const trigger = root.querySelector<HTMLButtonElement>("[data-doc-search-open]")
@@ -258,13 +260,16 @@ describe("browser controller lifecycle", () => {
     expect(surface.hasAttribute("open")).toBe(false)
     expect(document.activeElement).toBe(trigger)
     expect(close).not.toHaveBeenCalled()
+    expect(scrollTo).toHaveBeenLastCalledWith({ left: 0, top: 270 })
 
+    scrollY.mockReturnValue(480)
     trigger.click()
     input.value = "missing"
     input.dispatchEvent(new Event("input", { bubbles: true }))
     expect(surface.querySelector("[role=status]")?.textContent).toBe("No results")
     root.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
     expect(surface.hasAttribute("open")).toBe(false)
+    expect(scrollTo).toHaveBeenLastCalledWith({ left: 0, top: 480 })
     controller.destroy()
   })
 
