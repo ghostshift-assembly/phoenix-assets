@@ -8,7 +8,7 @@ manifest.
 
 ## The golden path
 
-- Use the default preset. The full stack uses
+- Select and record the integrations the host needs. The full default stack uses
   `PhoenixAssets.Presets.Svelte`. Configure the app and name your declaration
   modules:
 
@@ -35,7 +35,10 @@ manifest.
 
   In production this starts only the manifest server; in dev (when
   `config :phoenix_assets, :dev, enabled: true`) it also supervises Vite,
-  Storybook, and the generated-file watcher.
+  Storybook, and the generated-file watcher according to the selected config.
+  Record supervised versus on-demand processes, generated modules, imports and
+  required peers under PHA.02 PROF-1. A newer package does not authorize a new
+  inspector, runtime endpoint or collector to start in the host.
 
 - Point `svelte-check` at the generated contracts. The Vite plugin resolves
   `$phoenix/*` at dev and build time, but `svelte-check` and `tsc` do not run
@@ -68,7 +71,11 @@ config :phoenix_assets, :stack,
 ## Declaration modules (the backend contract)
 
 Each declaration module is a small DSL for metadata. Ash queries, policies,
-tenancy, and other server behavior stay in the host application.
+tenancy, and other server behavior stay in the host application. Generated types
+track these declarations; they do not inspect controllers. Follow the endpoint
+qualification requirements in [PHA.02](docs/specs/PHA.02-runtime-import-isolation.md).
+Removing a field from an actual response while retaining its declaration can leave
+typechecking green. Hosts test real responses, stable errors and current scope.
 
 ```elixir
 defmodule MyApp.Assets.ElectricShapes do
@@ -82,9 +89,9 @@ end
 
 defmodule MyApp.Assets.Commands do
   use PhoenixAssets.Commands.Definitions
-  # Reads are shapes; everything that changes state is a command. Declaring the
-  # error codes is the point: the generated client returns a discriminated
-  # result, so a call site cannot read the payload without handling failure.
+  # Commands describe bounded HTTP operations, including queries. The host
+  # chooses request/response or streaming semantics. Stable declared error
+  # codes give the generated client a discriminated result.
   command :publish_portfolio,
     route: "/api/portfolios/:id/publish",
     method: :post,
@@ -144,7 +151,10 @@ Rules to rely on:
 - A command result is a value. `runCommand` resolves to
   `{ ok: true, data }` or `{ ok: false, error, status }`; a network failure and
   an error code this build does not know both degrade to `"unknown_error"`
-  rather than escaping as an untyped string or a rejected promise.
+  rather than escaping as an untyped string or a rejected promise. The success
+  type is a declaration, not runtime DTO validation. Hosts apply their existing
+  domain codecs. A lost mutating response remains an unknown outcome; retain the
+  original domain operation identity and reconcile before any permitted retry.
 - Sensitive and non-public Ash fields are excluded by default from generated
   row types. `only: :all` includes private fields and `expose:` can explicitly
   include private or sensitive fields; review these overrides before publishing.
@@ -158,9 +168,10 @@ The host selects Phoenix.Sync and Electric. Phoenix Assets has no production
 Hex requirement on either package. For PostgreSQL 18.6, use the qualified
 Phoenix.Sync revision documented in the README and Electric 1.8.1 (with the
 host's explicit override when embedding). Preserve sandbox transaction isolation
-in tests. The frontend peers require `@electric-sql/client` >=1.5.27 within 1.x,
-`@tanstack/electric-db-collection` >=0.5.5 within 0.5.x, and
-`@tanstack/svelte-db` >=0.5.4 within 0.5.x. TanStack remains optional outside the
+in tests. Current source declares `@electric-sql/client` ^1.5.27,
+`@tanstack/electric-db-collection` ^0.6.0 and `@tanstack/svelte-db` ^0.5.9.
+Earlier 0.5.x collection qualification does not prove this source cohort or a
+consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING. TanStack remains optional outside the
 `/collection` entry point. Artifact and schema contracts retain their versions.
 
 ## Frontend packages
@@ -175,7 +186,8 @@ in tests. The frontend peers require `@electric-sql/client` >=1.5.27 within 1.x,
   shape clients at your app's token key. `createShapeCollection` (TanStack DB)
   lives behind the `@phoenix-assets/svelte/collection` subpath so the main
   barrel stays free of the optional `@tanstack/*` peers.
-  HTTP/Channels-only hosts use `PhoenixAssets.Presets.SvelteHttp` and the
+  HTTP/Channels-only hosts can select the source-implemented, separately
+  release-qualified `PhoenixAssets.Presets.SvelteHttp` and the
   `/core` runtime entrypoint for commands, locales and event helpers. Electric
   is an optional peer at installation and remains required by the legacy root
   barrel and Electric entrypoints. `/socket` needs only the Phoenix peer.
@@ -183,7 +195,10 @@ in tests. The frontend peers require `@electric-sql/client` >=1.5.27 within 1.x,
   closed LayerChart-backed compiler/components, evidence states, and accessible
   table twins. Pass only the renderer-neutral contract. Product code supplies
   semantic CSS tokens and domain chrome; it does not import LayerChart directly
-  or persist renderer option bags.
+  or persist renderer option bags. The current package installs LayerChart as
+  a regular dependency even for `/core` users. PHA.02 specifies a planned optional
+  peer migration; it is not yet a published installation promise. `/reporting`
+  re-exports components, including when used to import its runtime decoder.
 - `@phoenix-assets/doc-shell`: the renderer-neutral documentation UI for the
   `doc-shell/v1` artifact contract. Only needed if you render docs in-app; theme
   it through the `--doc-*` custom properties rather than app aliases.
@@ -201,9 +216,11 @@ host renders it.
 
 Do not add a Phoenix Assets preset, config key, generated field or Svelte helper
 whose only purpose is to enforce one application's breakpoints or page shell.
-Reusable transport or typed-state gaps can belong here when they remain useful
-to the next unrelated host. Product Storybook fixtures and boundary screenshots
-stay with the product that owns the task.
+A reusable transport or typed-state gap must pass PHA.02 PLACE-1: an intrinsic
+framework or existing-renderer need, differing real consumers, upstream semantic
+owner, bounded authority/lifecycle, optional footprint and release cost. Reuse alone
+is insufficient. Product Storybook fixtures and boundary screenshots stay with
+the product that owns the task.
 
 `@phoenix-assets/doc-shell` is an editorial documentation renderer, not the
 host application's authenticated work shell. Its reading, navigation, search
@@ -270,7 +287,12 @@ configuration. Set this before compiling dependencies:
 config :ash, default_string_length_count: :codepoints
 ```
 
-Update the Hex and npm companion packages together, then regenerate contracts.
+Coordinate the Hex and selected npm companion update, then regenerate contracts.
+Before claiming a feature, bind the declared constraints, lock/override resolution,
+extracted artifact and selected profile to its actual qualification under
+[RELEASING](RELEASING.md). A fleet release rule, sibling source version or registry
+entry does not establish the version running in this host. Missing selected
+capabilities remain unavailable until that host's qualified adoption.
 Generated Electric clients use `createShapeFetch` to refresh credentials on each
 request. Configure process-wide auth only with application-wide defaults; SSR
 request-specific tokens belong in per-request configuration.

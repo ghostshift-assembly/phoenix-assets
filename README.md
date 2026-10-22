@@ -295,7 +295,7 @@ module.
 ## Specifications
 
 - [DocShell renderers](docs/specs/PHA.01-doc-shell-renderers.md)
-- [Runtime import isolation](docs/specs/PHA.02-runtime-import-isolation.md)
+- [Runtime imports and consumer qualification](docs/specs/PHA.02-runtime-import-isolation.md)
 - [Development build facts](docs/specs/PHA.03-development-instrumentation.md)
   bounds a conditional build-only extension. Reuse native compiler/Vite facilities
   first; a custom transform needs a demonstrated reusable gap. Runtime inspection

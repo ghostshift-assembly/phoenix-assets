@@ -6,6 +6,67 @@ verified bytes.
 The release manifest binds every checksum to the source commit and version.
 Its contract remains `phoenix-assets/release/v1`.
 
+## Consumer qualification evidence — planned extension
+
+The existing release manifest and verification process own these gates. Keep
+`phoenix-assets/release/v1` stable; attach a versioned qualification sidecar by
+content digest to the retained release evidence, rather than silently adding
+unrecognized wire fields. No second registry, lifecycle or report-envelope field
+is introduced. These additional gates are specified; current scripts do not yet
+collect all of this evidence.
+
+For each selected profile record declared package constraints/overrides, exact
+lock and resolved source/integrity, toolchain/configuration/generation digests,
+extracted tarball identity, actual entrypoint/import graph, installed dependency
+closure and measured installed/emitted bytes. Record selected processes/routes
+separately. A dormant installed tool is not an activated integration. Use PHA.02
+GEN/ISO/PROF/RPT acceptance and PHA.01/PHA.03 for the respective render/build duties.
+
+Reporting qualification also records upstream contract/schema and fixture-format
+versions, immutable public producer repository/revision or publication identity,
+per-file fixture/generated-grammar digests, advertised capabilities/limits, exact
+renderer package/version/tarball digest, toolchain/profile and case results. The
+producer owns that corpus and its semantic verification. Retaining verified public
+bytes supports offline tests; never substitute a private checkout or a locally
+copied enum list. A checksum identifies bytes; publisher trust still follows this
+release process and the consuming channel's trust policy.
+
+Keep declared, source-implemented, locally tested, extracted-artifact qualified,
+published and operating claims separate. Each host records its selected Hex/npm
+companions and any upstream contract versions. One coordinated tag does not prove
+all hosts upgraded, use all packages, or run the same tuple. Running claims need
+host observations of loaded backend/build and served frontend artifacts. Library
+release checks cannot establish them. Known older qualified cohorts remain valid
+within their supported contracts; new source-only features remain unavailable there.
+
+- **REL-1:** change a lock, override, peer, generated contract or tarball while
+  holding display versions fixed. Reject reuse of the prior qualification. Record
+  the mismatched subject and retain evidence; requalify the exact selected bytes.
+- **REL-2:** advance the selected upstream producer profile without changing local
+  copied constants. Detect the stale join; run PHA.02 RPT-1/2 on the extracted
+  renderer and record each verdict. Compatible new producer data can qualify the
+  same renderer bytes; skipped cases and known validation gaps do not count as passes.
+- **REL-3:** qualify fresh narrow and reporting consumers separately under PHA.02
+  ISO/PROF. The optional LayerChart peer changes existing installation obligations:
+  use the breaking-release process, an explicit host migration and rollback proof.
+  Do not republish existing versions or change a host's lock implicitly. Until
+  these pass, retain the current published dependency behavior and state the gap.
+- **REL-4:** inspect both published build-tool packages and production application
+  archives. If PHA.03's reusable-gap gate admits a build extension, published
+  build-tool packages retain that implementation. No extension is mandatory merely
+  to qualify a release. Neither artifact contains host-generated private
+  correspondence, credentials or pairing material. Production app outputs exclude dev injection/routes/modules
+  under PHA.03. Ordinary source maps remain subject to the host's publication
+  policy. An `enabled: false` flag alone is not artifact inspection.
+
+Missing or mismatched qualification blocks the affected support/publication claim.
+An interrupted publisher reuses the original artifact identity under Recovery
+below. A host restores an older exact package/lock cohort only if current contract
+and trust policy still permit it; no component is silently replaced under an
+accepted digest. A missing selected peer is a build prerequisite failure, not a
+successful runtime table fallback. Public measurement and unrelated qualified
+asset profiles do not acquire a reporting or browser-development prerequisite.
+
 ## Local qualification
 
 Use the pinned toolchain and run the complete local gate before releasing:
