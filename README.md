@@ -18,17 +18,25 @@ result in an asset graph that can be checked before deployment. The default
 `PhoenixAssets.Presets.Svelte` covers Vite, SvelteKit, Tailwind v4, Storybook,
 ElectricSQL, PubSub, localization, commands, sessions, and Ash types.
 
-The library has a narrow opinion: Phoenix owns application behavior and
-authorization; the frontend consumes generated contracts. It does not move Ash
-queries or policies into JavaScript, and it does not own the application's sync
-backend.
+Phoenix owns application behavior and authorization; the frontend consumes
+host-declared contracts. Generation validates declarations and their route wiring.
+It does not prove that a controller actually returns the declared payload; hosts
+need runtime contract tests for that. Queries, policies and the sync backend
+remain host-owned.
+
+Sharing code across applications is not enough to place a feature here. Asset
+build/generation/supervision belongs here. The existing reporting and DocShell
+renderers are bounded adapters for upstream contracts; their presence does not
+make this a general UI or application-feature library. Runtime observation,
+browser pairing, source-edit workflows, business measurement and product layout
+belong to their host or dedicated contract/provider owners.
 
 ## What it provides
 
 - Routes, Ash resources, Electric shapes, commands, session data, PubSub topics,
   and gettext locales generate into `$phoenix/*` TypeScript modules.
   `mix phoenix_assets.gen --check` catches stale checked-in output.
-- Shape contracts describe reads. Command contracts describe request bodies,
+- Shape contracts describe sync reads. HTTP command contracts describe request bodies,
   success values, and endpoint error codes. The session contract carries the
   authenticated context expected by the frontend.
 - Routes, pages, stories, shapes, commands, topics, and locales share one
@@ -118,8 +126,8 @@ Electric 1.8.1 embedded stack, declare these host dependencies:
 {:electric, "~> 1.8.1", override: true}
 ```
 
-HTTP-only hosts can omit the Electric dependency and connect to the qualified
-external server. The Phoenix Assets Hex package does not constrain either
+Hosts using an external Electric server can omit the embedded Electric
+dependency and connect to the qualified external server. The Phoenix Assets Hex package does not constrain either
 backend dependency. Keep Phoenix.Sync's sandbox adapter in tests that use
 embedded sync, and configure PostgreSQL logical replication for the server.
 
@@ -240,7 +248,9 @@ held to the same finite, acyclic JSON-only byte and nesting limits:
 <PortableReport {envelope} />
 ```
 
-`layerchart` is an exact internal dependency of this subpath. Host applications
+`layerchart` is an exact dependency of the whole npm Svelte package, although
+reporting imports are isolated to this subpath. Avoiding the reporting import does
+not remove its installation or release cost. Host applications
 pass the portable report contract across storage or network boundaries, not
 LayerChart options. Hosts supply semantic CSS tokens, localized chrome, and
 domain evidence around the shared components.
@@ -286,9 +296,11 @@ module.
 
 - [DocShell renderers](docs/specs/PHA.01-doc-shell-renderers.md)
 - [Runtime import isolation](docs/specs/PHA.02-runtime-import-isolation.md)
-- [Development instrumentation](docs/specs/PHA.03-development-instrumentation.md)
-  specifies planned source correspondence and production exclusion; implementation,
-  package publication and host qualification remain pending.
+- [Development build facts](docs/specs/PHA.03-development-instrumentation.md)
+  bounds a conditional build-only extension. Reuse native compiler/Vite facilities
+  first; a custom transform needs a demonstrated reusable gap. Runtime inspection
+  and source authority remain consumer-owned. Implementation, publication and
+  qualification remain pending.
 
 ## Contributing
 
