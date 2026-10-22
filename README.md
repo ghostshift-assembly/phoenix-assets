@@ -282,6 +282,14 @@ module.
 
 ---
 
+## Specifications
+
+- [DocShell renderers](docs/specs/PHA.01-doc-shell-renderers.md)
+- [Runtime import isolation](docs/specs/PHA.02-runtime-import-isolation.md)
+- [Development instrumentation](docs/specs/PHA.03-development-instrumentation.md)
+  specifies planned source correspondence and production exclusion; implementation,
+  package publication and host qualification remain pending.
+
 ## Contributing
 
 See [CONTRIBUTING.md](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/CONTRIBUTING.md)
