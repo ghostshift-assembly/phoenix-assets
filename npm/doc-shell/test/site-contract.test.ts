@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest"
+import manifest from "../package.json" with { type: "json" }
 import { docShellAssetBudgets, rendererCapabilities } from "../src/capabilities.js"
 import type { DocShellSite } from "../src/types.js"
 
@@ -68,6 +69,7 @@ describe("doc-shell-site/v1 consumer contract", () => {
   })
 
   it("declares bounded local renderer capabilities and assets", () => {
+    expect(rendererCapabilities.renderer_version).toBe(manifest.version)
     expect(rendererCapabilities.schema_version).toBe("doc-shell-renderer-capabilities/v1")
     expect(rendererCapabilities.output_modes).toContain("static")
     expect(rendererCapabilities.features["doc-shell/mermaid/v1"].states).toContain("fallback")

@@ -181,6 +181,30 @@ describe("deterministic browser search", () => {
 })
 
 describe("browser controller lifecycle", () => {
+  it("rebinds replaced search markup and records after a LiveView patch", () => {
+    const root = fixture()
+    const controller = mountSearch(root)
+    const previous = root.querySelector("dialog")
+    if (!previous) throw new Error("missing search")
+    const replacement = previous.cloneNode(true) as HTMLDialogElement
+    const record = records[0]
+    if (!record) throw new Error("missing record")
+    replacement.dataset.docSearchRecords = encodedRecords([
+      { ...record, title: "Replacement guide" },
+    ])
+    previous.replaceWith(replacement)
+    controller.refresh()
+    root.querySelector<HTMLButtonElement>("[data-doc-search-open]")?.click()
+    const input = replacement.querySelector<HTMLInputElement>("input")
+    if (!input) throw new Error("missing query")
+    input.value = "static"
+    input.dispatchEvent(new Event("input", { bubbles: true }))
+    expect(replacement.hasAttribute("open")).toBe(true)
+    expect(document.activeElement).toBe(input)
+    expect(replacement.querySelector("ul")?.textContent).toContain("Replacement guide")
+    controller.destroy()
+  })
+
   it("bounds result excerpts and admits only inert mark highlighting", () => {
     const root = fixture()
     const surface = root.querySelector<HTMLElement>("[data-doc-search-dialog]")
@@ -204,7 +228,7 @@ describe("browser controller lifecycle", () => {
     expect(excerpt?.querySelector("mark")?.textContent).toBe("static")
     expect(excerpt?.querySelector("img, script")).toBeNull()
     expect(excerpt?.textContent).toContain('<img src="https://example.test/x"')
-    expect(excerpt?.textContent?.length).toBeLessThanOrEqual(321)
+    expect(excerpt?.textContent?.length).toBeLessThanOrEqual(320)
     expect(excerpt?.textContent).toMatch(/…$/)
     controller.destroy()
   })

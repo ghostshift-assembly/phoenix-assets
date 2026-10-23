@@ -89,7 +89,7 @@ const searchExcerpt = (value: string): HTMLElement => {
   const excerpt = document.createElement("p")
   excerpt.className = "doc-search-excerpt"
   let parent: HTMLElement = excerpt
-  let remaining = 320
+  let remaining = 319
   for (const part of value.slice(0, 2048).split(/(<\/?mark>)/i)) {
     if (part.toLowerCase() === "<mark>") {
       parent = document.createElement("mark")
@@ -119,13 +119,13 @@ export const mountSearch = (
   let generation = 0
   let returnScroll: { left: number; top: number } | undefined
 
-  const dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
-  const inline = dialog?.dataset.docSearchPresentation === "inline"
-  const input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
-  const list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
-  const status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
-  const records = dialog ? decodeRecords(dialog) : []
-  const pagefind = dialog
+  let dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
+  let inline = dialog?.dataset.docSearchPresentation === "inline"
+  let input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
+  let list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
+  let status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
+  let records = dialog ? decodeRecords(dialog) : []
+  let pagefind = dialog
     ? createContractPagefindSearch(decodeContract(dialog), loadPagefind)
     : undefined
 
@@ -212,14 +212,14 @@ export const mountSearch = (
     if (status) status.textContent = "Searching…"
     void pagefind(query, filters())
       .then((found) => {
-        if (generation !== current || controller.signal.aborted) return
+        if (generation !== current || controller.signal.aborted || !list) return
         results = found.slice(0, 20).map(pagefindRecord)
         list.dataset.docSearchState = "ready"
         list.removeAttribute("aria-busy")
         paint()
       })
       .catch(() => {
-        if (generation !== current || controller.signal.aborted) return
+        if (generation !== current || controller.signal.aborted || !list) return
         results = []
         list.dataset.docSearchState = "error"
         list.removeAttribute("aria-busy")
@@ -304,7 +304,25 @@ export const mountSearch = (
     { signal: controller.signal },
   )
 
-  return { refresh: render, destroy: () => controller.abort() }
+  const refresh = () => {
+    const previous = dialog
+    dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
+    inline = dialog?.dataset.docSearchPresentation === "inline"
+    input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
+    list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
+    status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
+    records = dialog ? decodeRecords(dialog) : []
+    pagefind = dialog
+      ? createContractPagefindSearch(decodeContract(dialog), loadPagefind)
+      : undefined
+    if (previous !== dialog) {
+      selected = 0
+      returnScroll = undefined
+      if (!trigger?.isConnected) trigger = undefined
+    }
+    render()
+  }
+  return { refresh, destroy: () => controller.abort() }
 }
 
 export const mountCopy = (root: HTMLElement): BrowserController => {

@@ -1,7 +1,9 @@
+import manifest from "../package.json" with { type: "json" }
+
 export const rendererCapabilities = {
   schema_version: "doc-shell-renderer-capabilities/v1",
   renderer_id: "phoenix-assets-svelte",
-  renderer_version: "1.1.1",
+  renderer_version: manifest.version,
   output_modes: ["hosted", "static"],
   features: {
     "doc-shell/html/v1": { states: ["fallback", "enhanced"], runtime: [] },
