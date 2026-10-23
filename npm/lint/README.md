@@ -12,7 +12,7 @@ Biome cannot infer.
 pnpm add -D @phoenix-assets/lint @biomejs/biome tailwindcss svelte
 ```
 
-`@biomejs/biome`, `tailwindcss`, and `svelte` are peer dependencies.
+`@biomejs/biome` (>=2.6.2), `tailwindcss`, and `svelte` are peer dependencies.
 
 ## Biome config
 

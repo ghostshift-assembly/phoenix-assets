@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: futhr/doc_shell
-          ref: 43e2740069abf3f02ba14431ea8fd1cdde35ec7c
+          ref: 493e7e9399e72095a8efa684b32da9aa08443df8
           path: .candidates/doc_shell
           persist-credentials: false
 

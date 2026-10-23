@@ -176,8 +176,8 @@ config :phoenix_assets, preset: PhoenixAssets.Presets.SvelteHttp, serve_mode: :s
 Use `@phoenix-assets/svelte/core` for commands/locales/events and `/socket` for
 Phoenix sockets. Electric and TanStack peers are optional; the legacy root
 runtime barrel still imports Electric helpers. DocShell 0.4 remains compatible
-with the asset substrate; its optional site renderer requires DocShell 0.5's
-presentation modules. Neither profile changes host authorization.
+with the asset substrate; its optional site renderer supports DocShell 0.5 and
+1.0 presentation modules. Neither profile changes host authorization.
 
 Tuning an integration uses configuration:
 
@@ -294,9 +294,9 @@ module.
 
 ## Specifications
 
-- [DocShell renderers](docs/specs/PHA.01-doc-shell-renderers.md)
-- [Runtime imports and consumer qualification](docs/specs/PHA.02-runtime-import-isolation.md)
-- [Development build facts](docs/specs/PHA.03-development-instrumentation.md)
+- [DocShell renderers](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/specs/PHA.01-doc-shell-renderers.md)
+- [Runtime imports and consumer qualification](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/specs/PHA.02-runtime-import-isolation.md)
+- [Development build facts](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/specs/PHA.03-development-instrumentation.md)
   bounds a conditional build-only extension. Reuse native compiler/Vite facilities
   first; a custom transform needs a demonstrated reusable gap. Runtime inspection
   and source authority remain consumer-owned. Implementation, publication and

@@ -54,7 +54,7 @@
     "shiki": "^4.5.0"
   },
   "devDependencies": {
-    "@storybook/svelte-vite": "10.6.2",
+    "@storybook/svelte-vite": "10.6.3",
     "@sveltejs/package": "catalog:",
     "@sveltejs/vite-plugin-svelte": "catalog:",
     "@vitest/coverage-v8": "catalog:",

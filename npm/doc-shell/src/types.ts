@@ -1,5 +1,5 @@
-// The `doc-shell/v1` contract, as its producers actually emit it. Two exist and
-// they do not agree on every key: `doc_shell`'s StaticGenerator emits `kind`,
+// The `doc-shell/v1` and `doc-shell/v2` presentation contracts. Producers
+// do not agree on every key: `doc_shell`'s StaticGenerator emits `kind`,
 // `meta`, and `tokens`; a host's GraphProjector emits none of the three. A field
 // only one producer sends is therefore optional here — that is the contract, not
 // an oversight. Keys both producers always send stay required, even when the
@@ -54,7 +54,7 @@ export interface Backlink {
 }
 
 export interface DocShellPresentation {
-  schema_version: "doc-shell/v1"
+  schema_version: "doc-shell/v1" | "doc-shell/v2"
   navigation: NavigationItem[]
   search: SearchEntry[]
   content: Record<string, DocAstNode[]>

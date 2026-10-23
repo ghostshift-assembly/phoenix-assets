@@ -37,7 +37,7 @@
     "check:publish": "publint"
   },
   "peerDependencies": {
-    "@biomejs/biome": ">=2.4.0",
+    "@biomejs/biome": ">=2.6.2",
     "svelte": "^5.0.0",
     "tailwindcss": "^4.0.0"
   },

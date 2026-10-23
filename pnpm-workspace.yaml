@@ -8,23 +8,22 @@ packages:
 # resolved range automatically.
 catalog:
   "@electric-sql/client": ^1.5.28
-  "@sveltejs/package": ^3.0.0
+  "@sveltejs/package": ^3.0.1
   "@sveltejs/vite-plugin-svelte": ^7.3.1
-  "@tanstack/electric-db-collection": ^0.6.0
-  "@tanstack/svelte-db": ^0.5.9
+  "@tanstack/electric-db-collection": ^0.6.3
+  "@tanstack/svelte-db": ^0.5.12
   "@types/node": ^24.19.2
-  "@vitest/coverage-v8": ^5.0.4
-  happy-dom: ^21.0.1
+  "@vitest/coverage-v8": ^5.0.5
+  happy-dom: ^21.0.4
   svelte: ^5.57.2
-  svelte-check: ^4.7.6
+  svelte-check: ^4.7.7
   tailwindcss: ^4.3.3
-  tsup: ^8.5.1
-  # svelte-check supports TypeScript 5/6, and tsup's declaration bundler uses
-  # the JavaScript compiler API. Keep the newest compatible major until both
-  # tools support TypeScript 7; an unsupported override would break host tooling.
+  tsup: ^9.0.0
+  # svelte-package still transpiles through TypeScript's JavaScript compiler API.
+  # Keep TypeScript 6 until that pipeline supports the native TypeScript 7 API.
   typescript: ^6.0.3
-  vite: ^8.3.4
-  vitest: ^5.0.4
+  vite: ^8.3.5
+  vitest: ^5.0.5
 
 # Only esbuild may run its dependency install/build script.
 allowBuilds:
@@ -34,12 +33,13 @@ overrides:
   # Svelte's hydratable server renderer uses Devalue 5's uneval replacer API.
   devalue: 5.9.4
   esbuild: 0.28.2
-  katex: 0.19.0
+  katex: 0.19.1
 
 minimumReleaseAgeExclude:
   - "@tanstack/db-ivm@0.2.0"
-  - "@tanstack/db@0.14.0"
-  - "@tanstack/electric-db-collection@0.6.0"
-  - "@tanstack/svelte-db@0.5.9"
-  - layerchart@2.8.0
+  - "@tanstack/db@0.15.2"
+  - "@tanstack/electric-db-collection@0.6.3"
+  - "@tanstack/svelte-db@0.5.12"
+  - layerchart@2.9.1
   - mermaid@12.2.0
+  - katex@0.19.1

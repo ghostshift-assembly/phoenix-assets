@@ -1,0 +1,119 @@
+{
+  "schema_version": "doc-shell/v2",
+  "navigation": [
+    {
+      "id": "intro",
+      "title": "Intro",
+      "path": "/docs/guide/intro",
+      "kind": "guide",
+      "meta": {
+        "flag": false,
+        "count": 2
+      },
+      "children": []
+    },
+    {
+      "id": "Example",
+      "title": "Example",
+      "path": "/docs/module/Example",
+      "kind": "module",
+      "meta": {
+        "module": "Example",
+        "moduledoc": "present",
+        "members": [
+          {
+            "id": "function:run/1",
+            "title": "run/1",
+            "anchor": "run/1",
+            "kind": "function"
+          },
+          {
+            "id": "type:t/0",
+            "title": "t/0",
+            "anchor": "t:t/0",
+            "kind": "type"
+          }
+        ]
+      },
+      "children": []
+    }
+  ],
+  "search": [
+    {
+      "id": "intro",
+      "title": "Intro",
+      "path": "/docs/guide/intro",
+      "kind": "guide",
+      "content": "Intro\nunbreakable",
+      "tokens": [],
+      "audience": null,
+      "locale": null
+    },
+    {
+      "id": "Example",
+      "title": "Example",
+      "path": "/docs/module/Example",
+      "kind": "module",
+      "content": "Intro\nunbreakable",
+      "tokens": [],
+      "audience": null,
+      "locale": null
+    }
+  ],
+  "content": {
+    "intro": [
+      {
+        "tag": "h1",
+        "attrs": {},
+        "content": [
+          "Intro"
+        ],
+        "meta": {}
+      },
+      {
+        "tag": "p",
+        "attrs": {},
+        "content": [
+          "un",
+          {
+            "tag": "strong",
+            "attrs": {},
+            "content": [
+              "break"
+            ],
+            "meta": {}
+          },
+          "able"
+        ],
+        "meta": {}
+      }
+    ],
+    "Example": [
+      {
+        "tag": "h1",
+        "attrs": {},
+        "content": [
+          "Intro"
+        ],
+        "meta": {}
+      },
+      {
+        "tag": "p",
+        "attrs": {},
+        "content": [
+          "un",
+          {
+            "tag": "strong",
+            "attrs": {},
+            "content": [
+              "break"
+            ],
+            "meta": {}
+          },
+          "able"
+        ],
+        "meta": {}
+      }
+    ]
+  }
+}

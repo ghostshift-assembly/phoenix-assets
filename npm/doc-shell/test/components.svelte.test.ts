@@ -3,7 +3,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import DocShell from "../src/doc-shell.svelte"
 import Search from "../src/search.svelte"
 import SiteShell from "../src/site-shell.svelte"
-import type { DocShellSite, SearchEntry } from "../src/types.js"
+import type { DocShellPresentation, DocShellSite, SearchEntry } from "../src/types.js"
+import presentationV2Fixture from "./fixtures/doc-shell-v2.json"
 import projectedSite from "./fixtures/projected-site.json"
 
 const site = projectedSite as DocShellSite
@@ -48,6 +49,27 @@ function assertControls(root: HTMLElement): void {
 }
 
 describe("rendered heading targets", () => {
+  it("renders the public DocShell 1.0 presentation without expanding member references", () => {
+    const element = target()
+    const presentation = {
+      ...presentationV2Fixture,
+      schema_version: "doc-shell/v2",
+    } satisfies DocShellPresentation
+    mounted.push(
+      mount(DocShell, {
+        target: element,
+        props: { presentation, currentId: "Example", currentPath: "/docs/module/Example" },
+      }),
+    )
+    flushSync()
+
+    expect(
+      element.querySelector("[data-schema-version]")?.getAttribute("data-schema-version"),
+    ).toBe("doc-shell/v2")
+    expect(element.querySelector("main")?.textContent).toContain("unbreakable")
+    expect(element.querySelector('a[href="/docs/module/Example"]')).not.toBeNull()
+  })
+
   it("keeps legacy DocShell table-of-contents links attached to rendered headings", () => {
     const element = target()
     mounted.push(

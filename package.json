@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "packageManager": "pnpm@12.11.2",
+  "packageManager": "pnpm@12.15.0",
   "description": "Monorepo for the phoenix_assets npm packages.",
   "scripts": {
     "build": "pnpm -r build",
@@ -21,8 +21,8 @@
   },
   "devDependencies": {
     "@arethetypeswrong/cli": "^0.18.5",
-    "@biomejs/biome": "^2.5.15",
-    "knip": "^6.41.0",
+    "@biomejs/biome": "^2.6.2",
+    "knip": "^6.42.1",
     "publint": "^0.3.25",
     "typescript": "catalog:"
   }

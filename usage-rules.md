@@ -73,7 +73,7 @@ config :phoenix_assets, :stack,
 Each declaration module is a small DSL for metadata. Ash queries, policies,
 tenancy, and other server behavior stay in the host application. Generated types
 track these declarations; they do not inspect controllers. Follow the endpoint
-qualification requirements in [PHA.02](docs/specs/PHA.02-runtime-import-isolation.md).
+qualification requirements in [PHA.02](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/specs/PHA.02-runtime-import-isolation.md).
 Removing a field from an actual response while retaining its declaration can leave
 typechecking green. Hosts test real responses, stable errors and current scope.
 
@@ -169,7 +169,7 @@ Hex requirement on either package. For PostgreSQL 18.6, use the qualified
 Phoenix.Sync revision documented in the README and Electric 1.8.1 (with the
 host's explicit override when embedding). Preserve sandbox transaction isolation
 in tests. Current source declares `@electric-sql/client` ^1.5.27,
-`@tanstack/electric-db-collection` ^0.6.0 and `@tanstack/svelte-db` ^0.5.9.
+`@tanstack/electric-db-collection` ^0.6.3 and `@tanstack/svelte-db` ^0.5.12.
 Earlier 0.5.x collection qualification does not prove this source cohort or a
 consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING. TanStack remains optional outside the
 `/collection` entry point. Artifact and schema contracts retain their versions.
@@ -200,8 +200,9 @@ consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING.
   peer migration; it is not yet a published installation promise. `/reporting`
   re-exports components, including when used to import its runtime decoder.
 - `@phoenix-assets/doc-shell`: the renderer-neutral documentation UI for the
-  `doc-shell/v1` artifact contract. Only needed if you render docs in-app; theme
-  it through the `--doc-*` custom properties rather than app aliases.
+  `doc-shell/v2` and legacy `doc-shell/v1` presentation contracts. Only needed
+  if you render docs in-app; theme it through the `--doc-*` custom properties
+  rather than app aliases.
 
 ## Host-owned application composition
 

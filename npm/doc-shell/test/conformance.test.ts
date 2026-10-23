@@ -1,6 +1,9 @@
+import { createHash } from "node:crypto"
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
 import type { DocAstElement, NavigationItem, SearchEntry } from "../src/types.js"
 import { presentationFixture } from "./fixtures/doc-shell-v1.js"
+import presentationV2Fixture from "./fixtures/doc-shell-v2.json"
 import { graphProjectorFixture } from "./fixtures/graph-projector.js"
 
 /**
@@ -39,13 +42,36 @@ const astElements = (content: Record<string, unknown[]>): DocAstElement[] =>
     .filter((node): node is DocAstElement => typeof node === "object" && node !== null)
 
 const producers = [
-  { name: "doc_shell StaticGenerator", presentation: presentationFixture },
-  { name: "host GraphProjector", presentation: graphProjectorFixture },
+  {
+    name: "doc_shell 0.5 StaticGenerator",
+    presentation: presentationFixture,
+    version: "doc-shell/v1",
+  },
+  { name: "host GraphProjector", presentation: graphProjectorFixture, version: "doc-shell/v1" },
+  {
+    name: "doc_shell 1.0 StaticGenerator",
+    presentation: presentationV2Fixture,
+    version: "doc-shell/v2",
+  },
 ]
 
-describe.each(producers)("$name emits doc-shell/v1", ({ presentation }) => {
-  it("is a v1 artifact with entries to check", () => {
-    expect(presentation.schema_version).toBe("doc-shell/v1")
+// Public producer fixture at futhr/doc_shell@493e7e9399e72095a8efa684b32da9aa08443df8.
+// Preserve its bytes; v2 keeps member references in navigation and member bodies upstream.
+it("retains the exact DocShell 1.0 producer fixture", () => {
+  const bytes = readFileSync(`${import.meta.dirname}/fixtures/doc-shell-v2.json`)
+  expect(createHash("sha256").update(bytes).digest("hex")).toBe(
+    "cc36b884d7b978a57b24c50bd1cd08e19835b3cfd72acffb8855fb148c98c17a",
+  )
+  const members = presentationV2Fixture.navigation[1]?.meta.members
+  expect(members).toEqual([
+    { id: "function:run/1", title: "run/1", anchor: "run/1", kind: "function" },
+    { id: "type:t/0", title: "t/0", anchor: "t:t/0", kind: "type" },
+  ])
+})
+
+describe.each(producers)("$name emits its declared contract", ({ presentation, version }) => {
+  it("is a versioned presentation with entries to check", () => {
+    expect(presentation.schema_version).toBe(version)
     expect(presentation.navigation.length).toBeGreaterThan(0)
     expect(presentation.search.length).toBeGreaterThan(0)
   })

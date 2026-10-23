@@ -95,7 +95,7 @@ defmodule PhoenixAssets.MixProject do
         {:doc_shell, path: Path.expand(path), optional: true, override: true}
 
       _ ->
-        {:doc_shell, "~> 0.4.0 or ~> 0.5", optional: true}
+        {:doc_shell, "~> 0.4.0 or ~> 0.5 or ~> 1.0", optional: true}
     end
   end
 

@@ -1,8 +1,13 @@
 # @phoenix-assets/doc-shell
 
-Svelte documentation UI for the renderer-neutral `doc-shell/v1` artifact
-contract. The producer can be the `doc_shell` Hex package, a host projector, or
-a build step that writes JSON. Each produces the same `DocShellPresentation`.
+Svelte documentation UI for renderer-neutral `doc-shell/v2` and legacy
+`doc-shell/v1` presentations. The producer can be the `doc_shell` Hex package,
+a host projector, or a build step that writes JSON. Each produces a
+`DocShellPresentation`.
+
+DocShell 1.0 keeps module member references in navigation metadata; full member
+documentation belongs to its module artifacts. The renderer treats this metadata
+as opaque and does not reconstruct member bodies from those references.
 
 ```svelte
 <script lang="ts">

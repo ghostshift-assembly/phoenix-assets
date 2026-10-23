@@ -77,9 +77,10 @@ mise exec -- pnpm install --frozen-lockfile
 mise exec -- mix check --no-retry
 ```
 
-The DocShell renderer requires `doc_shell ~> 0.5`. Publish DocShell 0.5.0
-before Phoenix Assets 1.2.1. While preparing both releases, set
-`DOC_SHELL_CANDIDATE` to the DocShell checkout for dependency installation and
+The DocShell site renderer supports DocShell 0.5 and 1.0. The extraction-only
+integration also accepts 0.4. Packaged consumers check all three versions and a
+consumer without optional dependencies. While preparing an upstream candidate,
+set `DOC_SHELL_CANDIDATE` to its checkout for dependency installation and
 qualification. Artifact builds remove that override and retain the public Hex
 requirement. Use separate build directories when switching between the registry
 dependency and a candidate checkout.

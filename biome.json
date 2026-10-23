@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.15/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
@@ -22,6 +22,8 @@
   "javascript": {
     "formatter": { "quoteStyle": "double", "semicolons": "asNeeded" }
   },
+  "markdown": { "formatter": { "enabled": false } },
+  "yaml": { "formatter": { "enabled": false } },
   "assist": {
     "enabled": true,
     "actions": {
@@ -52,6 +54,10 @@
     }
   },
   "overrides": [
+    {
+      "includes": ["npm/doc-shell/test/fixtures/doc-shell-v2.json"],
+      "formatter": { "enabled": false }
+    },
     {
       "includes": ["**/*.svelte"],
       "linter": {

@@ -1,5 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.5.12/schema.json",
+  "root": false,
+  "$schema": "https://biomejs.dev/schemas/2.6.2/schema.json",
   "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
   "files": {
     "ignoreUnknown": true,
@@ -26,6 +27,8 @@
       "bracketSpacing": true
     }
   },
+  "markdown": { "formatter": { "enabled": false } },
+  "yaml": { "formatter": { "enabled": false } },
   "json": {
     "parser": { "allowComments": true, "allowTrailingCommas": true }
   },
@@ -64,7 +67,10 @@
         "noForEach": "warn",
         "useFlatMap": "warn",
         "useOptionalChain": "warn",
-        "noExcessiveCognitiveComplexity": { "level": "warn", "options": { "maxAllowedComplexity": 50 } }
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": { "maxAllowedComplexity": 50 }
+        }
       },
       "performance": {
         "preset": "recommended",

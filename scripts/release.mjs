@@ -445,7 +445,7 @@ console.log("Packed HTTP runtime verified without Electric, TanStack or Phoenix 
   }
 }
 
-function smokeHexArtifact(sourceRoot, output, manifest, legacyDocShell = false) {
+function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion) {
   const artifact = manifest.artifacts.find(({ ecosystem }) => ecosystem === "hex")
   if (!artifact) throw new Error("Hex artifact is missing")
   const root = mkdtempSync(join(tmpdir(), "phoenix-assets-hex-smoke-"))
@@ -479,7 +479,7 @@ function smokeHexArtifact(sourceRoot, output, manifest, legacyDocShell = false) 
       `
 defmodule Consumer.MixProject do
   use Mix.Project
-  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${legacyDocShell ? ', {:doc_shell, "== 0.4.0"}, {:phoenix_live_view, "~> 1.1"}' : ""}]]
+  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${docShellVersion ? `, {:doc_shell, "== ${docShellVersion}"}, {:phoenix_live_view, "~> 1.1"}` : ""}]]
 end
 `,
     )
@@ -515,7 +515,7 @@ end
         "run",
         "-e",
         `
-      for app <- ${legacyDocShell ? "[:ash, :igniter, :gettext, :phoenix_sync, :tidewave, :ash_typescript]" : "[:ash, :igniter, :phoenix_live_view, :gettext, :phoenix_sync, :tidewave, :ash_typescript]"} do
+      for app <- ${docShellVersion ? "[:ash, :igniter, :gettext, :phoenix_sync, :tidewave, :ash_typescript]" : "[:ash, :igniter, :phoenix_live_view, :doc_shell, :gettext, :phoenix_sync, :tidewave, :ash_typescript]"} do
         if Application.spec(app), do: raise("unexpected optional dependency: #{app}")
       end
       Code.compiler_options(ignore_module_conflict: true)
@@ -527,14 +527,14 @@ end
       end
       unless Code.ensure_loaded?(PhoenixAssets), do: raise("runtime module missing")
       ${
-        legacyDocShell
+        docShellVersion
           ? `
       true = Code.ensure_loaded?(PhoenixAssets.DocShell.Ast)
-      false = Code.ensure_loaded?(DocShell.Presentation.Site)
+      ${docShellVersion === "0.4.0" ? "false" : "true"} = Code.ensure_loaded?(DocShell.Presentation.Site)
       for module <- [PhoenixAssets.DocShell.Components, PhoenixAssets.DocShell.ApiReference,
                      PhoenixAssets.DocShell.StaticRenderer, PhoenixAssets.DocShell.Assets,
                      PhoenixAssets.DocShell.Pagefind] do
-        false = Code.ensure_loaded?(module)
+        ${docShellVersion === "0.4.0" ? "false" : "true"} = Code.ensure_loaded?(module)
       end
       `
           : ""
@@ -563,7 +563,11 @@ end
   } finally {
     rmSync(root, { force: true, recursive: true })
   }
-  if (!legacyDocShell) smokeHexArtifact(sourceRoot, output, manifest, true)
+  if (!docShellVersion) {
+    for (const version of ["0.4.0", "0.5.0", "1.0.0"]) {
+      smokeHexArtifact(sourceRoot, output, manifest, version)
+    }
+  }
 }
 
 function smokeArtifacts(root, output, options) {
