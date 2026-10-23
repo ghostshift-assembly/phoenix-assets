@@ -310,10 +310,6 @@ importers:
         version: 5.0.5(@types/node@24.19.2)(@vitest/coverage-v8@5.0.5)(happy-dom@21.0.4)(vite@8.3.5(@types/node@24.19.2)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
 
   npm/svelte:
-    dependencies:
-      layerchart:
-        specifier: 2.9.1
-        version: 2.9.1(svelte@5.57.2)(zod@4.6.7)
     devDependencies:
       '@electric-sql/client':
         specifier: 'catalog:'
@@ -339,6 +335,9 @@ importers:
       happy-dom:
         specifier: 'catalog:'
         version: 21.0.4
+      layerchart:
+        specifier: 2.9.1
+        version: 2.9.1(svelte@5.57.2)(zod@4.6.7)
       phoenix:
         specifier: ^1.8.16
         version: 1.8.16

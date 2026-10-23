@@ -58,7 +58,8 @@
     "@tanstack/electric-db-collection": "^0.6.3",
     "@tanstack/svelte-db": "^0.5.12",
     "phoenix": "^1.7.0",
-    "svelte": "^5.7.0"
+    "svelte": "^5.7.0",
+    "layerchart": "2.9.1"
   },
   "peerDependenciesMeta": {
     "@electric-sql/client": {
@@ -71,6 +72,9 @@
       "optional": true
     },
     "phoenix": {
+      "optional": true
+    },
+    "layerchart": {
       "optional": true
     }
   },
@@ -87,12 +91,10 @@
     "svelte": "catalog:",
     "svelte-check": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:",
+    "layerchart": "2.9.1"
   },
   "engines": {
     "node": "^20.19.0 || >=22.12.0"
-  },
-  "dependencies": {
-    "layerchart": "2.9.1"
   }
 }

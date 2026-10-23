@@ -412,7 +412,7 @@ function smokeCoreArtifact(sourceRoot, archive) {
 import assert from "node:assert/strict"
 import { existsSync } from "node:fs"
 import { runCommand, configureShapeAuth, resolveLocale, matchEvent } from "@phoenix-assets/svelte/core"
-for (const name of ["@electric-sql/client", "@tanstack/electric-db-collection", "@tanstack/svelte-db", "phoenix"]) {
+for (const name of ["layerchart", "@electric-sql/client", "@tanstack/electric-db-collection", "@tanstack/svelte-db", "phoenix"]) {
   assert.equal(existsSync("node_modules/" + name), false, name + " unexpectedly installed")
 }
 configureShapeAuth({ readToken: () => "synthetic", headers: () => ({ "X-Scope": "one" }) })

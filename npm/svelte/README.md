@@ -91,10 +91,17 @@ visualization renders alongside its chart.
 
 The decoder rejects unknown and renderer-specific
 configuration, validates every field reference, and holds string and object
-callers to the same JSON-only byte and nesting limits. `layerchart` is an
-exact internal dependency of this subpath. Pass the contract across the wire,
+callers to the same JSON-only byte and nesting limits. Reporting hosts must
+explicitly install the optional peer `layerchart@2.9.1`. HTTP-only hosts need
+neither LayerChart nor its chart dependencies. Pass the contract across the wire,
 not renderer options, and supply semantic CSS tokens and domain chrome around
 the shared components.
+
+This is a breaking installation change for the next coordinated release. Before
+upgrading a reporting host, add `layerchart@2.9.1` to its dependencies and rebuild
+against the exact candidate tarball. Missing peers fail module resolution;
+incompatible peers fail a strict peer install. Restore the prior package and
+lockfile together to roll back. Keep host data and unrelated dependencies.
 
 The reporting entrypoints accept data at different trust boundaries:
 
