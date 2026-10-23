@@ -186,9 +186,9 @@ var O = (e) => e.normalize("NFC").toLocaleLowerCase("und"), H = (e, r) => {
       return;
     }
     d.dataset.docSearchState = "loading", d.setAttribute("aria-busy", "true"), m && (m.textContent = "Searching…"), S(c, E()).then((f) => {
-      i !== u || o.signal.aborted || (t = f.slice(0, 20).map(G), d.dataset.docSearchState = "ready", d.removeAttribute("aria-busy"), y());
+      i !== u || o.signal.aborted || !d || (t = f.slice(0, 20).map(G), d.dataset.docSearchState = "ready", d.removeAttribute("aria-busy"), y());
     }).catch(() => {
-      i !== u || o.signal.aborted || (t = [], d.dataset.docSearchState = "error", d.removeAttribute("aria-busy"), y());
+      i !== u || o.signal.aborted || !d || (t = [], d.dataset.docSearchState = "error", d.removeAttribute("aria-busy"), y());
     });
   }, x = (c) => {
     !s || !h || (a = c ?? a, g && !s.hasAttribute("open") && (l = {
