@@ -23,7 +23,9 @@ defmodule PhoenixAssets.Typespec do
   `source` and `output` are required; `output` is relative to the generated
   directory. The remaining keys are `PhoenixAssets.Generators.Typespec` options:
   `types` (declaration order, defaulting to every type sorted), `root`,
-  `root_name`, `discriminator_name`, and `trailer`.
+  `root_name`, `discriminator_name`, `field_names`, and `trailer`. Set
+  `field_names: :preserve` for JSON DTOs whose keys must remain unchanged;
+  the default `:camel` retains the existing generated naming convention.
 
   ## Why a plugin
 
@@ -41,7 +43,7 @@ defmodule PhoenixAssets.Typespec do
   alias PhoenixAssets.{GeneratedFile, Graph}
   alias PhoenixAssets.Generators.Typespec, as: Renderer
 
-  @renderer_options [:types, :root, :root_name, :discriminator_name, :trailer]
+  @renderer_options [:types, :root, :root_name, :discriminator_name, :field_names, :trailer]
 
   @impl PhoenixAssets.Plugin
   def init(opts, ctx) do

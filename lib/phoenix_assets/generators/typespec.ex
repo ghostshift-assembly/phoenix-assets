@@ -15,6 +15,7 @@ defmodule PhoenixAssets.Generators.Typespec do
           | {:root_name, String.t()}
           | {:discriminator_name, String.t()}
           | {:trailer, String.t()}
+          | {:field_names, :camel | :preserve}
 
   @doc "Fetches types from `source_module` and renders configured TypeScript."
   @spec render(module(), [option()]) :: {:ok, String.t()} | :error
@@ -43,6 +44,13 @@ defmodule PhoenixAssets.Generators.Typespec do
     end
 
     names = Keyword.get(opts, :types, type_map |> Map.keys() |> Enum.sort())
+    field_names = Keyword.get(opts, :field_names, :camel)
+
+    unless field_names in [:camel, :preserve] do
+      raise ArgumentError, "typespec field_names must be :camel or :preserve"
+    end
+
+    type_map = Map.put(type_map, {__MODULE__, :field_names}, field_names)
     root_name = Keyword.get(opts, :root_name, TS.type_name(root))
     discriminator_name = Keyword.get(opts, :discriminator_name)
 
@@ -51,7 +59,7 @@ defmodule PhoenixAssets.Generators.Typespec do
         TS.header() |> String.trim_trailing(),
         "// Source: #{inspect(source_module)}",
         render_discriminator(type_map[root], type_map, discriminator_name),
-        render_root(type_map[root], root_name),
+        render_root(type_map[root], root_name, type_map),
         names
         |> Enum.reject(&(&1 == root))
         |> Enum.filter(&Map.has_key?(type_map, &1))
@@ -90,17 +98,18 @@ defmodule PhoenixAssets.Generators.Typespec do
 
   defp discriminator(_, fallback), do: Atom.to_string(fallback)
 
-  defp render_root({:type, _, :union, variants}, name) do
+  defp render_root({:type, _, :union, variants}, name, type_map) do
     members =
       Enum.map_join(variants, "\n", fn
         {:user_type, _, member, []} -> "  | #{TS.type_name(member)}"
-        other -> "  | #{to_ts_type(other, %{})}"
+        other -> "  | #{to_ts_type(other, type_map)}"
       end)
 
     "export type #{TS.type_name(name)} =\n#{members}"
   end
 
-  defp render_root(body, name), do: "export type #{TS.type_name(name)} = #{to_ts_type(body, %{})}"
+  defp render_root(body, name, type_map),
+    do: "export type #{TS.type_name(name)} = #{to_ts_type(body, type_map)}"
 
   defp render_type(name, {:type, _, :map, empty}, _) when empty in [[], :any] do
     "export type #{TS.type_name(name)} = Record<string, unknown>"
@@ -161,7 +170,13 @@ defmodule PhoenixAssets.Generators.Typespec do
 
   defp map_field({:type, _, kind, [{:atom, _, key}, value]}, type_map) do
     optional = if kind == :map_field_assoc, do: "?", else: ""
-    "#{key |> TS.camelize() |> TS.object_key()}#{optional}: #{to_ts_type(value, type_map)}"
+
+    name =
+      if type_map[{__MODULE__, :field_names}] == :preserve,
+        do: to_string(key),
+        else: TS.camelize(key)
+
+    "#{TS.object_key(name)}#{optional}: #{to_ts_type(value, type_map)}"
   end
 
   defp map_field({:type, _, _, [key, value]}, type_map) do

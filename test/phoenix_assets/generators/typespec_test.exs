@@ -30,6 +30,18 @@ defmodule PhoenixAssets.Generators.TypespecTest do
     assert File.read!(output) =~ "export type Event"
   end
 
+  test "preserves JSON field names in root and referenced DTOs when selected" do
+    assert {:ok, output} = Typespec.render(TypespecFixture, field_names: :preserve)
+    assert output =~ "user_id: number"
+    refute output =~ "userId:"
+    assert {:ok, root} = Typespec.render(TypespecFixture, root: :created, field_names: :preserve)
+    assert root =~ "user_id: number"
+
+    assert_raise ArgumentError, ~r/field_names/, fn ->
+      Typespec.render(TypespecFixture, field_names: :invalid)
+    end
+  end
+
   test "renders opaque types, optional map fields, booleans, and arrays of unions" do
     assert {:ok, output} = Typespec.render(TypespecFixture.EdgeCases, [])
     assert output =~ "export type OpaqueId = string"
