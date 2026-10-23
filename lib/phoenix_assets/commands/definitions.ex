@@ -1,9 +1,9 @@
 defmodule PhoenixAssets.Commands.Definitions do
   @moduledoc """
-  DSL for declaring the server mutations that drive generated TypeScript clients.
+  DSL for declaring bounded HTTP operations for generated TypeScript clients.
 
-  Reads are shapes; everything that changes state is a *command*. A host module
-  `use`s this and declares each mutation with the endpoint that serves it, the
+  A command may mutate state or perform a bounded POST read. A host module
+  `use`s this and declares each operation with the endpoint that serves it, the
   request body it accepts, the payload it returns, and — the part that makes the
   contract worth having — the exact error codes it can answer with:
 
@@ -19,9 +19,11 @@ defmodule PhoenixAssets.Commands.Definitions do
           errors: [:already_published, :article_not_found]
       end
 
-  The generated client returns a discriminated result, so a caller cannot read
-  the payload without handling failure, and an error code the server stops
-  sending becomes a TypeScript error at every call site that still matches on it.
+  The generated client returns a discriminated result. Removing a declared code
+  can expose stale callers after regeneration. Controllers can change independently:
+  generation does not validate endpoint JSON, grant authority or prove a mutation
+  failed after transport loss. Hosts retain runtime codecs and reconcile unknown
+  outcomes using the original operation identity before any consequential retry.
 
   Options per `command/2`:
 

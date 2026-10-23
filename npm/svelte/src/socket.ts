@@ -8,6 +8,7 @@
  */
 export {
   configureSocket,
+  createSocket,
   disconnectSocket,
   getSocket,
   isSocketConnected,

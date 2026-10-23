@@ -6,11 +6,9 @@ defmodule PhoenixAssets.Session do
   `PhoenixAssets.Session.Fields`) and emits `session.ts` -- the `Session`
   interface and the route that serves it.
 
-  This is the counterpart to the read and write contracts: shapes describe what
-  can be read, commands describe what can be changed, and this describes *who is
-  asking*. Declaring it once gives both sides the same answer, so the frontend
-  stops shaping session JSON by hand and the server has a single projection to
-  keep honest.
+  This projects the host declaration; it does not validate live session JSON or
+  grant authority. Hosts own current actor/tenant admission, runtime field checks
+  and retirement when the caller's session changes.
 
   Contributes a graph entry and a doctor check that the declared route exists in
   the router.

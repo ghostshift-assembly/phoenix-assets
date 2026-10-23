@@ -1,16 +1,25 @@
 import { authHeaders, createShapeUrl } from "../electric/url.js"
 
-/** HTTP methods a command may use. Reads belong on shapes, never here. */
+/** Methods for bounded operations, including POST read queries. */
 export type CommandMethod = "POST" | "PUT" | "PATCH" | "DELETE"
 
 /** Per-call overrides a generated command accepts. */
 export interface CommandOptions {
+  /** Host transport retaining its response wrapper, scope and runtime codecs. */
+  transport?: (request: CommandRequest) => Promise<CommandTransportResponse>
   /** Replaces the global fetch (tests, SvelteKit `load`, instrumentation). */
   fetch?: typeof fetch
   /** Extra request headers, merged after the defaults. */
   headers?: Record<string, string>
   /** Abort signal for cancellation. */
   signal?: AbortSignal
+}
+
+/** A host transport's response, before declared error-code narrowing. */
+export interface CommandTransportResponse {
+  ok: boolean
+  status: number
+  payload: unknown
 }
 
 export interface CommandRequest extends CommandOptions {
@@ -21,13 +30,14 @@ export interface CommandRequest extends CommandOptions {
 }
 
 /**
- * The outcome of a command.
+ * The observed response of a command, without domain payload validation.
  *
  * A failure is a value, not an exception: every call site has to handle both
  * arms to compile. `error` is one of the command's declared codes, or
  * `"unknown_error"` when the server answered with a code this build does not
  * know — so an unrecognised code degrades to a handled failure instead of
- * escaping as an untyped string.
+ * escaping as an untyped string. `unknown_error` does not establish that an
+ * effect failed. Reconcile the original operation before any consequential retry.
  */
 export type CommandResult<TData, TError extends string> =
   | { ok: true; data: TData }
@@ -50,6 +60,12 @@ export async function runCommand<TData, TError extends string>(
 ): Promise<CommandResult<TData, TError>> {
   let status = 0
   try {
+    if (request.transport) {
+      const response = await request.transport(request)
+      return response.ok
+        ? { ok: true, data: response.payload as TData }
+        : { ok: false, error: errorCode(response.payload, knownErrors), status: response.status }
+    }
     const { path, method, params = {}, body, headers = {}, signal } = request
     const fetchFn = request.fetch ?? fetch
     const requestHeaders = new Headers({ "Content-Type": "application/json" })

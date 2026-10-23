@@ -3,6 +3,7 @@ export {
   type CommandOptions,
   type CommandRequest,
   type CommandResult,
+  type CommandTransportResponse,
   runCommand,
   UNKNOWN_COMMAND_ERROR,
 } from "./commands/run.js"

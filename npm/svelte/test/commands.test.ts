@@ -23,6 +23,51 @@ afterEach(() => {
 })
 
 describe("runCommand", () => {
+  it("uses the host transport once without bypassing its wrapper or scope", async () => {
+    const signal = new AbortController().signal
+    const transport = vi
+      .fn()
+      .mockResolvedValue({
+        ok: true,
+        status: 200,
+        payload: { data: { count: 2 }, meta: { cursor: "next" } },
+      })
+    const result = await runCommand({
+      path: "/api/search",
+      method: "POST",
+      body: { query: "bounded" },
+      headers: { "Idempotency-Key": "original" },
+      signal,
+      transport,
+    })
+    expect(result).toEqual({ ok: true, data: { data: { count: 2 }, meta: { cursor: "next" } } })
+    expect(transport).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({
+        path: "/api/search",
+        signal,
+        headers: { "Idempotency-Key": "original" },
+      }),
+    )
+  })
+
+  it("narrows host errors and leaves lost outcomes unknown without replay", async () => {
+    const transport = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: false, status: 403, payload: { error: "not_found" } })
+      .mockRejectedValueOnce(new Error("response lost after commit"))
+    const request = { path: "/api/pages", method: "POST" as const, transport }
+    expect(await runCommand(request, ERRORS)).toEqual({
+      ok: false,
+      status: 403,
+      error: "not_found",
+    })
+    expect(await runCommand(request, ERRORS)).toEqual({
+      ok: false,
+      status: 0,
+      error: "unknown_error",
+    })
+    expect(transport).toHaveBeenCalledTimes(2)
+  })
   it("returns the parsed payload on success", async () => {
     const fetchFn = vi.fn().mockResolvedValue(respond(200, { id: "page-1" }))
 

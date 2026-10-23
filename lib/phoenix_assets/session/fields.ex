@@ -20,8 +20,10 @@ defmodule PhoenixAssets.Session.Fields do
       end
 
   The generated `session.ts` carries the interface and the route, so the
-  frontend reads one declared shape instead of an ad-hoc JSON blob, and a field
-  the server stops sending is a compile error rather than a silent `undefined`.
+  frontend reads one declared shape instead of an ad-hoc JSON blob, and changes to the
+  declaration can expose stale callers after regeneration. The interface does not
+  validate runtime JSON or establish session authority. Hosts reject malformed,
+  missing or nullable fields under their endpoint contract and retire stale scope.
 
   Field names are emitted verbatim, matching the JSON the endpoint actually
   returns. Types: `:string`, `:integer`, `:float`, `:boolean`, `:map`, `:list`

@@ -16,9 +16,8 @@ vi.mock("phoenix", () => ({
   },
 }))
 
-const { configureSocket, disconnectSocket, getSocket, isSocketConnected } = await import(
-  "../src/socket.js"
-)
+const { configureSocket, createSocket, disconnectSocket, getSocket, isSocketConnected } =
+  await import("../src/socket.js")
 
 afterEach(() => {
   disconnectSocket()
@@ -26,6 +25,23 @@ afterEach(() => {
 })
 
 describe("the shared socket", () => {
+  it("keeps caller-owned scopes independent and unconnected", () => {
+    const tenant = createSocket({ path: "/socket", options: { authToken: "tenant-ticket" } })
+    const portal = createSocket({ path: "/portal-socket", options: { authToken: "portal-ticket" } })
+    expect(tenant).not.toBe(portal)
+    expect(connect).not.toHaveBeenCalled()
+    expect(construct).toHaveBeenNthCalledWith(
+      1,
+      "/socket",
+      expect.objectContaining({ authToken: "tenant-ticket" }),
+    )
+    expect(construct).toHaveBeenNthCalledWith(
+      2,
+      "/portal-socket",
+      expect.objectContaining({ authToken: "portal-ticket" }),
+    )
+    expect(isSocketConnected()).toBe(false)
+  })
   // A socket pointed at a guessed default would fail later, further from the
   // cause; every host wrote this singleton and none of them had this guard.
   it("refuses to connect before it is configured", () => {

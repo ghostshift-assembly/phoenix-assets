@@ -34,6 +34,18 @@ export interface SocketConfig {
 
 const DEFAULT_BACKOFF = [250, 500, 1000, 2000]
 
+/**
+ * Creates an independent, unconnected transport. The caller owns connect,
+ * disconnect and credential lifetime; no other scope reuses this instance.
+ */
+export function createSocket(config: SocketConfig): Socket {
+  return new Socket(config.path, {
+    params: config.params,
+    reconnectAfterMs: config.reconnectAfterMs ?? ((tries) => DEFAULT_BACKOFF[tries - 1] ?? 5000),
+    ...config.options,
+  })
+}
+
 let config: SocketConfig | null = null
 let socket: Socket | null = null
 
@@ -59,11 +71,7 @@ export function getSocket(): Socket {
     )
   }
 
-  socket = new Socket(config.path, {
-    params: config.params,
-    reconnectAfterMs: config.reconnectAfterMs ?? ((tries) => DEFAULT_BACKOFF[tries - 1] ?? 5000),
-    ...config.options,
-  })
+  socket = createSocket(config)
 
   socket.connect()
   return socket

@@ -1,18 +1,16 @@
 defmodule PhoenixAssets.Commands do
   @moduledoc """
-  Integration plugin that generates a typed mutation client from declarations.
+  Integration plugin that generates a typed HTTP client from declarations.
 
   Reads the commands declared in the module passed as `commands:` (see
   `PhoenixAssets.Commands.Definitions`) and emits `commands.ts` -- one function
   per command, built on `runCommand/2` from `@phoenix-assets/svelte/core`.
 
-  Where `PhoenixAssets.Electric` generates the read half of the boundary, this
-  generates the write half, and it carries the part a URL builder cannot: the
-  request body, the success payload, and the exact set of error codes the
-  endpoint answers with. Each command returns a discriminated
-  `CommandResult`, so the failure arm cannot be skipped, and each declared code
-  becomes a string-literal union member -- removing a code from the server makes
-  every stale call site a compile error.
+  Declarations describe bounded HTTP operations, including POST read queries.
+  The generated result and error unions project those declarations. They do not
+  validate endpoint payloads or enforce actor/tenant authority. Hosts verify real
+  success wrappers, required fields and error branches through their runtime codecs.
+  An `unknown_error` response requires host reconciliation before consequential retry.
 
   Also contributes graph entries and a doctor check per command that the route
   exists in the router *with the declared method*, which catches a verb

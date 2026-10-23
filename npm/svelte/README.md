@@ -35,6 +35,17 @@ Generated command clients use this subpath. The existing root barrel retains
 its Electric exports and needs the Electric peer when imported. `/socket`
 requires the optional Phoenix peer; it does not require Electric.
 
+Generated commands accept a per-call `transport` for hosts with an existing
+request boundary. It returns `{ ok, status, payload }`; the host retains its
+response wrapper, runtime codecs, credentials, tenant headers, cancellation and
+idempotency identity. The runtime narrows declared error codes. `unknown_error`
+does not prove that an effect failed; reconcile before consequential retry.
+
+`@phoenix-assets/svelte/socket` also exports `createSocket(config)`. It creates
+an independent, unconnected Phoenix socket. The caller owns connection, teardown
+and credential lifetime. Use it for distinct tenant, portal or capability scopes;
+the existing configured singleton remains available for hosts with one scope.
+
 ### `@phoenix-assets/svelte`
 
 ```ts
