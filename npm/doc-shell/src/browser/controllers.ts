@@ -1,4 +1,5 @@
 import { safeLinkTarget } from "../url.js"
+import { admitRequest } from "./request.js"
 import {
   createContractPagefindSearch,
   type PagefindModuleLoader,
@@ -89,8 +90,13 @@ const searchExcerpt = (value: string): HTMLElement => {
   const excerpt = document.createElement("p")
   excerpt.className = "doc-search-excerpt"
   let parent: HTMLElement = excerpt
-  let remaining = 319
-  for (const part of value.slice(0, 2048).split(/(<\/?mark>)/i)) {
+  const parts = value.slice(0, 2048).split(/(<\/?mark>)/i)
+  const length = parts
+    .filter((part) => !/^<\/?mark>$/i.test(part))
+    .reduce((size, part) => size + Array.from(part).length, 0)
+  const truncated = value.length > 2048 || length > 320
+  let remaining = truncated ? 319 : 320
+  for (const part of parts) {
     if (part.toLowerCase() === "<mark>") {
       parent = document.createElement("mark")
       excerpt.append(parent)
@@ -101,16 +107,22 @@ const searchExcerpt = (value: string): HTMLElement => {
       const shown = characters.slice(0, remaining)
       parent.append(document.createTextNode(shown.join("")))
       remaining -= shown.length
-      if (characters.length > shown.length) parent.append("…")
       if (remaining === 0) break
     }
   }
+  if (truncated) parent.append("…")
   return excerpt
 }
 
 export const mountSearch = (
   root: HTMLElement,
   loadPagefind?: PagefindModuleLoader,
+  options?: {
+    records: () => SearchRecord[]
+    contract?: () => unknown
+    search?: (query: string, filters: SearchFilters) => SearchRecord[] | Promise<SearchRecord[]>
+    navigate?: (path: string) => void
+  },
 ): BrowserController => {
   const controller = new AbortController()
   let trigger: HTMLElement | undefined
@@ -119,14 +131,17 @@ export const mountSearch = (
   let generation = 0
   let returnScroll: { left: number; top: number } | undefined
 
-  let dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
+  const selector = options
+    ? "[data-doc-search-dialog]"
+    : "[data-doc-search-dialog]:not([data-doc-search-owned])"
+  let dialog = root.querySelector<HTMLDialogElement>(selector)
   let inline = dialog?.dataset.docSearchPresentation === "inline"
   let input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
   let list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
   let status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
-  let records = dialog ? decodeRecords(dialog) : []
+  let records = options?.records() ?? (dialog ? decodeRecords(dialog) : [])
   let pagefind = dialog
-    ? createContractPagefindSearch(decodeContract(dialog), loadPagefind)
+    ? createContractPagefindSearch(options?.contract?.() ?? decodeContract(dialog), loadPagefind)
     : undefined
 
   const filters = (): SearchFilters =>
@@ -139,10 +154,11 @@ export const mountSearch = (
   const paint = () => {
     if (!input || !list) return
     selected = Math.min(selected, Math.max(0, results.length - 1))
+    const resultId = (index: number) => `${list?.id || "doc-search"}-result-${index}`
     list.replaceChildren(
       ...results.map((record, index) => {
         const item = document.createElement("li")
-        item.id = `doc-search-result-${index}`
+        item.id = resultId(index)
         item.setAttribute("role", "option")
         item.setAttribute("aria-selected", String(index === selected))
         const target = safeLinkTarget(record.route)
@@ -170,10 +186,7 @@ export const mountSearch = (
         return item
       }),
     )
-    input.setAttribute(
-      "aria-activedescendant",
-      results[selected] ? `doc-search-result-${selected}` : "",
-    )
+    input.setAttribute("aria-activedescendant", results[selected] ? resultId(selected) : "")
     if (status) {
       status.textContent =
         list.dataset.docSearchState === "error"
@@ -199,7 +212,7 @@ export const mountSearch = (
       return
     }
 
-    if (!pagefind) {
+    if (!pagefind && !options?.search) {
       results = querySearchRecords(records, query, filters(), 20)
       list.dataset.docSearchState = "ready"
       list.removeAttribute("aria-busy")
@@ -210,10 +223,13 @@ export const mountSearch = (
     list.dataset.docSearchState = "loading"
     list.setAttribute("aria-busy", "true")
     if (status) status.textContent = "Searching…"
-    void pagefind(query, filters())
-      .then((found) => {
+    const pending = options?.search
+      ? Promise.resolve().then(() => options.search?.(query, filters()) ?? [])
+      : pagefind?.(query, filters()).then((found) => found.map(pagefindRecord))
+    void pending
+      ?.then((found) => {
         if (generation !== current || controller.signal.aborted || !list) return
-        results = found.slice(0, 20).map(pagefindRecord)
+        results = found.slice(0, 20)
         list.dataset.docSearchState = "ready"
         list.removeAttribute("aria-busy")
         paint()
@@ -252,11 +268,20 @@ export const mountSearch = (
   root.addEventListener(
     "click",
     (event) => {
+      if (!dialog) return
       const target = event.target as Element
       const openButton = target.closest<HTMLElement>("[data-doc-search-open]")
       if (openButton) open(openButton)
       if (target.closest("[data-doc-search-close]")) close()
-      if (target.closest("[data-doc-search-results] a")) close()
+      const result = target.closest<HTMLAnchorElement>("[data-doc-search-results] a")
+      if (result) {
+        const link = safeLinkTarget(result.getAttribute("href") ?? undefined)
+        if (options?.navigate && link?.navigable) {
+          event.preventDefault()
+          options.navigate(link.href)
+        }
+        close()
+      }
     },
     { signal: controller.signal },
   )
@@ -278,6 +303,7 @@ export const mountSearch = (
   root.addEventListener(
     "keydown",
     (event) => {
+      if (!dialog) return
       if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
         event.preventDefault()
         open(root.querySelector<HTMLElement>("[data-doc-search-open]") ?? undefined)
@@ -306,14 +332,14 @@ export const mountSearch = (
 
   const refresh = () => {
     const previous = dialog
-    dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")
+    dialog = root.querySelector<HTMLDialogElement>(selector)
     inline = dialog?.dataset.docSearchPresentation === "inline"
     input = dialog?.querySelector<HTMLInputElement>("[data-doc-search-input]")
     list = dialog?.querySelector<HTMLElement>("[data-doc-search-results]")
     status = dialog?.querySelector<HTMLElement>("[data-doc-search-status]")
-    records = dialog ? decodeRecords(dialog) : []
+    records = options?.records() ?? (dialog ? decodeRecords(dialog) : [])
     pagefind = dialog
-      ? createContractPagefindSearch(decodeContract(dialog), loadPagefind)
+      ? createContractPagefindSearch(options?.contract?.() ?? decodeContract(dialog), loadPagefind)
       : undefined
     if (previous !== dialog) {
       selected = 0
@@ -344,6 +370,85 @@ export const mountCopy = (root: HTMLElement): BrowserController => {
     { signal: controller.signal },
   )
   return { refresh: () => undefined, destroy: () => controller.abort() }
+}
+
+/** Explicitly enabled request forms; responses and credentials remain local. */
+export const mountRequests = (
+  root: HTMLElement,
+  request: typeof fetch = fetch,
+): BrowserController => {
+  const controller = new AbortController()
+  const pending = new Map<HTMLFormElement, AbortController>()
+  root.addEventListener(
+    "submit",
+    (event) => {
+      const form = (event.target as Element).closest<HTMLFormElement>("[data-doc-api-request]")
+      if (!form) return
+      event.preventDefault()
+      if (pending.has(form)) return
+      const status = form.querySelector<HTMLElement>("[data-doc-api-status]")
+      const output = form.querySelector<HTMLElement>("[data-doc-api-response]")
+      const value = (name: string) =>
+        form.querySelector<HTMLInputElement>(`[name="${name}"]`)?.value ?? ""
+      try {
+        const origin = form.dataset.apiOrigin ?? ""
+        const target = admitRequest(value("path"), { apiOrigin: origin, allowedOrigins: [origin] })
+        const method = form.dataset.operationMethod?.toUpperCase() ?? ""
+        if (!["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"].includes(method))
+          throw new Error("Unsupported request method")
+        if (!form.querySelector<HTMLInputElement>('[name="confirm"]')?.checked)
+          throw new Error("Confirm the displayed request destination")
+        const token = value("token")
+        const headers = new Headers()
+        if (token)
+          headers.set("authorization", token.startsWith("Bearer ") ? token : `Bearer ${token}`)
+        const body = !["GET", "HEAD"].includes(method) ? value("body") : undefined
+        if (body) headers.set("content-type", "application/json")
+        const abort = new AbortController()
+        pending.set(form, abort)
+        if (status) status.textContent = "Sending…"
+        if (output) output.textContent = ""
+        void request(target.url, {
+          method,
+          headers,
+          body: body || undefined,
+          credentials: target.credentials,
+          signal: abort.signal,
+        })
+          .then(async (response) => ({ status: response.status, text: await response.text() }))
+          .then((response) => {
+            if (abort.signal.aborted || !form.isConnected) return
+            if (status) status.textContent = `HTTP ${response.status}`
+            if (output) output.textContent = response.text.slice(0, 65536)
+          })
+          .catch(() => {
+            if (!abort.signal.aborted && status)
+              status.textContent =
+                "Response unavailable. The operation outcome may be unknown; check its owner before retrying."
+          })
+          .finally(() => pending.delete(form))
+      } catch (error) {
+        if (status)
+          status.textContent = error instanceof Error ? error.message : "Request unavailable"
+      }
+    },
+    { signal: controller.signal },
+  )
+  const refresh = () => {
+    for (const [form, abort] of pending)
+      if (!form.isConnected) {
+        abort.abort()
+        pending.delete(form)
+      }
+  }
+  return {
+    refresh,
+    destroy: () => {
+      controller.abort()
+      for (const abort of pending.values()) abort.abort()
+      pending.clear()
+    },
+  }
 }
 
 export const copyText = async (

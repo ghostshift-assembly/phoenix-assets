@@ -3,9 +3,13 @@ import type { BrowserController, ThemePreference } from "./types.js"
 const storageKey = "phoenix-assets:doc-shell:theme"
 const allowed = new Set<ThemePreference>(["system", "light", "dark", "contrast"])
 
-export const readTheme = (storage: Pick<Storage, "getItem"> = localStorage): ThemePreference => {
-  const value = storage.getItem(storageKey) as ThemePreference | null
-  return value && allowed.has(value) ? value : "system"
+export const readTheme = (storage?: Pick<Storage, "getItem">): ThemePreference => {
+  try {
+    const value = (storage ?? localStorage).getItem(storageKey) as ThemePreference | null
+    return value && allowed.has(value) ? value : "system"
+  } catch {
+    return "system"
+  }
 }
 
 export const applyTheme = (root: HTMLElement, preference: ThemePreference) => {
@@ -15,7 +19,7 @@ export const applyTheme = (root: HTMLElement, preference: ThemePreference) => {
 
 export const mountTheme = (
   root: HTMLElement,
-  storage: Pick<Storage, "getItem" | "setItem"> = localStorage,
+  storage?: Pick<Storage, "getItem" | "setItem">,
 ): BrowserController => {
   const controller = new AbortController()
   const refresh = () => applyTheme(root, readTheme(storage))
@@ -25,7 +29,11 @@ export const mountTheme = (
       const button = (event.target as Element).closest<HTMLElement>("[data-doc-theme-value]")
       const value = button?.dataset.docThemeValue as ThemePreference | undefined
       if (!value || !allowed.has(value)) return
-      storage.setItem(storageKey, value)
+      try {
+        ;(storage ?? localStorage).setItem(storageKey, value)
+      } catch {
+        // A blocked preference store must not disable the current reader theme.
+      }
       applyTheme(root, value)
     },
     { signal: controller.signal },

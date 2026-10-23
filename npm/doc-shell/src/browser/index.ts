@@ -1,9 +1,16 @@
-import { mountCopy, mountNavigation, mountSearch, mountTabs } from "./controllers.js"
+import { mountCopy, mountNavigation, mountRequests, mountSearch, mountTabs } from "./controllers.js"
 import { mountTheme } from "./theme.js"
 import type { BrowserController } from "./types.js"
 
 export { isAllowedTryItOrigin, resolveTryItTarget, safeLinkTarget } from "../url.js"
-export { copyText, mountCopy, mountNavigation, mountSearch, mountTabs } from "./controllers.js"
+export {
+  copyText,
+  mountCopy,
+  mountNavigation,
+  mountRequests,
+  mountSearch,
+  mountTabs,
+} from "./controllers.js"
 export { type AdmittedRequest, admitRequest, type RequestPolicy } from "./request.js"
 export {
   admitPagefindContract,
@@ -26,6 +33,7 @@ export const mountBrowserCore = (root: HTMLElement): BrowserController => {
     mountSearch(root),
     mountCopy(root),
     mountTabs(root),
+    mountRequests(root),
   ]
   return {
     refresh: () => controllers.forEach((controller) => controller.refresh()),

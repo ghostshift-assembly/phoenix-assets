@@ -59,8 +59,14 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         <section :if={@operation.parameters != []}><h4>Parameters</h4><table><thead><tr><th>Name</th><th>Location</th><th>Required</th><th>Description</th></tr></thead><tbody><tr :for={parameter <- @operation.parameters}><th scope="row">{parameter["name"]}</th><td>{parameter["in"]}</td><td>{if parameter["required"], do: "Required", else: "Optional"}</td><td>{parameter["description"]}</td></tr></tbody></table></section>
         <.schema_section title="Request body" value={@operation.request_body} />
         <.schema_section title="Responses" value={@operation.responses} />
-        <form :if={@request_enabled && @origin} class="doc-api-request" data-doc-api-request data-api-origin={@origin} data-operation-path={@operation.path}>
-          <h4>Send request</h4><p>Destination: {@origin}</p><button type="submit" class="pa-button" data-pa-variant="primary">Review request</button>
+        <form :if={@request_enabled && @origin} class="doc-api-request" data-doc-api-request data-api-origin={@origin} data-operation-method={@operation.method}>
+          <h4>Send request</h4><p>Destination: {@origin}</p>
+          <label>Operation path<input class="pa-field" name="path" value={@operation.path} required /></label>
+          <label>Bearer token<input class="pa-field" name="token" type="password" autocomplete="off" /></label>
+          <label :if={@operation.method not in ["get", "head"]}>Request body<textarea class="pa-field" name="body"></textarea></label>
+          <label><input type="checkbox" name="confirm" required />Send this request to {@origin}</label>
+          <button type="submit" class="pa-button" data-pa-variant="primary">Send request</button>
+          <p role="status" data-doc-api-status></p><pre data-doc-api-response></pre>
         </form>
         <details><summary>Complete admitted operation JSON</summary><pre><code>{Jason.encode!(@operation.raw, pretty: true)}</code></pre></details>
       </article>

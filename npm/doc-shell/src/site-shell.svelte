@@ -1,6 +1,7 @@
 <script lang="ts">
 import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
+import type { PagefindContract } from "./browser/search.js"
 import Search from "./search.svelte"
 import Sidebar from "./sidebar.svelte"
 import type { DocShellSite } from "./types.js"
@@ -9,7 +10,13 @@ let {
   site,
   pageId,
   navigate,
-}: { site: DocShellSite; pageId: string; navigate?: (path: string) => void } = $props()
+  searchContract,
+}: {
+  site: DocShellSite
+  pageId: string
+  navigate?: (path: string) => void
+  searchContract?: PagefindContract
+} = $props()
 const page = $derived(site.pages[pageId])
 let shellRoot = $state<HTMLElement>()
 
@@ -35,7 +42,7 @@ $effect(() => {
     <a class="skip-link" href="#doc-main">Skip to documentation</a>
     <header class="site-header">
       <a href={site.base_path} class="brand">{site.title}</a>
-      <Search entries={site.search} {navigate} />
+      <Search entries={site.search} {navigate} contract={searchContract} />
       <div class="header-actions" aria-label="Reader preferences">
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value="system">System</button>
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value="light">Light</button>

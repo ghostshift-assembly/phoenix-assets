@@ -211,10 +211,10 @@ describe("custom search lifecycle", () => {
 
     current.resolve([result("current")])
     await settle()
-    expect(element.querySelector("[role=listbox]")?.textContent).toBe("current")
+    expect(element.querySelector("[role=listbox] a")?.firstChild?.textContent).toBe("current")
     old.resolve([result("old")])
     await settle()
-    expect(element.querySelector("[role=listbox]")?.textContent).toBe("current")
+    expect(element.querySelector("[role=listbox] a")?.firstChild?.textContent).toBe("current")
   })
 
   it("clears results below the minimum query length and ignores pending old work", async () => {
@@ -246,7 +246,7 @@ describe("custom search lifecycle", () => {
     expect(element.querySelectorAll("[role=option]")).toHaveLength(0)
     query("recovered")
     await settle()
-    expect(element.querySelector("[role=listbox]")?.textContent).toBe("recovered")
+    expect(element.querySelector("[role=listbox] a")?.firstChild?.textContent).toBe("recovered")
   })
 
   it("disposes a pending callback when unmounted", async () => {

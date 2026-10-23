@@ -7,7 +7,9 @@ import {
   createPagefindSearch,
   mountBrowserCore,
   mountBrowserCoreOnReady,
+  mountRequests,
   mountSearch,
+  mountTheme,
   PhoenixAssetsDocShell,
   querySearchRecords,
   readTheme,
@@ -441,6 +443,82 @@ describe("browser controller lifecycle", () => {
 })
 
 describe("theme and request policy", () => {
+  it("keeps theme controls usable when preference storage is blocked", () => {
+    const root = fixture()
+    const storage = {
+      getItem: () => {
+        throw new Error("blocked")
+      },
+      setItem: () => {
+        throw new Error("blocked")
+      },
+    }
+    const controller = mountTheme(root, storage)
+    expect(root.dataset.docTheme).toBe("system")
+    root.querySelector<HTMLButtonElement>("[data-doc-theme-value]")?.click()
+    expect(root.dataset.docTheme).toBe("dark")
+    controller.destroy()
+  })
+
+  it("requires confirmation, confines requests to the selected origin and renders inert responses", async () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      `<form data-doc-api-request data-api-origin="https://api.example.test" data-operation-method="post"><input name="path" value="/records"><input name="token" value="synthetic"><textarea name="body">{}</textarea><input type="checkbox" name="confirm"><p data-doc-api-status></p><pre data-doc-api-response></pre></form>`,
+    )
+    const request = vi
+      .fn()
+      .mockResolvedValue(new Response('<img src=x onerror="alert(1)">', { status: 201 }))
+    const controller = mountRequests(root, request)
+    const form = root.querySelector<HTMLFormElement>("form")
+    if (!form) throw new Error("missing form")
+    const submit = () =>
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    submit()
+    expect(request).not.toHaveBeenCalled()
+    const confirm = form.querySelector<HTMLInputElement>('[name="confirm"]')
+    if (confirm) confirm.checked = true
+    submit()
+    submit()
+    await vi.waitFor(() =>
+      expect(root.querySelector("[data-doc-api-status]")?.textContent).toBe("HTTP 201"),
+    )
+    expect(request).toHaveBeenCalledOnce()
+    expect(request).toHaveBeenCalledWith(
+      "https://api.example.test/records",
+      expect.objectContaining({ method: "POST", credentials: "same-origin", body: "{}" }),
+    )
+    expect(root.querySelector("[data-doc-api-response] img")).toBeNull()
+    const path = form.querySelector<HTMLInputElement>('[name="path"]')
+    if (path) path.value = "//evil.example.test/"
+    submit()
+    expect(request).toHaveBeenCalledOnce()
+    controller.destroy()
+  })
+
+  it("retires pending request responses on refresh or destruction without replay", async () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      `<form data-doc-api-request data-api-origin="https://api.example.test" data-operation-method="get"><input name="path" value="/records"><input type="checkbox" name="confirm" checked><p data-doc-api-status></p></form>`,
+    )
+    const request = vi.fn().mockImplementation(async (_url, options) => {
+      await new Promise((_, reject) =>
+        options.signal.addEventListener("abort", () => reject(new Error("aborted"))),
+      )
+      return new Response()
+    })
+    const controller = mountRequests(root, request)
+    const form = root.querySelector("form")
+    form?.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    const signal = request.mock.calls[0]?.[1].signal as AbortSignal
+    form?.remove()
+    controller.refresh()
+    expect(signal.aborted).toBe(true)
+    controller.destroy()
+    expect(request).toHaveBeenCalledOnce()
+  })
+
   it("defaults invalid stored values to system", () => {
     const storage = { getItem: () => "sepia" }
     expect(readTheme(storage)).toBe("system")

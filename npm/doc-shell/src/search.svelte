@@ -1,8 +1,8 @@
 <script lang="ts">
-import { querySearchRecords } from "./browser/search.js"
+import { mountSearch } from "./browser/controllers.js"
+import { type PagefindContract, querySearchRecords } from "./browser/search.js"
 import type { SearchRecord } from "./browser/types.js"
 import type { SearchEntry, SiteSearchEntry } from "./types.js"
-import { safeLinkTarget } from "./url.js"
 
 interface Props {
   entries: Array<SearchEntry | SiteSearchEntry>
@@ -11,82 +11,61 @@ interface Props {
     query: string,
     entries: Array<SearchEntry | SiteSearchEntry>,
   ) => Array<SearchEntry | SiteSearchEntry> | Promise<Array<SearchEntry | SiteSearchEntry>>
+  presentation?: "dialog" | "inline"
+  contract?: PagefindContract
 }
-const { entries, navigate, search }: Props = $props()
-let open = $state(false)
-let query = $state("")
-let external = $state<Array<SearchEntry | SiteSearchEntry>>([])
-let selected = $state(0)
-let trigger = $state<HTMLSpanElement>()
-let input = $state<HTMLInputElement>()
-const records = $derived(entries.map(toRecord))
-const results = $derived(
-  search
-    ? external.map(toRecord)
-    : query.length >= 2
-      ? querySearchRecords(records, query, {}, 10)
-      : [],
+const { entries, navigate, search, presentation = "dialog", contract }: Props = $props()
+const id = $props.id()
+let root = $state<HTMLElement>()
+const facets = $derived(
+  (["locale", "collection", "version", "audience", "kind", "tag", "status"] as const)
+    .map((name) => ({
+      name,
+      values: [
+        ...new Set(
+          entries
+            .map(toRecord)
+            .flatMap((record) =>
+              name === "tag"
+                ? record.tags
+                : Array.isArray(record[name])
+                  ? record[name]
+                  : [record[name]],
+            )
+            .filter((value): value is string => Boolean(value)),
+        ),
+      ].sort(),
+    }))
+    .filter((facet) => facet.values.length > 1),
 )
 $effect(() => {
-  const runSearch = search
-  const currentQuery = query
+  if (!root) return
   const currentEntries = entries
-  external = []
-  if (!runSearch || currentQuery.length < 2) return
-
-  let active = true
-  void Promise.resolve()
-    .then(() => runSearch(currentQuery, currentEntries))
-    .then(
-      (value) => {
-        if (active) external = value
-      },
-      () => {
-        if (active) external = []
-      },
-    )
-  return () => {
-    active = false
-  }
+  const currentSearch = search
+  const controller = mountSearch(root, undefined, {
+    records: () => currentEntries.map(toRecord),
+    contract: () => contract,
+    search: currentSearch
+      ? async (query, filters) =>
+          (await currentSearch(query, currentEntries))
+            .map(toRecord)
+            .filter((record) => querySearchRecords([record], "", filters).length > 0)
+      : undefined,
+    navigate,
+  })
+  controller.refresh()
+  return () => controller.destroy()
 })
-const close = () => {
-  open = false
-  requestAnimationFrame(() => trigger?.querySelector<HTMLElement>("button")?.focus())
-}
-const show = () => {
-  open = true
-  selected = 0
-  requestAnimationFrame(() => input?.focus())
-}
-const onKey = (event: KeyboardEvent) => {
-  if ((event.metaKey || event.ctrlKey) && event.key === "k") {
+const shortcut = (event: KeyboardEvent) => {
+  if (
+    !event.defaultPrevented &&
+    (event.metaKey || event.ctrlKey) &&
+    event.key.toLowerCase() === "k"
+  ) {
     event.preventDefault()
-    show()
+    root?.querySelector<HTMLButtonElement>("[data-doc-search-open]")?.click()
   }
 }
-const onDialogKey = (event: KeyboardEvent) => {
-  if (event.key === "Escape") {
-    event.preventDefault()
-    close()
-  } else if (event.key === "ArrowDown") {
-    event.preventDefault()
-    selected = Math.min(results.length - 1, selected + 1)
-  } else if (event.key === "ArrowUp") {
-    event.preventDefault()
-    selected = Math.max(0, selected - 1)
-  } else if (event.key === "Enter") {
-    const item = results[selected]
-    if (item) follow(item.route)
-  }
-}
-const follow = (path: string) => {
-  const link = safeLinkTarget(path)
-  if (!link) return
-  if (navigate && link.navigable) navigate(path)
-  else location.assign(link.href)
-  close()
-}
-
 function toRecord(entry: SearchEntry | SiteSearchEntry): SearchRecord {
   if ("page_id" in entry) return entry
   return {
@@ -104,7 +83,30 @@ function toRecord(entry: SearchEntry | SiteSearchEntry): SearchRecord {
   }
 }
 </script>
-<svelte:window onkeydown={onKey} />
-<span bind:this={trigger}><button type="button" class="pa-button" onclick={show}>Search documentation</button></span>
-{#if open}<div class="overlay" role="presentation" onclick={(event) => { if (event.target === event.currentTarget) close() }}><dialog open aria-label="Search documentation" onkeydown={onDialogKey}><input bind:this={input} bind:value={query} role="combobox" aria-controls="doc-search-results" aria-expanded="true" aria-activedescendant={results[selected] ? `doc-search-${selected}` : undefined} placeholder="Search documentation…" /><ul id="doc-search-results" role="listbox">{#each results as item, index (item.id)}{const link = $derived(safeLinkTarget(item.route))}<li id={`doc-search-${index}`} role="option" aria-selected={index === selected}>{#if link}<a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined} onclick={(event) => { if (navigate && link.navigable) { event.preventDefault(); navigate(item.route) } close() }}><strong>{item.title}</strong>{#if item.section}<span>{item.section}</span>{/if}<small>{[item.collection, item.version].filter(Boolean).join(" · ")}</small></a>{:else}<span data-unsafe-link>{item.title}</span>{/if}</li>{/each}</ul><button type="button" class="pa-button" onclick={close}>Close</button></dialog></div>{/if}
-<style>input { width: 100%; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); padding: .55rem .75rem; background: var(--doc-background); color: inherit; } .overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: start center; padding-top: 12vh; background: rgb(0 0 0 / .35); } dialog { position: static; width: min(36rem, 90vw); margin: 0; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); background: var(--doc-background); color: inherit; } ul { list-style: none; padding: 0; } a { display: block; padding: .5rem; color: inherit; }</style>
+<svelte:window onkeydown={shortcut} />
+<div bind:this={root} class="doc-search">
+  <button type="button" class="pa-button" data-doc-search-open>Search documentation</button>
+  <svelte:element this={presentation === "dialog" ? "dialog" : "section"}
+    class="doc-search-panel" class:doc-search-inline={presentation === "inline"}
+    data-doc-search-dialog data-doc-search-owned data-doc-search-presentation={presentation}
+    aria-label="Search documentation">
+    <label for={`${id}-query`}>Search documentation</label>
+    <input id={`${id}-query`} data-doc-search-input role="combobox" aria-controls={`${id}-results`} aria-expanded="true" placeholder="Search documentation…" />
+    {#each facets as facet (facet.name)}
+      <label>{facet.name}<select data-doc-search-filter={facet.name}><option value="">All</option>{#each facet.values as value (value)}<option {value}>{value}</option>{/each}</select></label>
+    {/each}
+    <p role="status" aria-live="polite" data-doc-search-status></p>
+    <ul id={`${id}-results`} role="listbox" data-doc-search-results></ul>
+    <button type="button" class="pa-button" data-doc-search-close>Close</button>
+  </svelte:element>
+</div>
+<style>
+  .doc-search-panel:not([open]) { display: none; }
+  .doc-search-panel { width: min(36rem, 90vw); max-height: 80dvh; overflow: auto; padding: 1rem; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); background: var(--doc-background); color: var(--doc-foreground); }
+  .doc-search-panel::backdrop { background: rgb(0 0 0 / .35); }
+  .doc-search-inline { width: 100%; }
+  input, select { width: 100%; padding: .55rem .75rem; border: 1px solid var(--doc-border); background: var(--doc-background); color: inherit; font: inherit; }
+  ul { list-style: none; padding: 0; }
+  ul :global(a) { display: block; padding: .5rem; color: inherit; }
+  ul :global(small) { display: block; }
+</style>
