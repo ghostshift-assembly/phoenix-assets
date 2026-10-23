@@ -158,11 +158,23 @@ defmodule PhoenixAssets.Generators.Typespec do
 
   defp to_ts_type({:type, _, type, []}, _) do
     case type do
-      nil -> "null"
-      :term -> "unknown"
-      :any -> "unknown"
-      :atom -> "string"
-      other -> TS.primitive(other)
+      nil ->
+        "null"
+
+      :term ->
+        "unknown"
+
+      :any ->
+        "unknown"
+
+      :atom ->
+        "string"
+
+      integer when integer in [:non_neg_integer, :pos_integer, :neg_integer, :byte, :arity] ->
+        "number"
+
+      other ->
+        TS.primitive(other)
     end
   end
 
