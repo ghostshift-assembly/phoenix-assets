@@ -29,4 +29,4 @@ $effect(() => {
   {#if svg}<div>{@html svg}</div><details><summary>Diagram source</summary><pre><code>{code}</code></pre></details>{:else}<pre><code>{code}</code></pre>{#if error}<figcaption>{error}</figcaption>{/if}{/if}
 </figure>
 
-<style>.mermaid { overflow: auto; margin: 1rem 0; padding: 1rem; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); text-align: center; } figcaption { color: var(--doc-muted); }</style>
+<style>.mermaid { overflow: auto; margin: 1rem 0; padding: 1rem; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); text-align: center; } .mermaid :global(svg) { background: white; border-radius: .25rem; } figcaption { color: var(--doc-muted); }</style>

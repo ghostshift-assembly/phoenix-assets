@@ -22,6 +22,20 @@ defmodule PhoenixAssets.DocShellTest do
 
   import Phoenix.LiveViewTest, only: [render_component: 2]
 
+  test "Mermaid code fences and step titles preserve their reader semantics" do
+    html =
+      [
+        node("pre", [node("code", ["graph LR; A-->B"], %{"class" => "language-mermaid"})]),
+        node("steps", [node("step", ["Instructions"], %{"title" => "Install"})])
+      ]
+      |> Ast.render()
+      |> HTML.safe_to_string()
+
+    assert html =~ "data-doc-mermaid"
+    assert html =~ "<h3>Install</h3>"
+    refute html =~ "data-doc-enhance=\"highlight\""
+  end
+
   test "repeated code and tab groups have deterministic unique identifiers and SSR panels" do
     code = node("pre", [node("code", ["same source"], %{"class" => "language-elixir"})])
 

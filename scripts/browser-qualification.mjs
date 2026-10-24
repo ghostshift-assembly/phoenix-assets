@@ -170,6 +170,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
             ),
             `${renderer} overflows at ${width}/${theme}`,
           )
+          await page.evaluate(() => scrollTo(0, 0))
           await page.screenshot({ path: join(screenshots, `${renderer}-${width}-${theme}.png`) })
         }
       }

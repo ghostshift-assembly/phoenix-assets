@@ -29,8 +29,8 @@ const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
   {:else if node.tag === "tabs" || node.tag === "code-group"}
     <Tabs nodes={Array.isArray(node.content) ? node.content : []} title={node.attrs?.title} {legacyHeadingIds} />
   {:else if node.tag === "steps"}
-    <ol class="doc-steps">{#each Array.isArray(node.content) ? node.content : [] as step, stepIndex (stepIndex)}<li>{#if typeof step !== "string" && step.tag === "step"}<RecursiveAstRenderer nodes={step.content ?? null} {legacyHeadingIds} />{:else}<RecursiveAstRenderer nodes={[step]} {legacyHeadingIds} />{/if}</li>{/each}</ol>
-  {:else if node.tag === "step"}<li><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></li>
+    <ol class="doc-steps">{#each Array.isArray(node.content) ? node.content : [] as step, stepIndex (stepIndex)}<li>{#if typeof step !== "string" && step.tag === "step"}{#if step.attrs?.title}<h3>{step.attrs.title}</h3>{/if}<RecursiveAstRenderer nodes={step.content ?? null} {legacyHeadingIds} />{:else}<RecursiveAstRenderer nodes={[step]} {legacyHeadingIds} />{/if}</li>{/each}</ol>
+  {:else if node.tag === "step"}<li>{#if node.attrs?.title}<h3>{node.attrs.title}</h3>{/if}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></li>
   {:else if node.tag === "mermaid"}<MermaidDiagram code={extractText(node.content)} />
   {:else if isDirective(node.tag)}
     <Directive name={node.tag} title={node.attrs?.title}>{#snippet children()}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} />{/snippet}</Directive>

@@ -280,3 +280,11 @@
     var(--shiki-dark-bg, transparent)
   );
 }
+
+/* Mermaid uses its pinned light diagram theme in every reader theme. */
+.doc-shell .doc-mermaid .doc-enhanced-output {
+  background: white;
+  color: #111;
+  padding: 0.5rem;
+  border-radius: 0.25rem;
+}

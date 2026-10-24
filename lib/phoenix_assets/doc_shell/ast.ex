@@ -127,6 +127,15 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       language =
         code_attrs |> Map.get("class", "language-text") |> String.replace_prefix("language-", "")
 
+      if language == "mermaid",
+        do: render_mermaid(content),
+        else: render_code(attrs, source, language)
+    end
+
+    defp render_pre(attrs, content),
+      do: element("pre", admitted_attributes(attrs), render_children(content))
+
+    defp render_code(attrs, source, language) do
       id =
         "doc-code-#{attrs["__doc_shell_position"]}-" <>
           (:crypto.hash(:sha256, source) |> Base.encode16(case: :lower) |> binary_part(0, 12))
@@ -144,9 +153,6 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       ]
     end
 
-    defp render_pre(attrs, content),
-      do: element("pre", admitted_attributes(attrs), render_children(content))
-
     defp render_mermaid(content) do
       source = text_content(content)
 
@@ -163,8 +169,12 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     defp render_directive("steps", _, content),
       do: element("ol", [{"class", "doc-steps"}], render_children(content))
 
-    defp render_directive("step", _, content),
-      do: element("li", [{"class", "doc-step"}], render_children(content))
+    defp render_directive("step", attrs, content) do
+      title =
+        if is_binary(attrs["title"]), do: element("h3", [], escape(attrs["title"])), else: []
+
+      element("li", [{"class", "doc-step"}], [title, render_children(content)])
+    end
 
     defp render_directive("accordion", attrs, content) do
       [
