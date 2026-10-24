@@ -152,6 +152,15 @@ defmodule PhoenixAssets.DocShellTest do
 
     page = File.read!(Path.join(destination, "docs/guide/index.html"))
     assert page =~ "<!doctype html>"
+    [_, import_map] = Regex.run(~r/<script type="importmap"[^>]*>(.*?)<\/script>/s, page)
+    assert %{"imports" => imports} = Jason.decode!(import_map)
+    assert map_size(imports) > 2
+
+    assert Enum.all?(imports, fn {logical, hashed} ->
+             String.starts_with?(logical, "/docs/assets/") and
+               String.starts_with?(hashed, "/docs/assets/") and logical != hashed
+           end)
+
     assert page =~ "data-content-digest=\"#{site.pages["guide"].content_digest}\""
     assert page =~ "data-cohort-digest=\"#{site.cohort_digest}\""
     assert page =~ "data-pa-doc-shell"

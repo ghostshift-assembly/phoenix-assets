@@ -46,7 +46,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         lang={@page.locale}
         dir={@direction}
       >
-        <script type="importmap" nonce={@nonce}>{Phoenix.HTML.raw(@import_map)}</script>
+        <script type="importmap" nonce={@nonce}><%= Phoenix.HTML.raw(@import_map) %></script>
         <a class="doc-skip-link" href="#doc-main">Skip to documentation</a>
         <.header context={@context}>
           <:brand :for={brand <- @brand}>{render_slot(brand)}</:brand>
