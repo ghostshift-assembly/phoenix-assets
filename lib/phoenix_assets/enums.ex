@@ -22,7 +22,11 @@ defmodule PhoenixAssets.Enums do
   defines them, read once per locale so a Gettext-backed implementation resolves
   in each. An enum that defines neither still emits its values, humanized.
 
-  Set `only:` to a list of modules to bypass discovery.
+  Set `only:` to an explicit public allowlist (or `[]` to emit nothing).
+  Discovery cannot decide which enum metadata a host may publish. Modules with
+  the same final name share a JSON group; generation refuses that collision
+  rather than silently replacing one module's values. Select an unambiguous
+  allowlist or rename the conflicting enum modules.
 
   A host can also discover enums owned by reusable dependency applications:
 
@@ -103,15 +107,32 @@ defmodule PhoenixAssets.Enums do
 
   # Discovery reads the application's module list, so an enum added anywhere is
   # picked up without a registry to forget to update.
-  defp modules(%{only: only}) when is_list(only), do: Enum.sort_by(only, &group_name/1)
+  defp modules(state) do
+    modules = state |> discover_modules() |> Enum.uniq() |> Enum.sort_by(&group_name/1)
 
-  defp modules(%{otp_app: otp_app} = state) do
+    case modules
+         |> Enum.group_by(&group_name/1)
+         |> Enum.sort()
+         |> Enum.find(fn {_, found} -> length(found) > 1 end) do
+      nil ->
+        modules
+
+      {group, found} ->
+        raise ArgumentError,
+              "phoenix_assets: enum group #{inspect(group)} collides between " <>
+                Enum.map_join(found, ", ", &inspect/1) <>
+                "; set enums: [only: [...]] to an unambiguous public allowlist"
+    end
+  end
+
+  defp discover_modules(%{only: only}) when is_list(only), do: only
+
+  defp discover_modules(%{otp_app: otp_app} = state) do
     [otp_app | Map.get(state, :apps, [])]
     |> Enum.uniq()
     |> Enum.flat_map(&application_modules/1)
     |> Enum.uniq()
     |> Enum.filter(&enum_module?/1)
-    |> Enum.sort_by(&group_name/1)
   end
 
   defp application_modules(otp_app) do

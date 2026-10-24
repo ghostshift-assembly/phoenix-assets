@@ -23,6 +23,20 @@ defmodule PhoenixAssets.EnumsTest do
     use Ash.Type.Enum, values: [:not_started, :in_progress]
   end
 
+  defmodule Other.BareLevel do
+    @moduledoc false
+    use Ash.Type.Enum, values: [:different]
+  end
+
+  test "refuses ambiguous groups before silently replacing published values" do
+    context = ctx()
+    {:ok, state} = Enums.init([only: [BareLevel, Other.BareLevel]], context)
+
+    assert_raise ArgumentError, ~r/enum group "bare_level" collides.*only:/, fn ->
+      Enums.generated_files(context, state)
+    end
+  end
+
   defp ctx(stack \\ []) do
     tmp = Path.join(System.tmp_dir!(), "enum_#{System.unique_integer([:positive])}")
     File.mkdir_p!(tmp)
