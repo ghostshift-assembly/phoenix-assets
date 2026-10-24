@@ -162,8 +162,16 @@ defmodule PhoenixAssets.Doctor do
     end
   end
 
-  defp manifest_check(%Context{config: %{serve_mode: :spa}}) do
-    Check.ok("SPA build serves its own index.html; no server-rendered Vite manifest required")
+  defp manifest_check(%Context{config: %{serve_mode: :spa}} = ctx) do
+    path = Path.join(ctx.static_root, "index.html")
+
+    case File.read(path) do
+      {:ok, bytes} when byte_size(bytes) > 0 ->
+        Check.ok("SPA index.html is present; no server-rendered Vite manifest required")
+
+      _ ->
+        Check.error("SPA index.html missing or empty at #{path}", "run the production SPA build")
+    end
   end
 
   defp manifest_check(ctx) do

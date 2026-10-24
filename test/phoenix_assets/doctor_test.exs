@@ -46,7 +46,7 @@ defmodule PhoenixAssets.DoctorTest do
     Context.new(config, env: :test, plugins: plugins)
   end
 
-  # The manifest checks only apply to `:ssr`, which is no longer the default.
+  # SSR requires a Vite manifest; SPA production checks its own index.html.
   defp ssr_ctx, do: ctx([], serve_mode: :ssr)
 
   defp result_for(results, id) do
@@ -110,7 +110,15 @@ defmodule PhoenixAssets.DoctorTest do
   end
 
   test "the default :spa serve_mode needs no server-rendered manifest" do
-    {_, results} = Doctor.run(ctx(), production: true)
+    context = ctx()
+    {_, missing} = Doctor.run(context, production: true)
+    assert result_for(missing, :manifest_present).status == :error
+    path = Path.join(context.static_root, "index.html")
+    File.write!(path, "")
+    {_, empty} = Doctor.run(context, production: true)
+    assert result_for(empty, :manifest_present).status == :error
+    File.write!(path, "<!doctype html><main>SPA</main>")
+    {_, results} = Doctor.run(context, production: true)
     assert result_for(results, :manifest_present).status == :ok
   end
 
