@@ -1,10 +1,12 @@
 import { flushSync, mount, tick, unmount } from "svelte"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
+import ApiReference from "../src/api-reference.svelte"
 import DocShell from "../src/doc-shell.svelte"
 import Search from "../src/search.svelte"
 import SiteShell from "../src/site-shell.svelte"
 import type { DocShellPresentation, DocShellSite, SearchEntry } from "../src/types.js"
 import presentationV2Fixture from "./fixtures/doc-shell-v2.json"
+import apiFixture from "./fixtures/openapi.json"
 import projectedSite from "./fixtures/projected-site.json"
 
 const site = projectedSite as DocShellSite
@@ -49,6 +51,30 @@ function assertControls(root: HTMLElement): void {
 }
 
 describe("rendered heading targets", () => {
+  it("keeps every API operation and its ordinary anchor readable without selecting a panel", () => {
+    const element = target()
+    mounted.push(mount(ApiReference, { target: element, props: { spec: apiFixture } }))
+    flushSync()
+
+    expect(
+      [...element.querySelectorAll(".operations h3")].map((heading) => heading.textContent),
+    ).toEqual(["Health check", "List things", "Create thing"])
+    expect(element.querySelectorAll(".operations article")).toHaveLength(3)
+    expect(element.querySelectorAll("main")).toHaveLength(0)
+    for (const link of element.querySelectorAll<HTMLAnchorElement>(
+      'nav[aria-label="API operations"] a',
+    )) {
+      const id = link.getAttribute("href")?.slice(1)
+      expect(element.querySelector<HTMLElement>(`[id="${id}"]`)?.hidden).not.toBe(true)
+      expect(element.querySelector(`[id="${id}"]`)).not.toBeNull()
+    }
+    expect(element.textContent).toContain("Read the admitted collection without changing it.")
+    expect([...element.querySelectorAll("summary")].map((node) => node.textContent)).toContain(
+      "Complete admitted OpenAPI JSON",
+    )
+    expect(element.textContent).toContain("queryThings")
+  })
+
   it("renders the public DocShell 1.0 presentation without expanding member references", () => {
     const element = target()
     const presentation = {

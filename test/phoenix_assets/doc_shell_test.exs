@@ -246,7 +246,7 @@ defmodule PhoenixAssets.DocShellTest do
     }
 
     assert {:ok, "3.2.0", _, [operation], nil} = ApiReference.normalize(spec)
-    assert operation.id == "operation-listThings"
+    assert operation.id == "operation-0-listThings"
 
     assert {:error, {:invalid_api_origin, _}} =
              ApiReference.normalize(spec, true, "https://user@example.test/path")
@@ -265,6 +265,52 @@ defmodule PhoenixAssets.DocShellTest do
     assert html =~ "OpenAPI 3.2.0"
     assert html =~ "Destination: https://api.example.test"
     assert html =~ "Complete admitted operation JSON"
+  end
+
+  test "OpenAPI output retains every operation, unknown fields and method-specific body controls" do
+    spec =
+      Path.expand("../../npm/doc-shell/test/fixtures/openapi.json", __DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    render = fn enabled ->
+      %{
+        spec: spec,
+        request_enabled: enabled,
+        api_origin: "https://api.example.test",
+        __changed__: nil
+      }
+      |> ApiReference.api_reference()
+      |> HTML.Safe.to_iodata()
+      |> IO.iodata_to_binary()
+    end
+
+    fallback = render.(false)
+    for title <- ["Health check", "List things", "Create thing"], do: assert(fallback =~ title)
+    assert fallback =~ "Read the admitted collection without changing it."
+    assert fallback =~ "queryThings"
+    assert fallback =~ "Complete admitted OpenAPI JSON"
+    refute fallback =~ "data-doc-api-request"
+
+    enabled = render.(true)
+    assert length(Regex.scan(~r/method="dialog"/, enabled)) == 3
+    assert length(Regex.scan(~r/<fieldset disabled data-doc-api-controls>/, enabled)) == 3
+
+    forms =
+      Regex.scan(~r/data-operation-method="([A-Z]+)"[^>]*>(.*?)<\/form>/s, enabled,
+        capture: :all_but_first
+      )
+
+    assert length(forms) == 3
+
+    for [method, form] <- forms do
+      if method in ["GET", "HEAD"],
+        do: refute(form =~ ~s(name="body")),
+        else: assert(form =~ ~s(name="body"))
+    end
+
+    assert {:error, {:unsupported_openapi_version, "3.0invalid"}} =
+             ApiReference.normalize(%{"openapi" => "3.0invalid"})
   end
 
   @tag timeout: 60_000

@@ -44,6 +44,10 @@ Svelte `^5.57.2`. Rebuild with those exact peers and retain the prior package an
 lock together for rollback. The shared lint package now uses Biome 2.6.2; migrate
 host configuration with Biome's migration command before adopting that package.
 HTTP-only hosts do not acquire a reporting or sync dependency.
+Svelte request panels now require an explicit `baseUrl`; `/` selects the current
+origin. API operations remain readable before browser enhancement. Enabled HEEx
+request forms keep native submission inert and controls disabled until the
+packaged controller mounts.
 
 Installed dependency counts/bytes and emitted browser bytes are separate
 measurements in the receipt. Installed tools do not prove activated services.

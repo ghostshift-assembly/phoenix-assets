@@ -86,6 +86,21 @@ describe("dynamic link policy", () => {
 })
 
 describe("try-it origin policy", () => {
+  it.each([undefined, "", "   "])(
+    "keeps request execution unavailable for an empty API base (%s)",
+    (baseUrl) => {
+      const request = vi.fn()
+      const element = target()
+      mounted.push(
+        mount(TryIt, { target: element, props: { entry: operation(), baseUrl, request } }),
+      )
+      flushSync()
+      expect(element.textContent).toContain("Request execution unavailable.")
+      expect(element.querySelector("button")).toBeNull()
+      expect(request).not.toHaveBeenCalled()
+    },
+  )
+
   it("resolves same-origin paths and rejects origin-changing operation paths", () => {
     expect(resolveTryItTarget("/v1", "/users", "https://docs.example.test/reference")).toEqual({
       url: "https://docs.example.test/v1/users",
@@ -113,7 +128,7 @@ describe("try-it origin policy", () => {
     const element = target()
     const component = mount(TryIt, {
       target: element,
-      props: { entry: operation(), request },
+      props: { entry: operation(), baseUrl: "/", request },
     })
     mounted.push(component)
     openTryIt(element)
@@ -134,11 +149,38 @@ describe("try-it origin policy", () => {
     expect((init.headers as Record<string, string>).authorization).toBe("Bearer secret")
   })
 
+  it("retains a body for an explicitly enabled DELETE operation", async () => {
+    const request = vi.fn().mockResolvedValue(new Response("{}", { status: 200 }))
+    const element = target()
+    mounted.push(
+      mount(TryIt, {
+        target: element,
+        props: {
+          entry: { ...operation(), method: "DELETE" },
+          baseUrl: "/",
+          request,
+        },
+      }),
+    )
+    openTryIt(element)
+    const body = element.querySelector<HTMLTextAreaElement>("textarea")
+    if (!body) throw new Error("missing DELETE body input")
+    body.value = '{"reason":"example"}'
+    body.dispatchEvent(new Event("input", { bubbles: true }))
+    flushSync()
+    element.querySelector<HTMLButtonElement>(".form > button")?.click()
+    await vi.waitFor(() => expect(request).toHaveBeenCalledOnce())
+    expect(request.mock.calls[0]?.[1]).toMatchObject({
+      method: "DELETE",
+      body: '{"reason":"example"}',
+    })
+  })
+
   it("blocks absolute operation paths and unapproved cross-origin bases", () => {
     const request = vi.fn()
 
     for (const props of [
-      { entry: operation("https://attacker.example.test/steal") },
+      { entry: operation("https://attacker.example.test/steal"), baseUrl: "/" },
       { entry: operation(), baseUrl: "https://api.example.test" },
     ]) {
       const element = target()

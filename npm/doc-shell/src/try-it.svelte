@@ -25,7 +25,7 @@ let confirmedOrigin = $state<string>()
 let tokenOrigin = $state<string>()
 let generation = 0
 let pending: AbortController | undefined
-const hasBody = $derived(["POST", "PUT", "PATCH"].includes(entry.method))
+const hasBody = $derived(!["GET", "HEAD"].includes(entry.method))
 const resolution = $derived.by(() => {
   try {
     return { target: resolveTryItTarget(baseUrl, operationPath) } as const
@@ -103,5 +103,7 @@ const send = async () => {
   }
 }
 </script>
+{#if !baseUrl.trim()}<p>Request execution unavailable.</p>{:else}<noscript>Request execution requires JavaScript.</noscript>
 <section><button type="button" onclick={() => (open = !open)} aria-expanded={open}>{open ? "Hide" : "Try it"}</button>{#if open}<div class="form">{#if resolution.error}<p role="alert">{resolution.error}</p>{:else if resolution.target?.crossOrigin}{#if originAllowed}<label class="origin-confirm"><input type="checkbox" checked={confirmedOrigin === resolution.target.origin} onchange={(event) => (confirmedOrigin = event.currentTarget.checked ? resolution.target?.origin : undefined)} /> Send this request to {resolution.target.origin}</label>{:else}<p role="alert">Requests to {resolution.target.origin} are blocked. Add the exact origin to <code>allowedOrigins</code> to enable confirmation.</p>{/if}{/if}<label>Operation path <input bind:value={operationPath} spellcheck="false" /></label><label>Bearer token <input bind:value={token} type="password" autocomplete="off" spellcheck="false" /></label>{#if hasBody}<label>JSON body <textarea bind:value={body}></textarea></label>{/if}<button type="button" onclick={send} disabled={loading || !resolution.target || !originAllowed || !originConfirmed}>{loading ? "Sending…" : "Send request"}</button>{#if status !== undefined}<strong>Status {status}</strong>{/if}{#if response !== undefined}<JsonView value={response} />{/if}</div>{/if}</section>
+{/if}
 <style>section { margin-top: 1rem; } .form, label { display: grid; gap: .5rem; } .form { margin-top: .75rem; } input, textarea, button { border: 1px solid var(--doc-border); border-radius: var(--doc-radius); padding: .5rem; background: var(--doc-background); color: inherit; } textarea { min-height: 8rem; font-family: ui-monospace, monospace; }</style>

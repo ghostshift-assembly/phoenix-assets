@@ -1,0 +1,51 @@
+{
+  "openapi": "3.2.0",
+  "info": {
+    "title": "Example API",
+    "version": "1.0.0",
+    "description": "A local reference fixture. Requests are unavailable by default."
+  },
+  "paths": {
+    "/things": {
+      "get": {
+        "operationId": "listThings",
+        "tags": ["Things"],
+        "summary": "List things",
+        "description": "Read the admitted collection without changing it.",
+        "responses": { "200": { "description": "The current collection." } }
+      },
+      "post": {
+        "operationId": "createThing",
+        "tags": ["Things"],
+        "summary": "Create thing",
+        "description": "Create one item through the host's authorized request owner.",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "name": { "type": "string", "description": "The public item label." }
+                }
+              }
+            }
+          }
+        },
+        "responses": { "201": { "description": "The created item." } }
+      },
+      "query": {
+        "operationId": "queryThings",
+        "description": "The unrecognized operation stays inspectable in the complete document."
+      }
+    },
+    "/health": {
+      "head": {
+        "operationId": "health",
+        "tags": ["Health"],
+        "summary": "Health check",
+        "description": "Check availability without a response body.",
+        "responses": { "200": { "description": "The service is available." } }
+      }
+    }
+  }
+}

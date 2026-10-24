@@ -28,8 +28,11 @@ uses the host's `navigate` callback when supplied.
 
 The recursive AST renderer handles all fourteen directives plus Shiki and
 Mermaid code fences. `ApiReference` renders tag-grouped OpenAPI operations,
-recursive schemas and examples, and a collapsible try-it panel with a lazy JSON
-viewer. Dynamic links reject executable and unknown URL schemes. Try-it paths
+recursive schemas and examples. Every operation has an ordinary link and stays
+readable without JavaScript. The complete document JSON retains unknown fields.
+Request execution is unavailable until the host supplies `baseUrl`; use `/`
+to select the current origin explicitly. Dynamic links reject executable and
+unknown URL schemes. Try-it paths
 cannot replace the configured API origin; a cross-origin `baseUrl` also needs an
 exact `allowedOrigins` entry and an on-screen confirmation before sending.
 Browser cookies remain same-origin-only. `pnpm check:offline` checks package

@@ -612,6 +612,33 @@ describe("theme and request policy", () => {
     controller.destroy()
   })
 
+  it("enables inert request controls only while mounted and retires credentials when their destination changes", () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      '<form method="dialog" data-doc-api-request data-api-origin="https://api.example.test" data-operation-method="POST"><fieldset disabled data-doc-api-controls><input name="token"><input type="checkbox" name="confirm"></fieldset></form>',
+    )
+    const form = root.querySelector<HTMLFormElement>("form")
+    const controls = root.querySelector<HTMLFieldSetElement>("fieldset")
+    const token = root.querySelector<HTMLInputElement>('[name="token"]')
+    const confirmation = root.querySelector<HTMLInputElement>('[name="confirm"]')
+    if (!form || !controls || !token || !confirmation) throw new Error("missing request fixture")
+    expect(controls.disabled).toBe(true)
+    const controller = mountRequests(root)
+    expect(controls.disabled).toBe(false)
+    token.value = "synthetic"
+    confirmation.checked = true
+    form.dataset.apiOrigin = "https://other.example.test"
+    controller.refresh()
+    expect(token.value).toBe("")
+    expect(confirmation.checked).toBe(false)
+    token.value = "synthetic"
+    controller.destroy()
+    controller.refresh()
+    expect(controls.disabled).toBe(true)
+    expect(token.value).toBe("")
+  })
+
   it("retires pending request responses on refresh or destruction without replay", async () => {
     const root = fixture()
     root.insertAdjacentHTML(
@@ -633,6 +660,39 @@ describe("theme and request policy", () => {
     expect(signal.aborted).toBe(true)
     controller.destroy()
     expect(request).toHaveBeenCalledOnce()
+  })
+
+  it("does not let a retired request release the replacement request's pending guard", async () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      '<form data-doc-api-request data-api-origin="https://api.example.test" data-operation-method="GET"><input name="path" value="/records"><input name="token"><input type="checkbox" name="confirm" checked><p data-doc-api-status></p></form>',
+    )
+    const responses: Array<(response: Response) => void> = []
+    const request = vi
+      .fn()
+      .mockImplementation(() => new Promise<Response>((resolve) => responses.push(resolve)))
+    const controller = mountRequests(root, request)
+    const form = root.querySelector<HTMLFormElement>("form")
+    if (!form) throw new Error("missing form")
+    const submit = () =>
+      form.dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
+    submit()
+    form.dataset.apiOrigin = "https://other.example.test"
+    controller.refresh()
+    const confirmation = form.querySelector<HTMLInputElement>('[name="confirm"]')
+    if (confirmation) confirmation.checked = true
+    submit()
+    const retired = new Response("retired")
+    responses[0]?.(retired)
+    // Settle the controlled response's promise chain before the duplicate submit.
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    submit()
+    expect(request).toHaveBeenCalledTimes(2)
+    expect(root.querySelector("[data-doc-api-status]")?.textContent).toBe("Sending…")
+    controller.destroy()
+    expect(request.mock.calls[1]?.[1].signal.aborted).toBe(true)
+    responses[1]?.(new Response("disposed"))
   })
 
   it("defaults invalid stored values to system", () => {

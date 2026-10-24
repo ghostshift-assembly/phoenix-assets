@@ -19,6 +19,7 @@ export async function qualifyBrowser(sourceRoot, root, output) {
   const fixture = join(output, "browser-static")
   assert.ok(existsSync(join(fixture, "site.json")), "extracted Hex renderer fixture is missing")
   copyFileSync(join(fixture, "site.json"), join(root, "site.json"))
+  copyFileSync(join(sourceRoot, "npm/doc-shell/test/fixtures/openapi.json"), join(root, "api.json"))
   const producer = join(sourceRoot, "npm/svelte/test/fixtures/upstream-reporting")
   copyFileSync(join(producer, "envelope.json"), join(root, "envelope.json"))
   const generated = JSON.parse(readFileSync(join(output, "producer/producer-cases.json"), "utf8"))
@@ -29,19 +30,23 @@ export async function qualifyBrowser(sourceRoot, root, output) {
   writeFileSync(
     join(root, "fixture.svelte"),
     `<script>
-import { SiteShell } from "@phoenix-assets/doc-shell"
+import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"
 import { PortableReport, decodeReportEnvelope, safeDecodeReportEnvelope } from "@phoenix-assets/svelte/reporting"
 import "@phoenix-assets/doc-shell/theme.css"
 import site from "./site.json"
+import api from "./api.json"
 import envelope from "./envelope.json"
 import samples from "./qualified-envelopes.json"
 window.decodeProducerCase = safeDecodeReportEnvelope
 const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
+const apiPage = new URLSearchParams(window.location.search).has("api")
 </script>
+{#if apiPage}<main class="doc-shell" data-pa-doc-shell style="padding:1rem;max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference spec={api} /></main>{:else}
 <SiteShell {site} {pageId} />
 {#if pageId === "anchors:guide"}
 <section class="doc-shell" aria-label="Portable reporting"><PortableReport envelope={decodeReportEnvelope(envelope)} /></section>
 {#each samples as sample}<section class="doc-shell" aria-label={sample.name}><PortableReport envelope={decodeReportEnvelope(sample.value)} /></section>{/each}
+{/if}
 {/if}
 `,
   )
@@ -61,7 +66,7 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
   const application = join(root, "browser-dist")
   writeFileSync(
     join(root, "ssrfixture.svelte"),
-    '<script>import { SiteShell } from "@phoenix-assets/doc-shell"; import site from "./site.json"; let { pageId = "anchors:guide" } = $props();</script><SiteShell {site} {pageId} />',
+    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false } = $props();</script>{#if api}<main class="doc-shell" data-pa-doc-shell style="padding:1rem;max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main>{:else}<SiteShell {site} {pageId} />{/if}',
   )
   writeFileSync(
     join(root, "ssr.config.mjs"),
@@ -74,7 +79,7 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
   const css = readdirSync(join(application, "assets")).filter((file) => file.endsWith(".css"))
   writeFileSync(
     join(root, "render-ssr.mjs"),
-    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } })));`,
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } }))); writeFileSync("browser-dist/api-ssr.html", html(render(Fixture, { props: { api: true } })));`,
   )
   execFileSync("node", ["render-ssr.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")
@@ -89,6 +94,7 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
       file = resolve(application, `.${path}`)
     if (path === "/svelte-ssr/") file = join(application, "ssr.html")
     if (path === "/svelte-ssr-404/") file = join(application, "ssr404.html")
+    if (path === "/svelte-api-ssr/") file = join(application, "api-ssr.html")
     const allowed = [application, fixture].some(
       (directory) => file === directory || file.startsWith(directory + sep),
     )
@@ -344,7 +350,90 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
       cases.push(`${path}: JavaScript-disabled 404 follows an admitted documentation route`)
       await missing.close()
     }
+    for (const path of ["/api.html", "/svelte-api-ssr/"]) {
+      const page = await offline.newPage()
+      await page.goto(origin + path)
+      for (const name of ["Health check", "List things", "Create thing"])
+        assert.ok(await page.getByRole("heading", { name, exact: true }).isVisible())
+      assert.equal(
+        await page.getByRole("navigation", { name: "API operations" }).getByRole("link").count(),
+        3,
+      )
+      await page.getByText("Complete admitted OpenAPI JSON", { exact: true }).click()
+      assert.ok(await page.getByText(/queryThings/).isVisible())
+      cases.push(
+        `${path}: JavaScript-disabled API descriptions, operation links and unknown-field JSON`,
+      )
+      await page.close()
+    }
+    const native = await offline.newPage()
+    await native.goto(`${origin}/api-enabled.html`)
+    assert.equal(await native.getByLabel("Bearer token").count(), 3)
+    assert.ok(await native.getByLabel("Bearer token").first().isDisabled())
+    await native.evaluate(() => {
+      const form = document.querySelector("form")
+      form.querySelector('[name="token"]').value = "SYNTHETIC_NATIVE_SECRET"
+      form.querySelector("fieldset").disabled = false
+      form.submit()
+    })
+    await native.waitForLoadState("networkidle")
+    assert.equal(native.url(), `${origin}/api-enabled.html`)
+    cases.push(
+      "heex: native API submission is inert without JavaScript and cannot place tokens in a URL",
+    )
+    await native.close()
     await offline.close()
+
+    for (const renderer of ["heex", "svelte"]) {
+      const context = await browser.newContext({ reducedMotion: "reduce" })
+      const page = await context.newPage()
+      const path = renderer === "heex" ? "/api.html" : "/svelte/?api=1"
+      await page.goto(origin + path)
+      for (const name of ["Health check", "List things", "Create thing"])
+        await page.getByRole("heading", { name, exact: true }).waitFor()
+      const links = page.getByRole("navigation", { name: "API operations" }).getByRole("link")
+      assert.deepEqual(
+        (await links.allTextContents()).map((text) => text.replace(/\s+/g, " ").trim()),
+        ["HEAD /health", "GET /things", "POST /things"],
+      )
+      for (const link of await links.all()) {
+        const href = await link.getAttribute("href")
+        assert.ok(await page.evaluate((id) => Boolean(document.getElementById(id)), href.slice(1)))
+      }
+      for (const width of [320, 1280]) {
+        await page.setViewportSize({ width, height: 900 })
+        for (const theme of ["light", "dark"]) {
+          await page.evaluate((theme) => {
+            localStorage.setItem("phoenix-assets:doc-shell:theme", theme)
+            for (const root of document.querySelectorAll("[data-pa-doc-shell]")) {
+              root.dataset.docTheme = theme
+              root.dataset.paTheme = theme
+            }
+            scrollTo(0, 0)
+          }, theme)
+          assert.ok(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+            `${renderer} API overflows at ${width}/${theme}`,
+          )
+          await page.screenshot({
+            path: join(screenshots, `${renderer}-api-${width}-${theme}.png`),
+            fullPage: true,
+          })
+        }
+      }
+      cases.push(
+        `${renderer}: all API operations have visible descriptions, unique native anchors and responsive themes`,
+      )
+      await context.close()
+    }
+    const requests = await browser.newPage()
+    await requests.goto(`${origin}/api-enabled.html`)
+    await requests.locator("[data-doc-api-controls]").first().waitFor()
+    await requests.waitForFunction(
+      () => !document.querySelector("[data-doc-api-controls]").disabled,
+    )
+    cases.push("heex: packaged browser controller enables admitted API controls")
+    await requests.close()
     const page2 = await browser.newPage()
     await page2.goto(`${origin}/svelte/`)
     await page2.waitForFunction(() => typeof window.decodeProducerCase === "function")

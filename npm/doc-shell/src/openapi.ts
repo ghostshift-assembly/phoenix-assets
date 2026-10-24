@@ -6,21 +6,23 @@ export const supportsOpenApi = (version: string | undefined): boolean =>
   version === undefined || /^3\.[012](?:\.|$)/.test(version)
 
 export const flattenOperations = (spec: OpenApiDocument): OperationEntry[] =>
-  Object.entries(spec.paths ?? {}).flatMap(([path, item]) =>
-    methods.flatMap((method) => {
-      const operation = item[method]
-      if (!operation) return []
-      return [
-        {
-          id: operation.operationId ?? `${method}-${path}`,
-          method: method.toUpperCase(),
-          path,
-          tags: operation.tags?.length ? operation.tags : ["default"],
-          operation,
-        },
-      ]
-    }),
-  )
+  Object.entries(spec.paths ?? {})
+    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+    .flatMap(([path, item]) =>
+      methods.flatMap((method) => {
+        const operation = item[method]
+        if (!operation) return []
+        return [
+          {
+            id: operation.operationId ?? `${method}-${path}`,
+            method: method.toUpperCase(),
+            path,
+            tags: operation.tags?.length ? operation.tags : ["default"],
+            operation,
+          },
+        ]
+      }),
+    )
 
 export const groupOperations = (operations: OperationEntry[]): Record<string, OperationEntry[]> => {
   const groups: Record<string, OperationEntry[]> = Object.create(null)

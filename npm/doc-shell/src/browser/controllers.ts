@@ -522,12 +522,37 @@ export const mountRequests = (
 ): BrowserController => {
   const controller = new AbortController()
   const pending = new Map<HTMLFormElement, AbortController>()
+  const forms = new Map<HTMLFormElement, string>()
+  const identity = (form: HTMLFormElement) =>
+    `${form.dataset.apiOrigin}:${form.dataset.operationMethod}`
+  const retire = (form: HTMLFormElement) => {
+    pending.get(form)?.abort()
+    pending.delete(form)
+    const controls = form.querySelector<HTMLFieldSetElement>("[data-doc-api-controls]")
+    if (controls) controls.disabled = true
+    const token = form.querySelector<HTMLInputElement>('[name="token"]')
+    if (token) token.value = ""
+    const confirmation = form.querySelector<HTMLInputElement>('[name="confirm"]')
+    if (confirmation) confirmation.checked = false
+    forms.delete(form)
+  }
+  const refresh = () => {
+    if (controller.signal.aborted) return
+    for (const [form, previous] of forms)
+      if (!form.isConnected || !root.contains(form) || previous !== identity(form)) retire(form)
+    for (const form of root.querySelectorAll<HTMLFormElement>("[data-doc-api-request]")) {
+      forms.set(form, identity(form))
+      const controls = form.querySelector<HTMLFieldSetElement>("[data-doc-api-controls]")
+      if (controls) controls.disabled = false
+    }
+  }
   root.addEventListener(
     "submit",
     (event) => {
-      const form = (event.target as Element).closest<HTMLFormElement>("[data-doc-api-request]")
-      if (!form) return
+      const form = event.target as HTMLFormElement
+      if (form?.tagName !== "FORM" || !form.matches("[data-doc-api-request]")) return
       event.preventDefault()
+      refresh()
       if (pending.has(form)) return
       const status = form.querySelector<HTMLElement>("[data-doc-api-status]")
       const output = form.querySelector<HTMLElement>("[data-doc-api-response]")
@@ -573,7 +598,9 @@ export const mountRequests = (
               status.textContent =
                 "Response unavailable. The operation outcome may be unknown; check its owner before retrying."
           })
-          .finally(() => pending.delete(form))
+          .finally(() => {
+            if (pending.get(form) === abort) pending.delete(form)
+          })
       } catch (error) {
         if (status)
           status.textContent = error instanceof Error ? error.message : "Request unavailable"
@@ -581,17 +608,12 @@ export const mountRequests = (
     },
     { signal: controller.signal },
   )
-  const refresh = () => {
-    for (const [form, abort] of pending)
-      if (!form.isConnected) {
-        abort.abort()
-        pending.delete(form)
-      }
-  }
+  refresh()
   return {
     refresh,
     destroy: () => {
       controller.abort()
+      for (const form of forms.keys()) retire(form)
       for (const abort of pending.values()) abort.abort()
       pending.clear()
     },

@@ -27,13 +27,18 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
             |> assign(:version, version)
             |> assign(:info, info)
             |> assign(:operations, operations)
+            |> assign(
+              :groups,
+              operations |> Enum.group_by(& &1.tag) |> Enum.sort_by(&elem(&1, 0))
+            )
             |> assign(:origin, origin)
 
           ~H"""
           <section class="doc-api-reference">
-            <header><p>OpenAPI {@version}</p><h2>{Map.get(@info, "title", "API reference")}</h2><p :if={@info["description"]}>{@info["description"]}</p></header>
-            <nav aria-label="API operations"><ul><li :for={operation <- @operations}><a href={"##{operation.id}"}><strong>{String.upcase(operation.method)}</strong> {operation.path}</a></li></ul></nav>
+            <header><p>OpenAPI {@version}</p><h2>{Map.get(@info, "title", "API reference")}</h2><small :if={@info["version"]}>v{@info["version"]}</small><p :if={@info["description"]}>{@info["description"]}</p></header>
+            <nav aria-label="API operations"><section :for={{tag, operations} <- @groups}><h3>{tag}</h3><ul><li :for={operation <- operations}><a href={"##{operation.id}"}><strong>{operation.method}</strong> {operation.path}</a></li></ul></section></nav>
             <.operation :for={operation <- @operations} operation={operation} origin={@origin} request_enabled={@request_enabled} />
+            <details><summary>Complete admitted OpenAPI JSON</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details>
           </section>
           """
 
@@ -41,7 +46,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           assigns = assign(assigns, :reason, inspect(reason))
 
           ~H"""
-          <section class="pa-state" data-pa-state="error" role="alert"><h2>API reference unavailable</h2><p>{@reason}</p></section>
+          <section class="pa-state" data-pa-state="error" role="alert"><h2>API reference unavailable</h2><p>{@reason}</p><details><summary>Complete admitted OpenAPI JSON</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details></section>
           """
       end
     end
@@ -59,14 +64,17 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         <section :if={@operation.parameters != []}><h4>Parameters</h4><table><thead><tr><th>Name</th><th>Location</th><th>Required</th><th>Description</th></tr></thead><tbody><tr :for={parameter <- @operation.parameters}><th scope="row">{parameter["name"]}</th><td>{parameter["in"]}</td><td>{if parameter["required"], do: "Required", else: "Optional"}</td><td>{parameter["description"]}</td></tr></tbody></table></section>
         <.schema_section title="Request body" value={@operation.request_body} />
         <.schema_section title="Responses" value={@operation.responses} />
-        <form :if={@request_enabled && @origin} class="doc-api-request" data-doc-api-request data-api-origin={@origin} data-operation-method={@operation.method}>
-          <h4>Send request</h4><p>Destination: {@origin}</p>
+        <form :if={@request_enabled && @origin} method="dialog" class="doc-api-request" data-doc-api-request data-api-origin={@origin} data-operation-method={@operation.method}>
+          <fieldset disabled data-doc-api-controls>
+          <legend>Send request</legend><p>Destination: {@origin}</p>
           <label>Operation path<input class="pa-field" name="path" value={@operation.path} required /></label>
           <label>Bearer token<input class="pa-field" name="token" type="password" autocomplete="off" /></label>
-          <label :if={@operation.method not in ["get", "head"]}>Request body<textarea class="pa-field" name="body"></textarea></label>
+          <label :if={@operation.method not in ["GET", "HEAD"]}>Request body<textarea class="pa-field" name="body"></textarea></label>
           <label><input type="checkbox" name="confirm" required />Send this request to {@origin}</label>
           <button type="submit" class="pa-button" data-pa-variant="primary">Send request</button>
           <p role="status" data-doc-api-status></p><pre data-doc-api-response></pre>
+          </fieldset>
+          <noscript>Request execution requires JavaScript.</noscript>
         </form>
         <details><summary>Complete admitted operation JSON</summary><pre><code>{Jason.encode!(@operation.raw, pretty: true)}</code></pre></details>
       </article>
@@ -140,9 +148,12 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     def normalize(_, _, _), do: {:error, :invalid_openapi_document}
 
-    defp version("3.0" <> _ = version), do: {:ok, version}
-    defp version("3.1" <> _ = version), do: {:ok, version}
-    defp version("3.2" <> _ = version), do: {:ok, version}
+    defp version(version) when is_binary(version) do
+      if Regex.match?(~r/\A3\.[012](?:\.|\z)/, version),
+        do: {:ok, version},
+        else: {:error, {:unsupported_openapi_version, version}}
+    end
+
     defp version(value), do: {:error, {:unsupported_openapi_version, value}}
 
     defp request_origin(false, _), do: {:ok, nil}
@@ -175,6 +186,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
               operation["summary"] || operation["operationId"] ||
                 "#{String.upcase(method)} #{path}",
             description: operation["description"],
+            tag: operation["tags"] |> list() |> Enum.find(&is_binary/1) || "default",
             parameters: list(operation["parameters"]),
             request_body: operation["requestBody"],
             responses: operation["responses"],
@@ -182,11 +194,15 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           }
         end
       end)
+      |> Enum.with_index()
+      |> Enum.map(fn {operation, index} ->
+        %{operation | id: "operation-#{index}-#{operation.id}"}
+      end)
     end
 
     defp operation_id(operation, method, path) do
       value = operation["operationId"] || "#{method}-#{path}"
-      "operation-" <> String.replace(value, ~r/[^A-Za-z0-9_.:-]+/, "-")
+      String.replace(value, ~r/[^A-Za-z0-9_.:-]+/, "-")
     end
 
     defp schema_tree(value, depth) when depth >= @max_depth,

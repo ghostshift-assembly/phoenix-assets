@@ -320,3 +320,9 @@
   cursor: pointer;
   font-weight: 700;
 }
+:where(.doc-shell) [data-doc-api-controls] {
+  min-inline-size: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
