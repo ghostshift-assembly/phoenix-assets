@@ -1,0 +1,63 @@
+{
+  "capability_warnings": [{"code":"unsupported_visualization_kind","effective_kind":"table","panel_id":"empty","requested_kind":"heatmap"}],
+  "definition": {
+    "description": "Cross-language fixture covering every independent panel state.",
+    "id": "fixture.mixed-states.v1",
+    "layout": {"columns":2,"order":["volume","empty","partial","failure"]},
+    "panels": [
+      {
+        "description":"Volume by category.","empty_message":"No volume was recorded.","id":"volume","query_ref":"fixture.volume.v1","table_columns":["category","value"],"title":"Volume",
+        "visualization":{"annotations":[],"encodings":{"x":"category","y":"value"},"formats":{"value":"count"},"interaction":{},"kind":"bar","sort":[{"direction":"desc","field":"value"}],"stack":"none","summary_template":"Volume ranked by category."}
+      },
+      {
+        "description":"A negotiated empty panel.","empty_message":"No matrix cells were returned.","id":"empty","query_ref":"fixture.empty.v1","table_columns":[],"title":"Empty matrix",
+        "visualization":{"annotations":[],"encodings":{},"formats":{},"interaction":{},"kind":"table","sort":[],"stack":"none","summary_template":"No matrix values are available."}
+      },
+      {
+        "description":"A truncated temporal series.","empty_message":"No samples were returned.","id":"partial","query_ref":"fixture.partial.v1","table_columns":["observed_at","latency"],"title":"Partial latency",
+        "visualization":{"annotations":[],"encodings":{"x":"observed_at","y":"latency"},"formats":{"latency":"ms"},"interaction":{},"kind":"line","sort":[{"direction":"asc","field":"observed_at"}],"stack":"none","summary_template":"Latency samples ordered by observation time."}
+      },
+      {
+        "description":"An isolated failed panel.","empty_message":"No failure data was returned.","id":"failure","query_ref":"fixture.failure.v1","table_columns":[],"title":"Failed query",
+        "visualization":{"annotations":[],"encodings":{},"formats":{},"interaction":{},"kind":"table","sort":[],"stack":"none","summary_template":"This panel failed independently."}
+      }
+    ],
+    "parameters": [],
+    "provenance": {"author_kind":"fixture","created_at":"2026-07-17T10:00:00Z"},
+    "schema_version": "1.0",
+    "title": "Mixed panel states"
+  },
+  "generated_at": "2026-07-17T10:00:00Z",
+  "results": {
+    "empty":{"detail":{"row_count":0},"state":"empty"},
+    "failure":{"detail":{"code":"source_unavailable"},"state":"error"},
+    "partial":{
+      "frame":{
+        "classification":{"highest":"internal","redactions":[]},
+        "fields":[
+          {"classification":"internal","label":"Observed at","name":"observed_at","nullable":false,"role":"time","type":"datetime","unit":null},
+          {"classification":"internal","label":"Latency","name":"latency","nullable":false,"role":"measure","type":"float","unit":"ms"}
+        ],
+        "freshness":{"source_watermark":"2026-07-17T09:59:00Z","stale":false},
+        "page":{"continuation_cursor":"fixture-next","truncated":true},
+        "provenance":{"evaluated_at":"2026-07-17T10:00:00Z","execution_id":"fixture-partial","query_ref":"fixture.partial.v1","source_class":"fixture"},
+        "rows":[["2026-07-17T09:59:00Z",12.5]]
+      },
+      "state":"partial"
+    },
+    "volume":{
+      "frame":{
+        "classification":{"highest":"internal","redactions":[]},
+        "fields":[
+          {"classification":"internal","label":"Category","name":"category","nullable":false,"role":"dimension","type":"string","unit":null},
+          {"classification":"internal","label":"Value","name":"value","nullable":false,"role":"measure","type":"integer","unit":"count"}
+        ],
+        "freshness":{"source_watermark":"2026-07-17T10:00:00Z","stale":false},
+        "page":{"continuation_cursor":null,"truncated":false},
+        "provenance":{"evaluated_at":"2026-07-17T10:00:00Z","execution_id":"fixture-volume","query_ref":"fixture.volume.v1","source_class":"fixture"},
+        "rows":[["alpha",42],["beta",21]]
+      },
+      "state":"ok"
+    }
+  }
+}

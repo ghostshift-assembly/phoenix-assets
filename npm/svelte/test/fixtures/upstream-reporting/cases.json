@@ -1,0 +1,9 @@
+[
+  {"name":"baseline","accept":true,"path":["definition","schema_version"],"value":"1.0"},
+  {"name":"compatible-minor","accept":true,"path":["definition","schema_version"],"value":"1.7"},
+  {"name":"unsupported-major","accept":false,"path":["definition","schema_version"],"value":"9.0"},
+  {"name":"unknown-envelope-member","accept":false,"path":["loader_url"],"value":"https://example.invalid/data"},
+  {"name":"typed-row-mismatch","accept":false,"path":["results","volume","frame","rows",0,1],"value":"forty-two"},
+  {"name":"unknown-encoding-field","accept":false,"path":["definition","panels",0,"visualization","encodings","y"],"value":"missing"},
+  {"name":"malformed-generated-at","accept":false,"path":["generated_at"],"value":"yesterday"}
+]

@@ -55,7 +55,10 @@
   },
   "overrides": [
     {
-      "includes": ["npm/doc-shell/test/fixtures/doc-shell-v2.json"],
+      "includes": [
+        "npm/doc-shell/test/fixtures/doc-shell-v2.json",
+        "npm/svelte/test/fixtures/upstream-reporting/**"
+      ],
       "formatter": { "enabled": false }
     },
     {

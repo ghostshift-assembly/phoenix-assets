@@ -1,4 +1,7 @@
+import { createHash } from "node:crypto"
+import { readFileSync } from "node:fs"
 import { describe, expect, it } from "vitest"
+import { reportingProfile } from "../../../scripts/reporting-profile.mjs"
 import {
   CLASSIFICATIONS,
   DEFAULT_REPORTING_LIMITS,
@@ -6,63 +9,43 @@ import {
   FIELD_TYPES,
   VISUALIZATION_KINDS,
 } from "../src/reporting/contract.js"
+import { safeDecodeReportEnvelope } from "../src/reporting/decode.js"
+import cases from "./fixtures/upstream-reporting/cases.json"
+import envelope from "./fixtures/upstream-reporting/envelope.json"
+import profile from "./fixtures/upstream-reporting/profile.json"
 
-/**
- * This package is a renderer for a contract it does not own. The canonical
- * definition lives upstream in `Refpath.Presentation.Validator`, and the same
- * enum lists are hand-maintained on both sides — a divergence would not fail a
- * build, it would fail a real user's report at decode time.
- *
- * These are the upstream lists, transcribed with their module attribute names
- * so a reviewer can diff them by eye against
- * `refpath/lib/refpath/presentation/validator.ex`. A contract change lands
- * upstream first; this test is what makes the follow-up impossible to forget.
- *
- * The endgame is generating `contract.ts` from the upstream typespecs, at which
- * point this file goes away.
- */
-const upstream = {
-  // @kinds
-  kinds: "number table line area bar scatter heatmap gauge sparkline",
-  // @types
-  types: "boolean integer float decimal string date time datetime duration",
-  // @roles
-  roles: "dimension measure time identifier",
-  // @classifications
-  classifications: "public internal confidential restricted",
-}
-
-const words = (list: string) => list.split(" ")
-
-describe("RT.69 contract conformance", () => {
-  it("renders exactly the upstream visualization kinds", () => {
-    expect([...VISUALIZATION_KINDS].sort()).toEqual(words(upstream.kinds).sort())
-  })
-
-  it("accepts exactly the upstream field types", () => {
-    expect([...FIELD_TYPES].sort()).toEqual(words(upstream.types).sort())
-  })
-
-  it("accepts exactly the upstream field roles", () => {
-    expect([...FIELD_ROLES].sort()).toEqual(words(upstream.roles).sort())
-  })
-
-  it("accepts exactly the upstream classifications", () => {
-    expect([...CLASSIFICATIONS].sort()).toEqual(words(upstream.classifications).sort())
-  })
-
-  // `maxBytes` mirrors `Refpath.Presentation.@max_json_bytes`; the rest mirror
-  // `Refpath.Presentation.Validator.@default_limits`. A renderer that decodes to
-  // a looser bound than the producer validates against accepts envelopes the
-  // owner never blessed.
-  it("enforces the upstream size and complexity limits", () => {
+describe("immutable public producer source and corpus", () => {
+  it("checks every snapshot digest before comparing the grammar", () => {
+    expect(reportingProfile()).toEqual(profile)
+    for (const [file, expected] of Object.entries(profile.sources)) {
+      const bytes = readFileSync(`${import.meta.dirname}/fixtures/upstream-reporting/${file}`)
+      expect(createHash("sha256").update(bytes).digest("hex"), file).toBe(expected)
+    }
+    expect([...VISUALIZATION_KINDS].sort()).toEqual([...profile.grammar.kinds].sort())
+    expect([...FIELD_TYPES].sort()).toEqual([...profile.grammar.types].sort())
+    expect([...FIELD_ROLES].sort()).toEqual([...profile.grammar.roles].sort())
+    expect([...CLASSIFICATIONS].sort()).toEqual([...profile.grammar.classifications].sort())
+    const limits = profile.limits
     expect(DEFAULT_REPORTING_LIMITS).toMatchObject({
-      maxBytes: 262_144,
-      maxPanels: 32,
-      maxFields: 64,
-      maxRows: 10_000,
-      maxCellBytes: 8_192,
-      maxDepth: 64,
+      maxBytes: limits.max_bytes,
+      maxPanels: limits.max_panels,
+      maxFields: limits.max_fields,
+      maxRows: limits.max_rows,
+      maxCellBytes: limits.max_cell_bytes,
+      maxDepth: limits.max_depth,
     })
   })
+
+  for (const fixture of cases) {
+    it(`decodes the public producer case: ${fixture.name}`, () => {
+      const value = structuredClone(envelope)
+      let target: Record<string | number, unknown> = value
+      for (const key of fixture.path.slice(0, -1))
+        target = target[key] as Record<string | number, unknown>
+      const key = fixture.path.at(-1)
+      if (key === undefined) throw new Error("Empty producer case path")
+      target[key] = fixture.value
+      expect(safeDecodeReportEnvelope(value).state === "ready").toBe(fixture.accept)
+    })
+  }
 })

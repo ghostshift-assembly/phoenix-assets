@@ -76,9 +76,11 @@ export function decodeReportEnvelope(
     if (result.state === "ok" || result.state === "partial") validateBindings(panel, result.frame)
   }
 
-  const warnings = expectArray(object.capability_warnings, ["capability_warnings"]).map(
-    (warning, index) => expectObject(warning, ["capability_warnings", index]),
-  )
+  const warnings = jsonRegion(
+    expectArray(object.capability_warnings, ["capability_warnings"]),
+    ["capability_warnings"],
+    limits,
+  ).map((warning, index) => expectObject(warning, ["capability_warnings", index]))
 
   return {
     definition,
@@ -99,7 +101,9 @@ export function decodeResultFrame(
 
 function decodeInput(input: string | unknown, limits: ReportingLimits): unknown {
   const value = typeof input === "string" ? parseJson(input, limits) : input
-  assertJsonValue(value, [], limits.maxDepth, new WeakSet<object>())
+  // The producer applies maxDepth to each open JSON region. Fixed envelope,
+  // panel and field containers have their own structural depth.
+  assertJsonValue(value, [], limits.maxDepth + 8, new WeakSet<object>())
   if (
     typeof input !== "string" &&
     encoder.encode(JSON.stringify(value)).byteLength > limits.maxBytes
@@ -162,12 +166,24 @@ function decodeDefinition(value: unknown, path: Path, limits: ReportingLimits): 
     title: expectString(object.title, [...path, "title"], 512),
     description: expectString(object.description, [...path, "description"], 4_096),
     panels,
-    layout: decodeLayout(object.layout, [...path, "layout"], panels),
+    layout: decodeLayout(
+      jsonRegion(object.layout, [...path, "layout"], limits),
+      [...path, "layout"],
+      panels,
+    ),
     parameters:
       object.parameters === undefined
         ? []
-        : expectArray(object.parameters, [...path, "parameters"]),
-    provenance: expectObject(object.provenance, [...path, "provenance"]),
+        : jsonRegion(
+            expectArray(object.parameters, [...path, "parameters"]),
+            [...path, "parameters"],
+            limits,
+          ),
+    provenance: jsonRegion(
+      expectObject(object.provenance, [...path, "provenance"]),
+      [...path, "provenance"],
+      limits,
+    ),
   }
 }
 
@@ -357,7 +373,12 @@ function decodePanelResult(value: unknown, path: Path, limits: ReportingLimits):
     return { state, frame: decodeFrame(object.frame, [...path, "frame"], limits) }
   }
   exactKeys(object, ["state", "detail"], path, ["detail"])
-  return { state, ...(object.detail === undefined ? {} : { detail: object.detail }) }
+  return {
+    state,
+    ...(object.detail === undefined
+      ? {}
+      : { detail: jsonRegion(object.detail, [...path, "detail"], limits) }),
+  }
 }
 
 function decodeFrame(value: unknown, path: Path, limits: ReportingLimits): ResultFrame {
@@ -380,10 +401,22 @@ function decodeFrame(value: unknown, path: Path, limits: ReportingLimits): Resul
   return {
     fields,
     rows: decodedRows,
-    provenance: expectObject(object.provenance, [...path, "provenance"]),
-    freshness: expectObject(object.freshness, [...path, "freshness"]),
-    classification: expectObject(object.classification, [...path, "classification"]),
-    page: expectObject(object.page, [...path, "page"]),
+    provenance: jsonRegion(
+      expectObject(object.provenance, [...path, "provenance"]),
+      [...path, "provenance"],
+      limits,
+    ),
+    freshness: jsonRegion(
+      expectObject(object.freshness, [...path, "freshness"]),
+      [...path, "freshness"],
+      limits,
+    ),
+    classification: jsonRegion(
+      expectObject(object.classification, [...path, "classification"]),
+      [...path, "classification"],
+      limits,
+    ),
+    page: jsonRegion(expectObject(object.page, [...path, "page"]), [...path, "page"], limits),
   }
 }
 
@@ -554,6 +587,11 @@ function expectDateTime(value: unknown, path: Path): string {
   const dateTime = expectString(value, path, 64)
   if (!isRfc3339DateTime(dateTime)) fail("invalid_datetime", path, "Expected an RFC 3339 datetime")
   return dateTime
+}
+
+function jsonRegion<T>(value: T, path: Path, limits: ReportingLimits): T {
+  assertJsonValue(value, path, limits.maxDepth, new WeakSet<object>())
+  return value
 }
 
 function assertJsonValue(

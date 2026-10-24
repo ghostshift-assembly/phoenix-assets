@@ -1,0 +1,157 @@
+{
+  "required_encodings": {
+    "area": [
+      "x",
+      "y"
+    ],
+    "bar": [
+      "x",
+      "y"
+    ],
+    "gauge": [
+      "value"
+    ],
+    "heatmap": [
+      "x",
+      "y",
+      "value"
+    ],
+    "line": [
+      "x",
+      "y"
+    ],
+    "number": [
+      "value"
+    ],
+    "scatter": [
+      "x",
+      "y"
+    ],
+    "sparkline": [
+      "x",
+      "y"
+    ],
+    "table": []
+  },
+  "schema_version": "phoenix-assets/producer-source-profile/v1",
+  "repository": "https://github.com/refpath/refpath",
+  "revision": "dd5c55e1f6a436fc845756e955d6302f78bba50d",
+  "verification": "Public producer source and corpus snapshot; source-derived grammar. Producer execution is recorded separately by qualification.",
+  "sources": {
+    "cases.json": "93b80a20f139833c7ee95a493fd952b54cde11b5d67d06755525fa78f500b742",
+    "envelope.json": "6cbe0a0bacb5da18335090236f51ed119328cc0f35f34298d214bec4a2527fa3",
+    "panel_definition.ex": "4f4ee38c39fd7f327d1ad828a03041a4a4f452f1cb547881f34417e0f7539b6d",
+    "presentation.ex": "586185a9f9cb00ab3296a2aa23b1d11ae08f4ee3b12c25d2fa99d735461f0314",
+    "renderer_capabilities.ex": "2307d1f2dceef9bf39d46d62ab8c136e38c8e65151f224f983f368b356e76287",
+    "report_definition.ex": "1470f018f260e7481998392f0bbf44c2bcf4fb5a4e914935e775adad590f5246",
+    "report_envelope.ex": "fbeeb57df64689b2e14e1318cb501763967b29c5b2503f4321f823286210e24a",
+    "result_field.ex": "1b14b3a5e1602d333e4b52a0d4b0f6b07549b0c53853212f7295bd442cdcfcf4",
+    "result_frame.ex": "07e63be101f8afc328bc672494267f8a987191f1e4596886469d171587d80db4",
+    "validator.ex": "a6c891c7bf7f93a2fdf5000d8954084898d3314ae65004b1863865adf75e7508",
+    "visualization_definition.ex": "80de7ca6999cc89e1502e0bc5e72e9094082179c061a7f3986e48b07f6979fb3"
+  },
+  "grammar": {
+    "definition_keys": [
+      "schema_version",
+      "id",
+      "title",
+      "description",
+      "panels",
+      "layout",
+      "parameters",
+      "provenance"
+    ],
+    "panel_keys": [
+      "id",
+      "title",
+      "description",
+      "query_ref",
+      "visualization",
+      "table_columns",
+      "empty_message"
+    ],
+    "visualization_keys": [
+      "kind",
+      "encodings",
+      "formats",
+      "sort",
+      "stack",
+      "annotations",
+      "interaction",
+      "summary_template"
+    ],
+    "field_keys": [
+      "name",
+      "label",
+      "type",
+      "role",
+      "unit",
+      "nullable",
+      "classification"
+    ],
+    "frame_keys": [
+      "fields",
+      "rows",
+      "provenance",
+      "freshness",
+      "classification",
+      "page"
+    ],
+    "encoding_keys": [
+      "x",
+      "y",
+      "series",
+      "value",
+      "label",
+      "color_group",
+      "size"
+    ],
+    "kinds": [
+      "number",
+      "table",
+      "line",
+      "area",
+      "bar",
+      "scatter",
+      "heatmap",
+      "gauge",
+      "sparkline"
+    ],
+    "types": [
+      "boolean",
+      "integer",
+      "float",
+      "decimal",
+      "string",
+      "date",
+      "time",
+      "datetime",
+      "duration"
+    ],
+    "roles": [
+      "dimension",
+      "measure",
+      "time",
+      "identifier"
+    ],
+    "classifications": [
+      "public",
+      "internal",
+      "confidential",
+      "restricted"
+    ],
+    "stacks": [
+      "none",
+      "normal",
+      "normalized"
+    ]
+  },
+  "limits": {
+    "max_panels": 32,
+    "max_fields": 64,
+    "max_rows": 10000,
+    "max_cell_bytes": 8192,
+    "max_depth": 64,
+    "max_bytes": 262144
+  }
+}
