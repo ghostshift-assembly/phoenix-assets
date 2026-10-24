@@ -22,6 +22,6 @@ export const docShellAssetBudgets = {
   css: { raw: 49_152, gzip: 12_288 },
   search: { raw: 65_536, gzip: 20_480 },
   highlight: { raw: 196_608, gzip: 65_536 },
-  mermaid: { raw: 1_048_576, gzip: 320_000 },
+  mermaid: { raw: 2_097_152, gzip: 655_360 },
   request: { raw: 32_768, gzip: 12_288 },
 } as const

@@ -22,18 +22,20 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
     @doc "Renders a list of valid AST nodes into escaped HTML-safe iodata."
     @spec render([DocShell.Ast.ast_node()]) :: safe()
-    def render(nodes) when is_list(nodes), do: {:safe, Enum.map(nodes, &render_node/1)}
+    def render(nodes) when is_list(nodes), do: {:safe, render_children(mark_positions(nodes, []))}
 
     @doc "Renders one AST node through the closed element policy."
     @spec render_node(DocShell.Ast.ast_node()) :: iodata()
-    def render_node(text) when is_binary(text), do: escape(text)
+    def render_node(node), do: render_marked(hd(mark_positions([node], [])))
 
-    def render_node(%{"tag" => tag, "attrs" => attrs, "content" => content})
-        when is_binary(tag) and is_map(attrs) and is_list(content) do
+    defp render_marked(text) when is_binary(text), do: escape(text)
+
+    defp render_marked(%{"tag" => tag, "attrs" => attrs, "content" => content})
+         when is_binary(tag) and is_map(attrs) and is_list(content) do
       render_tag(tag, attrs, content)
     end
 
-    def render_node(_), do: escape("[invalid documentation node]")
+    defp render_marked(_), do: escape("[invalid documentation node]")
 
     defp render_tag(tag, attrs, content) when tag in @directives,
       do: render_directive(tag, attrs, content)
@@ -55,7 +57,24 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         else: unknown(tag, content)
     end
 
-    defp render_children(content), do: Enum.map(content, &render_node/1)
+    defp render_children(content), do: Enum.map(content, &render_marked/1)
+
+    defp mark_positions(nodes, prefix) do
+      nodes
+      |> Enum.with_index()
+      |> Enum.map(fn
+        {%{"attrs" => attrs, "content" => content} = node, index}
+        when is_map(attrs) and is_list(content) ->
+          position = prefix ++ [index]
+
+          node
+          |> Map.put("attrs", Map.put(attrs, "__doc_shell_position", Enum.join(position, "-")))
+          |> Map.put("content", mark_positions(content, position))
+
+        {node, _} ->
+          node
+      end)
+    end
 
     defp render_heading(tag, attrs, content) do
       id =
@@ -102,14 +121,14 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       end
     end
 
-    defp render_pre(_, [%{"tag" => "code", "attrs" => code_attrs, "content" => content}]) do
+    defp render_pre(attrs, [%{"tag" => "code", "attrs" => code_attrs, "content" => content}]) do
       source = text_content(content)
 
       language =
         code_attrs |> Map.get("class", "language-text") |> String.replace_prefix("language-", "")
 
       id =
-        "doc-code-" <>
+        "doc-code-#{attrs["__doc_shell_position"]}-" <>
           (:crypto.hash(:sha256, source) |> Base.encode16(case: :lower) |> binary_part(0, 12))
 
       [
@@ -117,7 +136,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         escape_attribute(language),
         "\"><button type=\"button\" class=\"pa-button\" data-pa-variant=\"secondary\" data-doc-copy=\"",
         id,
-        "\" aria-label=\"Copy code\">Copy</button><pre><code id=\"",
+        "\" aria-label=\"Copy code\">Copy</button><button type=\"button\" data-doc-enhance=\"highlight\" hidden>Highlight code</button><pre><code id=\"",
         id,
         "\">",
         escape(source),
@@ -132,13 +151,14 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       source = text_content(content)
 
       [
-        "<figure class=\"doc-mermaid\" data-doc-mermaid><pre><code>",
+        "<figure class=\"doc-mermaid\" data-doc-mermaid><button type=\"button\" data-doc-enhance=\"mermaid\" hidden>Render diagram</button><pre><code>",
         escape(source),
         "</code></pre><figcaption>Diagram source</figcaption></figure>"
       ]
     end
 
-    defp render_directive("tabs", attrs, content), do: render_tabs(attrs, content)
+    defp render_directive(tag, attrs, content) when tag in ["tabs", "code-group"],
+      do: render_tabs(attrs, content)
 
     defp render_directive("steps", _, content),
       do: element("ol", [{"class", "doc-steps"}], render_children(content))
@@ -174,7 +194,9 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
     defp render_tabs(attrs, content) do
       tabs = Enum.with_index(content)
-      group = attrs["id"] |> string() |> valid_id("doc-tabs")
+
+      group =
+        (attrs["id"] |> string() |> valid_id("doc-tabs")) <> "-" <> attrs["__doc_shell_position"]
 
       buttons =
         Enum.map(tabs, fn {node, index} ->
@@ -202,11 +224,11 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
           label = tab_label(node, index)
 
           [
-            "<section role=\"tabpanel\" id=\"#{group}-panel-#{index}\" aria-labelledby=\"#{group}-tab-#{index}\"><h3>",
+            "<div role=\"tabpanel\" tabindex=\"0\" id=\"#{group}-panel-#{index}\" aria-labelledby=\"#{group}-tab-#{index}\"><h3>",
             escape(label),
             "</h3>",
-            render_node(node),
-            "</section>"
+            render_marked(node),
+            "</div>"
           ]
         end)
 

@@ -22,7 +22,13 @@ export const mountTheme = (
   storage?: Pick<Storage, "getItem" | "setItem">,
 ): BrowserController => {
   const controller = new AbortController()
-  const refresh = () => applyTheme(root, readTheme(storage))
+  const apply = (value: ThemePreference) => {
+    applyTheme(root, value)
+    root
+      .querySelectorAll<HTMLElement>("[data-pa-doc-shell]")
+      .forEach((shell) => applyTheme(shell, value))
+  }
+  const refresh = () => apply(readTheme(storage))
   root.addEventListener(
     "click",
     (event) => {
@@ -34,7 +40,7 @@ export const mountTheme = (
       } catch {
         // A blocked preference store must not disable the current reader theme.
       }
-      applyTheme(root, value)
+      apply(value)
     },
     { signal: controller.signal },
   )

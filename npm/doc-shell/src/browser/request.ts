@@ -25,3 +25,25 @@ export const admitRequest = (operationPath: string, policy: RequestPolicy): Admi
     credentials: "same-origin",
   }
 }
+
+/** Reads a bounded response and cancels the remaining stream. */
+export const readResponseText = async (response: Response, maxBytes = 65536): Promise<string> => {
+  if (!response.body) return ""
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let text = ""
+  let remaining = maxBytes
+  try {
+    while (remaining > 0) {
+      const { done, value } = await reader.read()
+      if (done) return text + decoder.decode()
+      const bytes = value.subarray(0, remaining)
+      text += decoder.decode(bytes, { stream: true })
+      remaining -= bytes.length
+    }
+    await reader.cancel()
+    return `${text}…`
+  } finally {
+    reader.releaseLock()
+  }
+}

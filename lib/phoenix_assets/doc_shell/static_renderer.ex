@@ -48,7 +48,6 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
 
     @impl true
     def capabilities do
-      fallback = %Capability{states: [:fallback], runtime: []}
       enhanced = %Capability{states: [:fallback, :enhanced], runtime: [:browser_js]}
 
       %Capabilities{
@@ -63,8 +62,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
           "doc-shell/navigation/v1" => enhanced,
           "doc-shell/copy/v1" => enhanced,
           "doc-shell/tabs/v1" => enhanced,
-          "doc-shell/highlight/v1" => fallback,
-          "doc-shell/mermaid/v1" => fallback
+          "doc-shell/highlight/v1" => enhanced,
+          "doc-shell/mermaid/v1" => enhanced
         }
       }
     end
@@ -90,7 +89,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
         escape_attribute(css),
         "\"><script type=\"module\" src=\"",
         escape_attribute(browser),
-        "\"></script></head><body>",
+        "\"></script></head><body class=\"doc-shell\" data-pa-doc-shell>",
         HTML.Safe.to_iodata(body),
         "</body></html>"
       ]

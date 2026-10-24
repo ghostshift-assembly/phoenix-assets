@@ -1,4 +1,5 @@
 import { mountCopy, mountNavigation, mountRequests, mountSearch, mountTabs } from "./controllers.js"
+import { mountEnhancements } from "./enhancements.js"
 import { mountTheme } from "./theme.js"
 import type { BrowserController } from "./types.js"
 
@@ -11,6 +12,7 @@ export {
   mountSearch,
   mountTabs,
 } from "./controllers.js"
+export { mountEnhancements } from "./enhancements.js"
 export { type AdmittedRequest, admitRequest, type RequestPolicy } from "./request.js"
 export {
   admitPagefindContract,
@@ -34,7 +36,9 @@ export const mountBrowserCore = (root: HTMLElement): BrowserController => {
     mountCopy(root),
     mountTabs(root),
     mountRequests(root),
+    mountEnhancements(root),
   ]
+  controllers.forEach((controller) => controller.refresh())
   return {
     refresh: () => controllers.forEach((controller) => controller.refresh()),
     destroy: () => controllers.splice(0).forEach((controller) => controller.destroy()),

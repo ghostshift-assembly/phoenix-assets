@@ -8,10 +8,12 @@ interface Props {
 }
 const { code, language = "text" }: Props = $props()
 let html = $state("")
+let copyState = $state("Copy")
 $effect(() => {
   // Two edits in quick succession can settle out of order; the flag drops
   // whichever result the component has already moved past.
   let current = true
+  copyState = "Copy"
   void highlight(code, language)
     .then((value) => {
       if (current) html = value ?? ""
@@ -26,7 +28,7 @@ $effect(() => {
 </script>
 
 <div class="code-block" data-language={language}>
-  <button type="button" onclick={() => void copyText(code)}>Copy</button>
+  <button type="button" onclick={() => void copyText(code).then(() => { copyState = "Copied" }, () => { copyState = "Copy unavailable; select source" })}>{copyState}</button>
   {#if html}<div class="highlighted">{@html html}</div>{:else}<pre><code>{code}</code></pre>{/if}
 </div>
 
@@ -36,8 +38,8 @@ $effect(() => {
   pre, :global(.shiki) { margin: 0; padding: 1rem; overflow: auto; }
   /* Shiki emits both themes as custom properties; the host's color-scheme
      picks a side, so a dark host needs no extra class or media query. */
-  :global(.shiki),
-  :global(.shiki span) {
+  .code-block :global(.shiki),
+  .code-block :global(.shiki span) {
     color: light-dark(var(--shiki-light), var(--shiki-dark));
     background-color: light-dark(var(--shiki-light-bg), var(--shiki-dark-bg));
   }

@@ -11,7 +11,7 @@ modifiers, and the portable report renderer.
 pnpm add -D @phoenix-assets/svelte
 ```
 
-Peer: `svelte` (`^5.7.0`). `@electric-sql/client` (`^1.5.27`) is optional and
+Peer: `svelte` (`^5.57.2`). `@electric-sql/client` (`^1.5.27`) is optional and
 required only for Electric entrypoints. The
 `@tanstack/electric-db-collection` (`^0.6.3`) and `@tanstack/svelte-db` (`^0.5.12`)
 peers are optional and only needed for the `/collection` subpath. Collection

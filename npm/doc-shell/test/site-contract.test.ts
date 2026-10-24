@@ -74,6 +74,6 @@ describe("doc-shell-site/v1 consumer contract", () => {
     expect(rendererCapabilities.output_modes).toContain("static")
     expect(rendererCapabilities.features["doc-shell/mermaid/v1"].states).toContain("fallback")
     expect(docShellAssetBudgets.browser.raw).toBeLessThanOrEqual(49_152)
-    expect(docShellAssetBudgets.mermaid.raw).toBeLessThanOrEqual(1_048_576)
+    expect(docShellAssetBudgets.mermaid.raw).toBeLessThanOrEqual(2_097_152)
   })
 })

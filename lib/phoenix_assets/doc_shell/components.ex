@@ -12,38 +12,48 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     @search_browser_contract_keys ~w(schema_version algorithm path filters version)
 
-    alias PhoenixAssets.DocShell.Ast
+    alias PhoenixAssets.DocShell.{Assets, Ast}
 
     attr(:page, :any, required: true)
     attr(:context, :any, required: true)
     slot(:brand)
     slot(:footer)
+    attr(:nonce, :string, default: nil)
 
     @doc "Renders one complete documentation shell and page."
     @spec page(map()) :: Phoenix.LiveView.Rendered.t()
     def page(assigns) do
       assigns =
         assigns
+        |> assign_new(:nonce, fn -> nil end)
         |> assign(:content, Ast.render(assigns.page.content))
         |> assign(:direction, direction(assigns.page.locale))
+        |> assign(:enhancement_assets, Map.get(assigns.context, :assets, %{}))
+        |> assign(
+          :import_map,
+          Assets.import_map(Map.get(assigns.context, :assets, %{}))
+          |> Jason.encode!(escape: :html_safe)
+        )
 
       ~H"""
       <div
         class="doc-shell pa-doc-shell"
         data-pa-doc-shell
+        data-doc-enhancement-assets={Jason.encode!(@enhancement_assets)}
         data-doc-theme="system"
         data-content-digest={@page.content_digest}
         data-cohort-digest={@context.cohort_digest}
         lang={@page.locale}
         dir={@direction}
       >
+        <script type="importmap" nonce={@nonce}>{Phoenix.HTML.raw(@import_map)}</script>
         <a class="doc-skip-link" href="#doc-main">Skip to documentation</a>
         <.header context={@context}>
           <:brand :for={brand <- @brand}>{render_slot(brand)}</:brand>
         </.header>
         <button
           type="button"
-          class="doc-mobile-nav"
+          class="pa-button doc-mobile-nav"
           data-doc-nav-toggle
           aria-controls="doc-navigation"
           aria-expanded="false"
@@ -228,7 +238,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @spec reading_flow(map()) :: Phoenix.LiveView.Rendered.t()
     def reading_flow(assigns) do
       ~H"""
-      <nav aria-label="Continue reading" class="doc-reading-flow"><a :if={@previous} rel="prev" href={@previous.path}>← {@previous.title}</a><a :if={@next} rel="next" href={@next.path}>{@next.title} →</a></nav>
+      <nav :if={@previous || @next} aria-label="Continue reading" class="doc-reading-flow"><a :if={@previous} rel="prev" href={@previous.path}>← {@previous.title}</a><a :if={@next} rel="next" href={@next.path}>{@next.title} →</a></nav>
       """
     end
 

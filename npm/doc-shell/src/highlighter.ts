@@ -59,7 +59,7 @@ let pending: Promise<HighlighterCore> | null = null
 function highlighter(): Promise<HighlighterCore> {
   pending ??= createHighlighterCore({
     themes: [import("@shikijs/themes/github-light"), import("@shikijs/themes/github-dark")],
-    langs: Object.values(grammars),
+    langs: [],
     // The JavaScript engine keeps the package WASM-free, so hosts can bundle it
     // without an asset loader and `check:offline` stays trivially satisfied.
     engine: createJavaScriptRegexEngine(),
@@ -80,6 +80,7 @@ export async function highlight(code: string, language: string): Promise<string 
   if (!lang) return null
 
   const shiki = await highlighter()
+  if (!shiki.getLoadedLanguages().includes(lang)) await shiki.loadLanguage(grammars[lang])
   return shiki.codeToHtml(code, {
     lang,
     themes: { light: "github-light", dark: "github-dark" },

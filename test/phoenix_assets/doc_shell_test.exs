@@ -1,4 +1,6 @@
 defmodule PhoenixAssets.DocShellTest do
+  @moduledoc false
+
   use ExUnit.Case, async: true
 
   alias DocShell.Json.Canonical
@@ -19,6 +21,24 @@ defmodule PhoenixAssets.DocShellTest do
   alias PhoenixAssets.DocShell.{ApiReference, Assets, Ast, Components, Pagefind, StaticRenderer}
 
   import Phoenix.LiveViewTest, only: [render_component: 2]
+
+  test "repeated code and tab groups have deterministic unique identifiers and SSR panels" do
+    code = node("pre", [node("code", ["same source"], %{"class" => "language-elixir"})])
+
+    tabs =
+      node("tabs", [
+        node("p", ["first"], %{"title" => "One"}),
+        node("p", ["second"], %{"title" => "Two"})
+      ])
+
+    nodes = [code, code, tabs, tabs]
+    html = nodes |> Ast.render() |> HTML.safe_to_string()
+    ids = Regex.scan(~r/ id="([^"]+)"/, html, capture: :all_but_first) |> List.flatten()
+    assert length(ids) == length(Enum.uniq(ids))
+    assert html == nodes |> Ast.render() |> HTML.safe_to_string()
+    assert length(Regex.scan(~r/role="tabpanel"/, html)) == 4
+    refute html =~ ~r/role="tabpanel"[^>]* hidden/
+  end
 
   test "inline search composes with host chrome and bounded facets without an embedded corpus" do
     html =
@@ -77,7 +97,7 @@ defmodule PhoenixAssets.DocShellTest do
 
     assert :ok = Renderer.Capabilities.validate(capabilities)
     assert capabilities.output_modes == [:hosted, :static]
-    assert capabilities.features["doc-shell/mermaid/v1"].states == [:fallback]
+    assert capabilities.features["doc-shell/mermaid/v1"].states == [:fallback, :enhanced]
     refute :connected in capabilities.features["doc-shell/search/v1"].states
     assert :ok = Assets.validate()
     assert Assets.budgets().browser.gzip == 16_384

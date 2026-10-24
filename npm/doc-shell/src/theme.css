@@ -1,4 +1,5 @@
 :where(.doc-shell) {
+  color-scheme: light;
   --pa-semantic-color-canvas: #ffffff;
   --pa-semantic-color-surface: #f5f7fa;
   --pa-semantic-color-text: #172033;
@@ -36,6 +37,22 @@
   background: var(--pa-semantic-color-surface);
   color: var(--pa-semantic-color-text);
   font: inherit;
+}
+
+:where(body.doc-shell) {
+  margin: 0;
+  min-height: 100dvh;
+}
+:where(.doc-shell) .doc-page-header h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  line-height: 1.08;
+}
+:where(.doc-shell) .doc-breadcrumbs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  list-style: none;
+  padding: 0;
 }
 
 :where(.doc-shell) .pa-button {
@@ -249,4 +266,17 @@
     animation-duration: 0s;
     transition-duration: 0s;
   }
+}
+
+:where(.doc-shell) .doc-enhanced-output {
+  max-width: 100%;
+  overflow: auto;
+}
+:where(.doc-shell) .doc-enhanced-output .shiki,
+:where(.doc-shell) .doc-enhanced-output .shiki span {
+  color: light-dark(var(--shiki-light), var(--shiki-dark));
+  background-color: light-dark(
+    var(--shiki-light-bg, transparent),
+    var(--shiki-dark-bg, transparent)
+  );
 }

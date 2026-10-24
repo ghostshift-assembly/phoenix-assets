@@ -45,7 +45,7 @@
     "check:publish": "publint && attw --pack . --profile esm-only --ignore-rules internal-resolution-error no-resolution -q"
   },
   "peerDependencies": {
-    "svelte": "^5.7.0"
+    "svelte": "^5.57.2"
   },
   "dependencies": {
     "@shikijs/langs": "^4.5.0",

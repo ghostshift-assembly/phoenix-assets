@@ -7,6 +7,7 @@ import {
   createPagefindSearch,
   mountBrowserCore,
   mountBrowserCoreOnReady,
+  mountEnhancements,
   mountRequests,
   mountSearch,
   mountTheme,
@@ -14,6 +15,7 @@ import {
   querySearchRecords,
   readTheme,
 } from "../src/browser/index.js"
+import { readResponseText } from "../src/browser/request.js"
 import type { SearchRecord } from "../src/browser/types.js"
 
 const records: SearchRecord[] = [
@@ -442,7 +444,72 @@ describe("browser controller lifecycle", () => {
   })
 })
 
+describe("optional local enhancements", () => {
+  it("loads only on use and preserves the original source", async () => {
+    const root = fixture()
+    const container = root.querySelector<HTMLElement>("[data-doc-code]")
+    if (!container) throw new Error("missing code")
+    container.innerHTML =
+      '<button data-doc-enhance="highlight" hidden>Highlight</button><pre><code>const safe = "&lt;unsafe&gt;"</code></pre>'
+    container.dataset.docEnhancementAssets = JSON.stringify({
+      "doc-shell-highlight.js": "/assets/highlight-qualified.js",
+    })
+    const enhance = vi
+      .fn()
+      .mockResolvedValue('<pre class="shiki"><code>safe highlighted</code></pre>')
+    const load = vi.fn().mockResolvedValue({ enhance })
+    const controller = mountEnhancements(root, load)
+    expect(load).not.toHaveBeenCalled()
+    const button = container.querySelector<HTMLButtonElement>("button")
+    expect(button?.hidden).toBe(false)
+    button?.click()
+    await vi.waitFor(() => expect(container.dataset.docEnhancementState).toBe("enhanced"))
+    expect(enhance).toHaveBeenCalledExactlyOnceWith('const safe = "<unsafe>"', "text")
+    expect(container.querySelector("details code")?.textContent).toContain("<unsafe>")
+    expect(container.querySelector("unsafe")).toBeNull()
+    controller.destroy()
+  })
+
+  it("refuses remote modules and retains the plain source on failed enhancement", async () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      '<figure data-doc-mermaid data-doc-enhancement-assets><button data-doc-enhance="mermaid" hidden>Render</button><pre>graph LR; A--&gt;B</pre></figure>',
+    )
+    const container = root.querySelector<HTMLElement>("figure")
+    const button = container?.querySelector<HTMLButtonElement>("button")
+    if (!container || !button) throw new Error("missing diagram")
+    container.dataset.docEnhancementAssets = JSON.stringify({
+      "doc-shell-mermaid.js": "https://external.invalid/renderer.js",
+    })
+    const load = vi.fn().mockRejectedValue(new Error("unavailable"))
+    const controller = mountEnhancements(root, load)
+    expect(button.hidden).toBe(true)
+    button.click()
+    expect(load).not.toHaveBeenCalled()
+    container.dataset.docEnhancementAssets = JSON.stringify({
+      "doc-shell-mermaid.js": "/assets/diagram-qualified.js",
+    })
+    controller.refresh()
+    button.click()
+    await vi.waitFor(() => expect(button.textContent).toContain("source retained"))
+    expect(container.querySelector("pre")?.textContent).toBe("graph LR; A-->B")
+    controller.destroy()
+  })
+})
+
 describe("theme and request policy", () => {
+  it("applies document-level static controls to the nested renderer roots", () => {
+    const root = fixture()
+    root.insertAdjacentHTML(
+      "beforeend",
+      '<section data-pa-doc-shell data-doc-theme="system"></section>',
+    )
+    const controller = mountTheme(root)
+    root.querySelector<HTMLButtonElement>("[data-doc-theme-value]")?.click()
+    expect(root.querySelector<HTMLElement>("[data-pa-doc-shell]")?.dataset.docTheme).toBe("dark")
+    controller.destroy()
+  })
   it("keeps theme controls usable when preference storage is blocked", () => {
     const root = fixture()
     const storage = {
@@ -553,5 +620,21 @@ describe("theme and request policy", () => {
         currentHref: "https://docs.example.test/reference",
       }),
     ).toMatchObject({ crossOrigin: false, confirmation: undefined, credentials: "same-origin" })
+  })
+})
+
+describe("bounded response bodies", () => {
+  it("cancels a response after the byte limit", async () => {
+    const cancel = vi.fn()
+    const response = new Response(
+      new ReadableStream({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("abcdefghij"))
+        },
+        cancel,
+      }),
+    )
+    expect(await readResponseText(response, 4)).toBe("abcd…")
+    expect(cancel).toHaveBeenCalledOnce()
   })
 })

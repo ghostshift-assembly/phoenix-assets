@@ -37,12 +37,24 @@ source for direct network asset references.
 
 Mermaid 12 requires Node 22.12 or newer and browsers supporting ES2024
 (Safari 17.4 or newer). The renderer explicitly keeps the Dagre layout,
-default theme, and classic look used before the upgrade. Diagram front matter
-can override those defaults. Failed rendering keeps the diagram source visible.
-The workspace resolves KaTeX 0.19, including its settings security fixes.
+default theme, and classic look used before the upgrade. Diagram configuration directives, front matter and remote resources are refused. Failed rendering keeps the diagram source visible.
+Both renderers retain plain source if enhancement fails. The workspace resolves KaTeX 0.19, including its settings security fixes.
 
 Shiki grammars are loaded explicitly rather than through its full bundle. See
 `supportedLanguages` for the set, which covers a Phoenix + SvelteKit codebase and
 the formats its docs quote. Anything else renders as plain text. Highlighting
 emits both themes as `--shiki-light` / `--shiki-dark` custom properties, so the
 page's `color-scheme` picks a side and a dark host needs no extra class.
+
+
+The next coordinated release requires Svelte `^5.57.2`. Upgrade the host's Svelte
+compiler and runtime together before installing its exact candidate archive.
+The browser subpath remains independent of Svelte. HEEx static output ships local
+optional highlighting and Mermaid chunks, loaded by the enhancement controls;
+its import map follows the exporter's content-hashed URLs. Hosts with a script
+nonce pass it to `PhoenixAssets.DocShell.Components.page/1`.
+
+Try-it requests require confirmation, refuse redirects, keep tokens in component
+memory, abort when their operation or component retires, and display at most
+65,536 response bytes. A lost mutation response remains an unknown outcome and
+is never retried automatically.

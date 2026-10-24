@@ -1,5 +1,5 @@
 import { safeLinkTarget } from "../url.js"
-import { admitRequest } from "./request.js"
+import { admitRequest, readResponseText } from "./request.js"
 import {
   createContractPagefindSearch,
   type PagefindModuleLoader,
@@ -315,12 +315,13 @@ export const mountSearch = (
         close()
         return
       }
-      if (inline && event.target !== input) return
+      if (event.target !== input) return
       if (event.key === "ArrowDown" || event.key === "ArrowUp") {
         event.preventDefault()
         const offset = event.key === "ArrowDown" ? 1 : -1
         selected = Math.max(0, Math.min(results.length - 1, selected + offset))
         paint()
+        list?.children[selected]?.scrollIntoView({ block: "nearest" })
       } else if (event.key === "Enter" && results[selected]) {
         event.preventDefault()
         const link = list?.children[selected]?.querySelector<HTMLAnchorElement>("a")
@@ -361,11 +362,17 @@ export const mountCopy = (root: HTMLElement): BrowserController => {
       const target = trigger.dataset.docCopy
       const code = target
         ? root.querySelector<HTMLElement>(`#${CSS.escape(target)}`)
-        : trigger.closest("[data-doc-code]")?.querySelector("code")
+        : trigger.closest("[data-doc-code], [data-doc-mermaid]")?.querySelector("code")
       if (!code) return
-      await navigator.clipboard?.writeText(code.textContent ?? "")
-      trigger.dataset.docCopyState = "copied"
-      trigger.setAttribute("aria-label", "Copied")
+      try {
+        if (!navigator.clipboard) throw new Error("Clipboard unavailable")
+        await navigator.clipboard.writeText(code.textContent ?? "")
+        trigger.dataset.docCopyState = "copied"
+        trigger.setAttribute("aria-label", "Copied")
+      } catch {
+        trigger.dataset.docCopyState = "unavailable"
+        trigger.setAttribute("aria-label", "Copy unavailable; select the source")
+      }
     },
     { signal: controller.signal },
   )
@@ -413,9 +420,13 @@ export const mountRequests = (
           headers,
           body: body || undefined,
           credentials: target.credentials,
+          redirect: "error",
           signal: abort.signal,
         })
-          .then(async (response) => ({ status: response.status, text: await response.text() }))
+          .then(async (response) => ({
+            status: response.status,
+            text: await readResponseText(response),
+          }))
           .then((response) => {
             if (abort.signal.aborted || !form.isConnected) return
             if (status) status.textContent = `HTTP ${response.status}`

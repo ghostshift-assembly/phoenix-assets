@@ -63,10 +63,10 @@ $effect(() => {
           <div class="badges">{#if page.status}<span class="pa-status">{page.status}</span>{/if}{#each page.tags as tag}<span class="pa-status">{tag}</span>{/each}</div>
         </header>
         <article><AstRenderer nodes={page.content} legacyHeadingIds={false} /></article>
-        <nav aria-label="Continue reading" class="reading-flow">
+        {#if page.previous || page.next}<nav aria-label="Continue reading" class="reading-flow">
           {#if page.previous}<a rel="prev" href={page.previous.path}>← {page.previous.title}</a>{/if}
           {#if page.next}<a rel="next" href={page.next.path}>{page.next.title} →</a>{/if}
-        </nav>
+        </nav>{/if}
         <footer class="provenance">
           {#if page.last_modified}<span>Updated {page.last_modified}</span>{/if}
           {#if page.source_url}<a href={page.source_url}>View source</a>{/if}

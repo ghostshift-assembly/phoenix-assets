@@ -25,13 +25,11 @@ afterEach(() => {
 describe("runCommand", () => {
   it("uses the host transport once without bypassing its wrapper or scope", async () => {
     const signal = new AbortController().signal
-    const transport = vi
-      .fn()
-      .mockResolvedValue({
-        ok: true,
-        status: 200,
-        payload: { data: { count: 2 }, meta: { cursor: "next" } },
-      })
+    const transport = vi.fn().mockResolvedValue({
+      ok: true,
+      status: 200,
+      payload: { data: { count: 2 }, meta: { cursor: "next" } },
+    })
     const result = await runCommand({
       path: "/api/search",
       method: "POST",

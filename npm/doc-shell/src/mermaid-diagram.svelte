@@ -1,4 +1,6 @@
 <script lang="ts">
+import { renderMermaid } from "./mermaid.js"
+
 interface Props {
   code: string
 }
@@ -10,19 +12,9 @@ $effect(() => {
   let active = true
   svg = ""
   error = ""
-  void import("mermaid")
-    .then(async ({ default: mermaid }) => {
-      mermaid.initialize({
-        startOnLoad: false,
-        securityLevel: "strict",
-        layout: "dagre",
-        theme: "default",
-        look: "classic",
-      })
-      return mermaid.render(`doc-shell-${crypto.randomUUID()}`, source)
-    })
+  void renderMermaid(source)
     .then((result) => {
-      if (active) svg = result.svg
+      if (active) svg = result
     })
     .catch((reason) => {
       if (active) error = reason instanceof Error ? reason.message : String(reason)
