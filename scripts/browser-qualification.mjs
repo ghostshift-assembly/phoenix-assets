@@ -249,14 +249,15 @@ window.decodeProducerCase = safeDecodeReportEnvelope
       assert.equal(accepted, fixture.accept, fixture.name)
       cases.push(`extracted reporting decoder: ${fixture.name}`)
     }
-    for (const sample of samples)
+    for (const sample of samples) {
+      const region = page2.getByRole("region", { name: sample.name, exact: true })
+      const toggle = region.getByRole("button", { name: "View as table", exact: true })
+      if (await toggle.count()) await toggle.click()
       assert.ok(
-        (await page2
-          .getByRole("region", { name: sample.name, exact: true })
-          .getByRole("table")
-          .count()) > 0,
+        (await region.getByRole("table").count()) > 0,
         `${sample.name} has no table alternative`,
       )
+    }
     assert.ok(
       (await page2.getByRole("table").count()) > 0,
       "reporting table alternatives are missing",
