@@ -73,6 +73,7 @@ const qualificationSubjects = (root, output) => {
 const toolchain = () =>
   Object.fromEntries([
     ["node", process.version],
+    ["pnpm_node", execFileSync("pnpm", ["exec", "node", "--version"], { encoding: "utf8" }).trim()],
     [
       "elixir",
       execFileSync(

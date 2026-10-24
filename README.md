@@ -186,13 +186,18 @@ config :phoenix_assets, :dev, storybook: [enabled: false]   # run it via `mix st
 config :phoenix_assets, :stack, locales: ["sv", "en"], default_locale: "sv"
 ```
 
-Point `svelte-check` at the generated contracts. It does not run through Vite,
-so it needs the alias that the plugin resolves at build time:
+Configure the generated-contract alias with SvelteKit so the separate type
+check resolves the same modules as Vite. SvelteKit 3 reads Vite plugin options;
+recent 2.x versions support them too:
 
-```js
-// assets/svelte.config.js
-kit: { alias: { $phoenix: "src/lib/generated" } }
+```ts
+// assets/vite.config.ts
+sveltekit({ alias: { $phoenix: "src/lib/generated" } })
 ```
+
+Legacy 2.x hosts may retain `kit.alias` in `svelte.config.js`. SvelteKit 3
+requires its matching adapters, Node 22.17+, Svelte 5.57.1+, TypeScript 6 and
+Vite 8.0.12+; follow the [upstream migration guide](https://svelte.dev/docs/kit/migrating-to-sveltekit-3).
 
 ### Declare & generate contracts
 

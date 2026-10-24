@@ -74,7 +74,7 @@ defmodule PhoenixAssets.SvelteKit do
       Check.new(
         id: :svelte_config,
         group: :sveltekit,
-        run: &file_check(&1, "svelte.config.js", "SvelteKit config")
+        run: &svelte_config_check/1
       ),
       Check.new(
         id: :package_json,
@@ -149,6 +149,18 @@ defmodule PhoenixAssets.SvelteKit do
   defp segment_key(":" <> param), do: "By" <> Macro.camelize(param)
   defp segment_key("*" <> param), do: "By" <> Macro.camelize(param)
   defp segment_key(segment), do: Macro.camelize(segment)
+
+  # SvelteKit 3 reads plugin options from Vite; legacy 2.x hosts may retain
+  # svelte.config.js. Compilation and the host type check validate the contents.
+  defp svelte_config_check(ctx) do
+    files =
+      ~w(vite.config.ts vite.config.js vite.config.mts vite.config.mjs vite.config.cts vite.config.cjs svelte.config.js)
+
+    case Enum.find(files, &File.regular?(Path.join(ctx.asset_root, &1))) do
+      nil -> Check.warn("SvelteKit configuration missing under #{ctx.asset_root}")
+      file -> Check.ok("SvelteKit configuration present at #{file}")
+    end
+  end
 
   defp file_check(ctx, file, label) do
     path = Path.join(ctx.asset_root, file)

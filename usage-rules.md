@@ -40,17 +40,17 @@ manifest.
   required peers under PHA.02 PROF-1. A newer package does not authorize a new
   inspector, runtime endpoint or collector to start in the host.
 
-- Point `svelte-check` at the generated contracts. The Vite plugin resolves
-  `$phoenix/*` at dev and build time, but `svelte-check` and `tsc` do not run
-  through Vite, so they need the alias spelled out:
+- Configure the generated-contract alias with SvelteKit, matching
+  `generated_dir`. SvelteKit 3 reads Vite plugin options, which recent 2.x
+  versions also support:
 
-  ```js
-  // assets/svelte.config.js
-  kit: { alias: { $phoenix: "src/lib/generated" } }
+  ```ts
+  // assets/vite.config.ts
+  sveltekit({ alias: { $phoenix: "src/lib/generated" } })
   ```
 
-  Match `generated_dir` if it has been moved. Without this alias, Vite can build
-  while the separate type check fails.
+  Legacy 2.x hosts may retain `kit.alias` in `svelte.config.js`. Run both the
+  production build and separate type check when migrating configuration.
 
 ## Tuning the stack without a preset
 

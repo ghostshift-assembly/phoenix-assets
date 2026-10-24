@@ -134,6 +134,8 @@ jobs:
           run-id: ${{ inputs.artifact_run_id }}
           github-token: ${{ github.token }}
           path: dist/release
+      - name: Install the locked qualification toolchain
+        run: pnpm install --frozen-lockfile
       - name: Verify retained bytes and record the exact screenshot review
         env:
           REVIEWED_SHA: ${{ inputs.reviewed_qualification_sha256 }}

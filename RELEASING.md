@@ -12,7 +12,9 @@ Its contract remains `phoenix-assets/release/v1`.
 `phoenix-assets/qualification/v1` evidence beside the unchanged release manifest.
 `qualification.json` names the content-addressed receipt by SHA-256. It binds
 tracked source, locks, peers, public producer fixtures, toolchain, archives,
-consumer locks, emitted output and browser screenshots. Changing any bound input
+consumer locks, emitted output and browser screenshots. The toolchain records
+both the calling Node and the Node used by pnpm scripts; `devEngines.runtime`
+pins pnpm execution to Node 24.21.0. Changing any bound input
 invalidates reuse even when package versions stay fixed.
 
 The HTTP consumer installs Svelte and `/core` without Electric, TanStack, Phoenix

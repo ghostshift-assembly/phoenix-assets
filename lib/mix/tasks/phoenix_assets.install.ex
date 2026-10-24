@@ -61,7 +61,7 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
       import { defineConfig } from "vite"
 
       export default defineConfig({
-        plugins: [tailwindcss(), sveltekit(), phoenixAssets()],
+        plugins: [tailwindcss(), sveltekit({ alias: { $phoenix: "src/lib/generated" } }), phoenixAssets()],
       })
       """
     end
@@ -84,12 +84,13 @@ if Code.ensure_loaded?(Igniter.Mix.Task) do
                cd assets && pnpm add -D @phoenix-assets/vite \\
                  @phoenix-assets/svelte @phoenix-assets/lint
 
-        3. Point svelte-check at the generated contracts in
-           assets/svelte.config.js -- it does not run through Vite, so the
-           $phoenix alias the plugin resolves at build time has to be spelled
-           out for the type-check:
+        3. Keep the generated-contract alias in your SvelteKit configuration.
+           SvelteKit 3 reads Vite plugin options (also supported by recent 2.x):
 
-               kit: { alias: { $phoenix: "src/lib/generated" } }
+               sveltekit({ alias: { $phoenix: "src/lib/generated" } })
+
+           Legacy 2.x hosts may retain kit.alias in assets/svelte.config.js.
+           Match generated_dir so both the build and type check resolve it.
 
         4. Declare your stack and generate the typed contracts:
 

@@ -7,6 +7,24 @@ defmodule PhoenixAssets.SvelteKitTest do
 
   defp ctx, do: Context.new(Config.load!(otp_app: :my_app), env: :test)
 
+  test "doctor accepts Vite plugin configuration and the legacy SvelteKit 2 file" do
+    directory =
+      Path.join(System.tmp_dir!(), "sveltekit-config-#{System.unique_integer([:positive])}")
+
+    File.mkdir_p!(directory)
+    on_exit(fn -> File.rm_rf!(directory) end)
+    context = Context.new(Config.load!(otp_app: :my_app, asset_root: directory), env: :test)
+    check = Enum.find(SvelteKit.doctor_checks(context, %{}), &(&1.id == :svelte_config))
+    assert check.run.(context).status == :warn
+
+    for file <- ["vite.config.ts", "vite.config.js", "svelte.config.js"] do
+      path = Path.join(directory, file)
+      File.write!(path, "export default {}")
+      assert check.run.(context).status == :ok
+      File.rm!(path)
+    end
+  end
+
   test "contributes a supervised vite dev process" do
     {:ok, state} = SvelteKit.init([], ctx())
     assert [%{id: :vite}] = SvelteKit.dev_processes(ctx(), state)
