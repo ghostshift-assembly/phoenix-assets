@@ -84,14 +84,16 @@ transport only; they cannot certify each application's controllers.
 ## Installation and entrypoint profiles
 
 Installed graph, runtime imports, activated processes/routes and emitted browser
-bytes are distinct measurements. Current `@phoenix-assets/svelte` source retains
-LayerChart 2.9.1 as a regular dependency. `/core` avoids reporting imports but does
-not avoid that installation. `/reporting` re-exports components: its runtime decoder
-import is not a chart-free entrypoint. No new package or decoder subpath is required.
+bytes are distinct measurements. Current `@phoenix-assets/svelte` source declares
+LayerChart 2.9.1 as an optional peer, with the same exact development dependency
+for its own tests. `/core` avoids reporting imports. `/reporting` re-exports
+components: its runtime decoder import is not a chart-free entrypoint. No new
+package or decoder subpath is required.
 
-The planned repair is an optional LayerChart peer within the existing package,
-with the same version as a development dependency for its own tests. Start
-qualification at the existing exact 2.9.1; widen only with compatibility evidence.
+The optional-peer repair is implemented in the source manifest. Exact-artifact
+qualification must prove the selected installation and emitted closure; source
+configuration alone is not an installed-host or publication claim. Keep the
+existing exact 2.9.1 peer; widen only with compatibility evidence.
 First record the baseline installation graph/size and emitted bundle separately.
 A reporting host explicitly installs the qualified peer; a core-only host must
 not resolve it through this package. Do not substitute `optionalDependencies`,

@@ -253,10 +253,11 @@ held to the same finite, acyclic JSON-only byte and nesting limits:
 <PortableReport {envelope} />
 ```
 
-`layerchart` is an exact dependency of the whole npm Svelte package, although
-reporting imports are isolated to this subpath. Avoiding the reporting import does
-not remove its installation or release cost. Host applications
-pass the portable report contract across storage or network boundaries, not
+Current source declares `layerchart@2.9.1` as an optional peer. Reporting consumers
+install it explicitly; `/core` does not import reporting. The extracted HTTP
+consumer checks that unselected reporting and sync peers are absent. Installed
+hosts still need the exact-artifact upgrade qualification in RELEASING.
+Host applications pass the portable report contract across storage or network boundaries, not
 LayerChart options. Hosts supply semantic CSS tokens, localized chrome, and
 domain evidence around the shared components.
 

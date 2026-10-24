@@ -195,10 +195,12 @@ consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING.
   closed LayerChart-backed compiler/components, evidence states, and accessible
   table twins. Pass only the renderer-neutral contract. Product code supplies
   semantic CSS tokens and domain chrome; it does not import LayerChart directly
-  or persist renderer option bags. The current package installs LayerChart as
-  a regular dependency even for `/core` users. PHA.02 specifies a planned optional
-  peer migration; it is not yet a published installation promise. `/reporting`
-  re-exports components, including when used to import its runtime decoder.
+  or persist renderer option bags. Current source declares `layerchart@2.9.1`
+  as an optional peer; reporting consumers install it explicitly. The workspace
+  retains that exact version for its own tests. `/core` does not select reporting;
+  the extracted HTTP consumer qualifies its installed and emitted closure under
+  RELEASING. This source declaration does not change an already installed host.
+  `/reporting` re-exports components, including when used to import its runtime decoder.
 - `@phoenix-assets/doc-shell`: the renderer-neutral documentation UI for the
   `doc-shell/v2` and legacy `doc-shell/v1` presentation contracts. Only needed
   if you render docs in-app; theme it through the `--doc-*` custom properties
