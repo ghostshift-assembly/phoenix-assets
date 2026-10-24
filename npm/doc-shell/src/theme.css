@@ -288,3 +288,35 @@
   padding: 0.5rem;
   border-radius: 0.25rem;
 }
+
+:where(.doc-shell) dialog[data-doc-nav] {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: auto;
+  max-width: none;
+  color: inherit;
+  background: transparent;
+}
+:where(.doc-shell) dialog[data-doc-nav][aria-modal="true"] {
+  position: fixed;
+  inset: 0.5rem;
+  margin: 0;
+  width: min(24rem, calc(100% - 1rem));
+  max-height: calc(100dvh - 1rem);
+  padding: 1rem;
+  border: 1px solid var(--doc-border);
+  background: var(--doc-background);
+  color: var(--doc-foreground);
+}
+:where(.doc-shell) dialog[data-doc-nav]::backdrop {
+  background: rgb(0 0 0 / 50%);
+}
+:where(.doc-shell) [data-doc-nav-close][hidden] {
+  display: none;
+}
+:where(.doc-shell) .doc-toc summary,
+:where(.doc-shell) .toc summary {
+  cursor: pointer;
+  font-weight: 700;
+}

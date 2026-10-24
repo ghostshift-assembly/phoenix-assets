@@ -36,10 +36,13 @@ import site from "./site.json"
 import envelope from "./envelope.json"
 import samples from "./qualified-envelopes.json"
 window.decodeProducerCase = safeDecodeReportEnvelope
+const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
 </script>
-<SiteShell {site} pageId="anchors:guide" />
+<SiteShell {site} {pageId} />
+{#if pageId === "anchors:guide"}
 <section class="doc-shell" aria-label="Portable reporting"><PortableReport envelope={decodeReportEnvelope(envelope)} /></section>
 {#each samples as sample}<section class="doc-shell" aria-label={sample.name}><PortableReport envelope={decodeReportEnvelope(sample.value)} /></section>{/each}
+{/if}
 `,
   )
   writeFileSync(
@@ -71,7 +74,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
   const css = readdirSync(join(application, "assets")).filter((file) => file.endsWith(".css"))
   writeFileSync(
     join(root, "render-ssr.mjs"),
-    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const result = render(Fixture); writeFileSync("browser-dist/ssr.html", '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'); const missing = render(Fixture, { props: { pageId: "missing" } }); writeFileSync("browser-dist/ssr404.html", '<!doctype html><html><body>' + missing.body + '</body></html>');`,
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } })));`,
   )
   execFileSync("node", ["render-ssr.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")
@@ -183,7 +186,47 @@ window.decodeProducerCase = safeDecodeReportEnvelope
           .getAttribute("aria-expanded"),
         "true",
       )
-      await page.getByRole("button", { name: "Search documentation", exact: true }).click()
+      const navigation = page.getByRole("dialog", { name: "Documentation navigation", exact: true })
+      await navigation.waitFor()
+      assert.equal(await navigation.evaluate((element) => element.matches(":modal")), true)
+      const focusBefore = await navigation.evaluate((element) => ({
+        inside: element.contains(document.activeElement),
+        tag: document.activeElement?.tagName,
+        close: document.activeElement?.hasAttribute("data-doc-nav-close"),
+      }))
+      await page.keyboard.press("Shift+Tab")
+      const focusAfter = await navigation.evaluate((element) => ({
+        inside: element.contains(document.activeElement),
+        tag: document.activeElement?.tagName,
+      }))
+      assert.equal(
+        focusAfter.inside,
+        true,
+        `${renderer}: navigation focus ${JSON.stringify({ focusBefore, focusAfter })}`,
+      )
+      await page.keyboard.press("Escape")
+      assert.equal(
+        await page
+          .getByRole("button", { name: "Browse documentation", exact: true })
+          .evaluate((element) => element === document.activeElement),
+        true,
+      )
+      for (const theme of ["light", "dark"]) {
+        await page
+          .getByRole("button", { name: theme === "light" ? "Light" : "Dark", exact: true })
+          .click()
+        await page.getByRole("button", { name: "Browse documentation", exact: true }).click()
+        await page.screenshot({
+          path: join(screenshots, `${renderer}-mobile-navigation-${theme}.png`),
+        })
+        await page.keyboard.press("Escape")
+      }
+      await page.getByRole("button", { name: "Browse documentation", exact: true }).click()
+      await page.keyboard.press("Control+k")
+      assert.equal(
+        await page.locator("dialog[data-doc-nav]").evaluate((element) => element.matches(":modal")),
+        false,
+      )
       const input = page.locator("[data-doc-search-input]")
       await input.fill("setup")
       await page.locator("[data-doc-search-results] a").first().waitFor()
@@ -220,8 +263,40 @@ window.decodeProducerCase = safeDecodeReportEnvelope
       assert.deepEqual(external, [], `${renderer} requested an external asset`)
       assert.deepEqual(errors, [], `${renderer} browser errors`)
       cases.push(
-        `${renderer}: headings, local assets, 320/768/1280, light/dark/contrast, reduced motion, 400% zoom-equivalent viewport, mobile navigation, native search focus, RTL`,
+        `${renderer}: headings, local assets, 320/768/1280, light/dark/contrast, reduced motion, 400% zoom-equivalent viewport, native modal navigation, shortcut handoff, search focus, RTL`,
       )
+      await page.goto(origin + (renderer === "heex" ? "/404.html" : "/svelte/?page=missing"))
+      await page.getByRole("heading", { name: "Page not found", exact: true }).waitFor()
+      assert.equal(
+        await page
+          .getByRole("link", { name: "Documentation home", exact: true })
+          .getAttribute("href"),
+        "/docs/guide/",
+      )
+      assert.equal(
+        await page.getByRole("button", { name: "Search documentation", exact: true }).count(),
+        1,
+      )
+      for (const width of [320, 1280]) {
+        await page.setViewportSize({ width, height: 900 })
+        for (const theme of ["light", "dark"]) {
+          await page
+            .getByRole("button", { name: theme === "light" ? "Light" : "Dark", exact: true })
+            .click()
+          assert.ok(
+            await page
+              .locator("[data-pa-doc-shell]")
+              .first()
+              .evaluate((element) => element.getBoundingClientRect().height >= innerHeight),
+            `${renderer}: short-page canvas does not fill the viewport`,
+          )
+          await page.screenshot({
+            path: join(screenshots, `${renderer}-404-${width}-${theme}.png`),
+          })
+        }
+      }
+      assert.deepEqual(errors, [], `${renderer} 404 browser errors`)
+      cases.push(`${renderer}: 404 keeps admitted home, navigation, search and theme controls`)
       await context.close()
     }
     const offline = await browser.newContext({ javaScriptEnabled: false })
@@ -238,14 +313,16 @@ window.decodeProducerCase = safeDecodeReportEnvelope
       cases.push(`${path}: JavaScript-disabled article, navigation, TOC and ordinary links`)
       await page.close()
     }
-    const missing = await offline.newPage()
-    await missing.goto(`${origin}/svelte-ssr-404/`)
-    const home = missing.getByRole("link", { name: "Documentation home", exact: true })
-    assert.equal(await home.getAttribute("href"), "/docs/guide/")
-    await home.click()
-    await missing.getByRole("heading", { name: "Projected anchors", exact: true }).waitFor()
-    cases.push("svelte: JavaScript-disabled 404 follows an admitted documentation route")
-    await missing.close()
+    for (const path of ["/svelte-ssr-404/", "/404.html"]) {
+      const missing = await offline.newPage()
+      await missing.goto(origin + path)
+      const home = missing.getByRole("link", { name: "Documentation home", exact: true })
+      assert.equal(await home.getAttribute("href"), "/docs/guide/")
+      await home.click()
+      await missing.getByRole("heading", { name: "Projected anchors", exact: true }).waitFor()
+      cases.push(`${path}: JavaScript-disabled 404 follows an admitted documentation route`)
+      await missing.close()
+    }
     await offline.close()
     const page2 = await browser.newPage()
     await page2.goto(`${origin}/svelte/`)

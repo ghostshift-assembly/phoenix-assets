@@ -130,7 +130,11 @@ describe("SiteShell browser controller ownership", () => {
     mounted.push(mount(SiteShell, { target: element, props }))
     flushSync()
     expect(element.textContent).toContain("Page not found")
-    expect(element.querySelector("a")?.getAttribute("href")).toBe("/docs/guide/")
+    expect(
+      Array.from(element.querySelectorAll("a"))
+        .find((link) => link.textContent === "Documentation home")
+        ?.getAttribute("href"),
+    ).toBe("/docs/guide/")
 
     props.pageId = "anchors:guide"
     flushSync()

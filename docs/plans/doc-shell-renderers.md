@@ -20,14 +20,15 @@ This tracker implements
 ## Qualification scope
 
 The source includes the browser lifecycle, HEEx/static adapters, shared search,
-Pagefind adapter, native tabs/disclosures, bounded request execution and local
+Pagefind adapter, native modal mobile navigation, tabs/contents disclosures,
+bounded request execution and local
 optional syntax/diagram assets. Unit tests cover the upstream corpus, unsafe
 inputs, stale DOM work, deterministic IDs and optional-dependency isolation.
 The exact-archive qualification records the executed browser cases and retained
 screenshots. PHA-P10 closes only for the exact receipt that passes the release
 process; source status alone is not release qualification. PHA-V03/V09/V10 still
 require their full conformance-page, hosted Pagefind and visual inventories for a
-claim covering all those surfaces. The current guide fixture does not establish
+claim covering all those surfaces. The current guide and 404 fixtures do not establish
 that broader claim.
 
 The optional ELK chunk emitted by Mermaid 12 measures approximately 1.47 MiB raw

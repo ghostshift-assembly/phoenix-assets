@@ -14,30 +14,160 @@ const scoped = (root: HTMLElement, selector: string) => [
 
 export const mountNavigation = (root: HTMLElement): BrowserController => {
   const controller = new AbortController()
-  const refresh = () =>
+  const media = window.matchMedia("(max-width: 48rem)")
+  const dialogs = new Map<HTMLDialogElement, HTMLElement>()
+  const modal = new WeakSet<HTMLDialogElement>()
+
+  const closeDialog = (navigation: HTMLDialogElement) => {
+    const button = dialogs.get(navigation)
+    const restoreFocus = modal.has(navigation)
+    button?.setAttribute("aria-expanded", "false")
+    navigation.dataset.docNavState = "closed"
+    modal.delete(navigation)
+    navigation.removeAttribute("aria-modal")
+    if (navigation.open) navigation.close()
+    if (restoreFocus && button?.isConnected) button.focus()
+  }
+
+  const setOpen = (trigger: HTMLElement, navigation: HTMLElement, open: boolean) => {
+    trigger.setAttribute("aria-expanded", String(open))
+    navigation.dataset.docNavState = open ? "open" : "closed"
+    if (!(navigation instanceof HTMLDialogElement)) return
+    if (open && media.matches && typeof navigation.showModal === "function") {
+      if (navigation.open && !modal.has(navigation)) navigation.close()
+      navigation.setAttribute("aria-modal", "true")
+      if (!navigation.open) navigation.showModal()
+      modal.add(navigation)
+    } else {
+      if (navigation.open && (media.matches || modal.has(navigation))) navigation.close()
+      modal.delete(navigation)
+      navigation.removeAttribute("aria-modal")
+      if (!media.matches && !navigation.open) navigation.setAttribute("open", "")
+      if (open && media.matches) navigation.setAttribute("open", "")
+    }
+  }
+
+  const refresh = () => {
+    for (const [dialog] of dialogs) {
+      if (!root.contains(dialog)) {
+        if (dialog.open) dialog.close()
+        dialogs.delete(dialog)
+      }
+    }
     scoped(root, "[data-doc-nav-toggle]").forEach((trigger) => {
       const target = trigger.getAttribute("aria-controls")
       const navigation = target ? root.querySelector<HTMLElement>(`#${CSS.escape(target)}`) : null
-      if (navigation && !navigation.dataset.docNavState) navigation.dataset.docNavState = "closed"
+      if (!navigation) return
+      if (!navigation.dataset.docNavState) navigation.dataset.docNavState = "closed"
+      if (navigation instanceof HTMLDialogElement) {
+        dialogs.set(navigation, trigger)
+        navigation.querySelectorAll<HTMLElement>("[data-doc-nav-close]").forEach((button) => {
+          button.hidden = !media.matches
+        })
+        setOpen(trigger, navigation, trigger.getAttribute("aria-expanded") === "true")
+      }
     })
+  }
+  root.addEventListener(
+    "cancel",
+    (event) => {
+      const navigation = event.target
+      if (navigation instanceof HTMLDialogElement && dialogs.has(navigation)) {
+        event.preventDefault()
+        closeDialog(navigation)
+      }
+    },
+    { capture: true, signal: controller.signal },
+  )
+  root.addEventListener(
+    "close",
+    (event) => {
+      const navigation = event.target
+      if (!(navigation instanceof HTMLDialogElement) || navigation.open) return
+      if (dialogs.has(navigation)) closeDialog(navigation)
+    },
+    { capture: true, signal: controller.signal },
+  )
   root.addEventListener(
     "click",
     (event) => {
-      const trigger = (event.target as Element).closest<HTMLElement>("[data-doc-nav-toggle]")
-      if (!trigger) return
-      const target = trigger.getAttribute("aria-controls")
-      const navigation = target
-        ? root.querySelector<HTMLElement>(`#${CSS.escape(target)}`)
-        : undefined
-      if (!navigation) return
-      const open = trigger.getAttribute("aria-expanded") !== "true"
-      trigger.setAttribute("aria-expanded", String(open))
-      navigation.dataset.docNavState = open ? "open" : "closed"
+      const element = event.target as Element
+      const trigger = element.closest<HTMLElement>("[data-doc-nav-toggle]")
+      if (trigger) {
+        const target = trigger.getAttribute("aria-controls")
+        const navigation = target ? root.querySelector<HTMLElement>(`#${CSS.escape(target)}`) : null
+        if (navigation)
+          setOpen(trigger, navigation, trigger.getAttribute("aria-expanded") !== "true")
+        return
+      }
+      const navigation = element.closest<HTMLDialogElement>("dialog[data-doc-nav]")
+      if (navigation && modal.has(navigation) && element.closest("[data-doc-nav-close], a[href]")) {
+        closeDialog(navigation)
+      }
+    },
+    { signal: controller.signal },
+  )
+  root.addEventListener(
+    "keydown",
+    (event) => {
+      if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
+        for (const [dialog] of dialogs) if (modal.has(dialog)) closeDialog(dialog)
+      }
+      const navigation = (event.target as Element).closest<HTMLDialogElement>(
+        "dialog[data-doc-nav]",
+      )
+      if (event.key !== "Tab" || !navigation || !modal.has(navigation)) return
+      const controls = scoped(
+        navigation,
+        "a[href], button, summary, input, select, textarea, [tabindex]",
+      ).filter(
+        (element) =>
+          element.tabIndex >= 0 &&
+          !element.matches(":disabled") &&
+          element.getClientRects().length > 0 &&
+          getComputedStyle(element).visibility !== "hidden",
+      )
+      const first = controls[0]
+      const last = controls.at(-1)
+      const active = document.activeElement
+      if (
+        !first ||
+        (event.shiftKey ? active === first || active === navigation : active === last)
+      ) {
+        event.preventDefault()
+        ;(event.shiftKey ? last : first)?.focus()
+        if (!first) navigation.focus()
+      }
+    },
+    { signal: controller.signal },
+  )
+  media.addEventListener(
+    "change",
+    () => {
+      for (const [dialog, trigger] of dialogs) setOpen(trigger, dialog, false)
+      refresh()
     },
     { signal: controller.signal },
   )
   refresh()
-  return { refresh, destroy: () => controller.abort() }
+  return {
+    refresh,
+    destroy: () => {
+      controller.abort()
+      for (const [dialog] of dialogs) {
+        if (dialog.open && modal.has(dialog)) dialog.close()
+        dialog.removeAttribute("aria-modal")
+        dialog.setAttribute("open", "")
+        dialog.querySelectorAll<HTMLElement>("[data-doc-nav-close]").forEach((button) => {
+          button.hidden = true
+        })
+      }
+      scoped(root, "[data-doc-nav]").forEach((navigation) => {
+        delete navigation.dataset.docNavState
+      })
+      dialogs.clear()
+    },
+  }
 }
 
 const decodeRecords = (element: HTMLElement): SearchRecord[] => {

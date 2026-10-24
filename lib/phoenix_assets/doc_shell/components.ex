@@ -59,9 +59,10 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           aria-expanded="false"
         >Browse documentation</button>
         <div class="doc-layout">
-          <aside id="doc-navigation" class="doc-sidebar" data-doc-nav>
+          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label="Documentation navigation">
+            <button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button>
             <.navigation items={@context.navigation} current_route={@page.route} />
-          </aside>
+          </dialog>
           <main id="doc-main" tabindex="-1" data-pagefind-body>
             <.announcement :if={@page.banner} banner={@page.banner} />
             <.breadcrumbs items={@page.breadcrumbs} />
@@ -227,7 +228,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @spec table_of_contents(map()) :: Phoenix.LiveView.Rendered.t()
     def table_of_contents(assigns) do
       ~H"""
-      <aside class="doc-toc"><nav aria-label="On this page"><strong>On this page</strong><ol><li :for={heading <- @headings} data-level={heading.level}><a href={"##{heading.id}"}>{heading.title}</a></li></ol></nav></aside>
+      <aside class="doc-toc"><details open><summary>On this page</summary><nav aria-label="On this page"><ol><li :for={heading <- @headings} data-level={heading.level}><a href={"##{heading.id}"}>{heading.title}</a></li></ol></nav></details></aside>
       """
     end
 
@@ -315,10 +316,12 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       <div class="doc-shell pa-doc-shell" data-pa-doc-shell>
         <a class="doc-skip-link" href="#doc-main">Skip to documentation</a>
         <.header context={@context} />
+        <button type="button" class="pa-button doc-mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">Browse documentation</button>
         <div class="doc-layout">
-          <aside id="doc-navigation" class="doc-sidebar" data-doc-nav>
+          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label="Documentation navigation">
+            <button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button>
             <.navigation items={@site.navigation} current_route="" />
-          </aside>
+          </dialog>
           <main id="doc-main" tabindex="-1">
             <h1>Page not found</h1>
             <p>The requested documentation page is not part of this site generation.</p>
@@ -371,11 +374,13 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     defp filter_label(value), do: String.capitalize(value)
 
     defp home_path(context) do
-      case context.navigation do
-        [%{path: path} | _] -> path
-        _ -> "/"
-      end
+      Enum.find_value(context.navigation, "/", &navigation_home_path/1)
     end
+
+    defp navigation_home_path(%{path: path}) when is_binary(path) and path != "", do: path
+
+    defp navigation_home_path(%{children: children}),
+      do: Enum.find_value(children, &navigation_home_path/1)
 
     defp site_home_path(site) do
       if Map.has_key?(site.routes, site.base_path) do

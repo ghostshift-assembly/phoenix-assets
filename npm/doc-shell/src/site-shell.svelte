@@ -55,7 +55,7 @@ $effect(() => {
     </header>
     <button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">Browse documentation</button>
     <div class="site-layout">
-      <aside id="doc-navigation" class="sidebar" data-doc-nav><Sidebar items={site.navigation} currentPath={page.route} {navigate} /></aside>
+      <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label="Documentation navigation"><button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button><Sidebar items={site.navigation} currentPath={page.route} {navigate} /></dialog>
       <main id="doc-main" tabindex="-1">
         {#if page.banner}<aside class="pa-callout" role="note"><strong>{String(page.banner["label"] ?? "Notice")}</strong></aside>{/if}
         <nav aria-label="Breadcrumbs"><ol class="breadcrumbs">{#each page.breadcrumbs as item}<li><a href={item.path}>{item.title}</a></li>{/each}</ol></nav>
@@ -77,19 +77,36 @@ $effect(() => {
         </footer>
       </main>
       <aside class="toc">
-        <nav aria-label="On this page"><strong>On this page</strong><ol>{#each page.headings as heading}<li data-level={heading.level}><a href={`#${heading.id}`}>{heading.title}</a></li>{/each}</ol></nav>
+        <details open><summary>On this page</summary><nav aria-label="On this page"><ol>{#each page.headings as heading}<li data-level={heading.level}><a href={`#${heading.id}`}>{heading.title}</a></li>{/each}</ol></nav></details>
       </aside>
     </div>
   </div>
 {:else}
-  <section data-pa-doc-shell class="doc-shell pa-state" role="status">
-    <h1>Page not found</h1><p>The requested documentation page is not part of this site generation.</p>
-    <a href={homePath} class="pa-button" onclick={(event) => { if (navigate && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(homePath) } }}>Documentation home</a>
+  <section bind:this={shellRoot} data-pa-doc-shell class="doc-shell pa-doc-shell">
+    <a class="skip-link" href="#doc-main">Skip to documentation</a>
+    <header class="site-header">
+      <a href={homePath} class="brand">{site.title}</a>
+      <Search entries={site.search} {navigate} contract={searchContract} />
+      <div class="header-actions" aria-label="Reader preferences">
+        <button type="button" class="pa-button" data-doc-theme-value="system">System</button>
+        <button type="button" class="pa-button" data-doc-theme-value="light">Light</button>
+        <button type="button" class="pa-button" data-doc-theme-value="dark">Dark</button>
+        <button type="button" class="pa-button" data-doc-theme-value="contrast">High contrast</button>
+      </div>
+    </header>
+    <button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">Browse documentation</button>
+    <div class="site-layout">
+      <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label="Documentation navigation"><button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button><Sidebar items={site.navigation} currentPath="" {navigate} /></dialog>
+      <main id="doc-main" tabindex="-1">
+        <h1>Page not found</h1><p>The requested documentation page is not part of this site generation.</p>
+        <a href={homePath} class="pa-button" onclick={(event) => { if (navigate && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(homePath) } }}>Documentation home</a>
+      </main>
+    </div>
   </section>
 {/if}
 
 <style>
-  .pa-doc-shell { min-height: 100%; background: var(--pa-semantic-color-canvas); color: var(--pa-semantic-color-text); }
+  .pa-doc-shell { min-height: 100dvh; background: var(--pa-semantic-color-canvas); color: var(--pa-semantic-color-text); }
   .skip-link { position: fixed; z-index: 100; inset-block-start: .5rem; inset-inline-start: .5rem; padding: .6rem; background: var(--pa-semantic-color-accent); color: var(--pa-semantic-color-accent-text); transform: translateY(-150%); }
   .skip-link:focus { transform: none; }
   .site-header { position: sticky; z-index: 20; inset-block-start: 0; display: flex; align-items: center; gap: 1rem; min-height: 4rem; padding: .6rem 1rem; border-block-end: 1px solid var(--pa-semantic-color-border); background: var(--pa-semantic-color-canvas); }

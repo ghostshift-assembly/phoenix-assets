@@ -8,6 +8,7 @@ import {
   mountBrowserCore,
   mountBrowserCoreOnReady,
   mountEnhancements,
+  mountNavigation,
   mountRequests,
   mountSearch,
   mountTheme,
@@ -299,6 +300,54 @@ describe("browser controller lifecycle", () => {
     expect(surface.hasAttribute("open")).toBe(false)
     expect(scrollTo).toHaveBeenLastCalledWith({ left: 0, top: 480 })
     controller.destroy()
+  })
+
+  it("disposes modal navigation across close, resize and DOM replacement", async () => {
+    const media = Object.assign(new EventTarget(), { matches: true })
+    vi.spyOn(window, "matchMedia").mockReturnValue(media as MediaQueryList)
+    const root = fixture()
+    root.querySelector("[data-doc-nav]")?.replaceWith(
+      Object.assign(document.createElement("dialog"), {
+        id: "navigation",
+        innerHTML: '<button data-doc-nav-close hidden>Close</button><a href="#chapter">Chapter</a>',
+      }),
+    )
+    const dialog = root.querySelector<HTMLDialogElement>("#navigation")
+    const trigger = root.querySelector<HTMLButtonElement>("[data-doc-nav-toggle]")
+    if (!dialog || !trigger) throw new Error("navigation fixture is absent")
+    dialog.dataset.docNav = ""
+    dialog.open = true
+    const controller = mountNavigation(root)
+    expect(dialog.open).toBe(false)
+    trigger.click()
+    expect(dialog.open).toBe(true)
+    expect(dialog.getAttribute("aria-modal")).toBe("true")
+    dialog.dispatchEvent(new Event("cancel", { cancelable: true }))
+    await vi.waitFor(() => expect(trigger.getAttribute("aria-expanded")).toBe("false"))
+    expect(document.activeElement).toBe(trigger)
+    trigger.click()
+    dialog.querySelector<HTMLButtonElement>("[data-doc-nav-close]")?.click()
+    await vi.waitFor(() => expect(dialog.open).toBe(false))
+    media.matches = false
+    media.dispatchEvent(new Event("change"))
+    expect(dialog.open).toBe(true)
+    expect(dialog.hasAttribute("aria-modal")).toBe(false)
+    expect(dialog.querySelector<HTMLElement>("[data-doc-nav-close]")?.hidden).toBe(true)
+    media.matches = true
+    media.dispatchEvent(new Event("change"))
+    trigger.click()
+    const replacement = dialog.cloneNode(true) as HTMLDialogElement
+    dialog.replaceWith(replacement)
+    controller.refresh()
+    expect(dialog.open).toBe(false)
+    trigger.click()
+    controller.destroy()
+    expect(replacement.open).toBe(true)
+    expect(replacement.hasAttribute("aria-modal")).toBe(false)
+    expect(replacement.dataset.docNavState).toBeUndefined()
+    media.matches = false
+    media.dispatchEvent(new Event("change"))
+    expect(replacement.open).toBe(true)
   })
 
   it("mounts search, navigation, copy, tabs, and theme below one explicit root", async () => {

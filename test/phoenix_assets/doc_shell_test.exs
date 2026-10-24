@@ -135,6 +135,18 @@ defmodule PhoenixAssets.DocShellTest do
     assert html =~ "<summary>Section</summary>"
     assert html =~ ~s(href="/docs/guide/")
     refute html =~ ~s(href="")
+
+    header =
+      Components.header(%{
+        context: %{navigation: [group], site_title: "Docs", search: %{"records" => []}},
+        brand: [],
+        __changed__: nil
+      })
+      |> HTML.Safe.to_iodata()
+      |> IO.iodata_to_binary()
+
+    assert header =~ ~s(href="/docs/guide/")
+    refute header =~ ~s(href="")
   end
 
   test "consumes DocShell's shared conformance and unsafe-input corpus" do
