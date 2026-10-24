@@ -60,7 +60,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     def operation(assigns) do
       ~H"""
       <article id={@operation.id} class="doc-api-operation">
-        <header><strong>{@operation.method}</strong><code>{@operation.path}</code><h3>{@operation.summary}</h3><p :if={@operation.description}>{@operation.description}</p></header>
+        <header><strong>{@operation.method}</strong> <code>{@operation.path}</code><h3>{@operation.summary}</h3><p :if={@operation.description}>{@operation.description}</p></header>
         <section :if={@operation.parameters != []}><h4>Parameters</h4><table><thead><tr><th>Name</th><th>Location</th><th>Required</th><th>Description</th></tr></thead><tbody><tr :for={parameter <- @operation.parameters}><th scope="row">{parameter["name"]}</th><td>{parameter["in"]}</td><td>{if parameter["required"], do: "Required", else: "Optional"}</td><td>{parameter["description"]}</td></tr></tbody></table></section>
         <.schema_section title="Request body" value={@operation.request_body} />
         <.schema_section title="Responses" value={@operation.responses} />

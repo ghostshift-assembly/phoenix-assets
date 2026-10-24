@@ -326,3 +326,6 @@
   margin: 0;
   padding: 0;
 }
+:where(.doc-shell) .doc-api-schema dd {
+  margin-inline-start: clamp(0.5rem, 2vw, 1rem);
+}
