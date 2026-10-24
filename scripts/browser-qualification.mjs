@@ -41,7 +41,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
 const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
 const apiPage = new URLSearchParams(window.location.search).has("api")
 </script>
-{#if apiPage}<main class="doc-shell" data-pa-doc-shell style="padding:1rem;max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference spec={api} /></main>{:else}
+{#if apiPage}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference spec={api} /></main></div>{:else}
 <SiteShell {site} {pageId} />
 {#if pageId === "anchors:guide"}
 <section class="doc-shell" aria-label="Portable reporting"><PortableReport envelope={decodeReportEnvelope(envelope)} /></section>
@@ -66,7 +66,7 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
   const application = join(root, "browser-dist")
   writeFileSync(
     join(root, "ssrfixture.svelte"),
-    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false } = $props();</script>{#if api}<main class="doc-shell" data-pa-doc-shell style="padding:1rem;max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main>{:else}<SiteShell {site} {pageId} />{/if}',
+    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell {site} {pageId} />{/if}',
   )
   writeFileSync(
     join(root, "ssr.config.mjs"),
@@ -386,7 +386,17 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
 
     for (const renderer of ["heex", "svelte"]) {
       const context = await browser.newContext({ reducedMotion: "reduce" })
+      const external = []
+      await context.route("**/*", (route) => {
+        if (new URL(route.request().url()).origin !== origin) {
+          external.push(route.request().url())
+          return route.abort()
+        }
+        return route.continue()
+      })
       const page = await context.newPage()
+      const errors = []
+      page.on("pageerror", (error) => errors.push(error.message))
       const path = renderer === "heex" ? "/api.html" : "/svelte/?api=1"
       await page.goto(origin + path)
       for (const name of ["Health check", "List things", "Create thing"])
@@ -424,6 +434,8 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
       cases.push(
         `${renderer}: all API operations have visible descriptions, unique native anchors and responsive themes`,
       )
+      assert.deepEqual(errors, [])
+      assert.deepEqual(external, [])
       await context.close()
     }
     const requests = await browser.newPage()
