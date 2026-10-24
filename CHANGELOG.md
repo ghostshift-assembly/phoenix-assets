@@ -5,17 +5,6 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
-## Unreleased
-
-### Changed
-
-- Refresh Hex and npm dependencies and pinned GitHub Actions.
-- Use pnpm 12 and migrate dependency build permissions to `allowBuilds`.
-- Update the Electric collection peers together for TanStack DB 0.14.
-- Update Mermaid to 12.2 while retaining the renderer's previous layout,
-  theme, and look. The documentation package now requires Node 22.12 or newer
-  and ES2024-capable browsers for diagrams.
-
 ## [v1.2.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.2.0...v1.2.1) (2026-10-10)
 
 
