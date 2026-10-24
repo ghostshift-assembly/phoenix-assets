@@ -9,13 +9,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Asset) do
 
     alias DocShell.Presentation.Asset
 
-    @directory Path.expand("../../../priv/doc_shell", __DIR__)
-    @paths @directory
-           |> Path.join("*")
-           |> Path.wildcard()
-           |> Enum.filter(&(Path.extname(&1) in [".css", ".js"]))
-    for path <- @paths, do: @external_resource(path)
-    @embedded Enum.map(@paths, &{Path.basename(&1), File.read!(&1)})
+    @required ~w(doc-shell.css doc-shell-browser.js doc-shell-highlight.js doc-shell-mermaid.js)
     @budgets %{
       css: %{raw: 49_152, gzip: 12_288},
       browser: %{raw: 49_152, gzip: 16_384},
@@ -26,7 +20,13 @@ if Code.ensure_loaded?(DocShell.Presentation.Asset) do
     @doc "Returns all local entries and chunks at logical paths for content hashing."
     @spec all() :: [Asset.t()]
     def all do
-      Enum.map(@embedded, fn {name, bytes} ->
+      :phoenix_assets
+      |> Application.app_dir("priv/doc_shell/*")
+      |> Path.wildcard()
+      |> Enum.filter(&(Path.extname(&1) in [".css", ".js"]))
+      |> Enum.map(fn path ->
+        name = Path.basename(path)
+        bytes = File.read!(path)
         media = if Path.extname(name) == ".css", do: "text/css", else: "text/javascript"
         %Asset{path: name, media_type: media <> "; charset=utf-8", bytes: bytes}
       end)
@@ -61,7 +61,16 @@ if Code.ensure_loaded?(DocShell.Presentation.Asset) do
     @doc "Validates size, local imports, source-map absence and Svelte isolation."
     @spec validate() :: :ok | {:error, term()}
     def validate do
-      Enum.reduce_while(@embedded, :ok, fn {name, bytes}, :ok ->
+      assets = all()
+
+      case @required -- Enum.map(assets, & &1.path) do
+        [] -> validate_assets(assets)
+        missing -> {:error, {:missing_assets, missing}}
+      end
+    end
+
+    defp validate_assets(assets) do
+      Enum.reduce_while(assets, :ok, fn %Asset{path: name, bytes: bytes}, :ok ->
         category = category(name)
         budget = Map.fetch!(@budgets, category)
 

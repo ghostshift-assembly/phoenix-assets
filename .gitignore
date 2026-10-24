@@ -15,6 +15,7 @@ storybook-static/
 /npm/*/coverage/
 /dist/release/
 /npm/*/.svelte-kit/
+/priv/doc_shell/
 *.tsbuildinfo
 
 # AI agents

@@ -20,11 +20,13 @@
     {:ex_unit, false},
     {:coveralls,
      command: "mix coveralls.lcov",
+     deps: [:doc_shell_assets],
      env: %{"ERL_COMPILER_OPTIONS" => "nowarn_deprecated_catch", "MIX_ENV" => "test"}},
 
     ## --- Frontend (pnpm): install, then lint / typecheck / test+coverage,
     ## dead-code detection (knip), and package-export correctness (publint + attw) ---
     {:pnpm_install, command: "pnpm install --frozen-lockfile"},
+    {:doc_shell_assets, command: "pnpm build:doc-shell-assets", deps: [:pnpm_install]},
     {:npm_audit, command: "pnpm audit --prod", deps: [:pnpm_install]},
     {:biome, command: "pnpm lint", deps: [:pnpm_install]},
     {:typecheck, command: "pnpm typecheck", deps: [:pnpm_install]},
@@ -32,7 +34,7 @@
     {:knip, command: "pnpm knip", deps: [:pnpm_install]},
     {:check_exports, command: "pnpm check:exports", deps: [:pnpm_install]},
     {:release_tests, command: "pnpm test:release", deps: [:pnpm_install]},
-    {:hex_consumer, command: "node scripts/release.mjs smoke-hex"},
+    {:hex_consumer, command: "node scripts/release.mjs smoke-hex", deps: [:coveralls]},
     {:http_consumer,
      command: "node scripts/release.mjs smoke-core", deps: [:pnpm_install, :check_exports]},
     {:release_contract, command: "pnpm check:release", deps: [:pnpm_install]},

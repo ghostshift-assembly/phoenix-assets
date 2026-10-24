@@ -15,6 +15,7 @@ defmodule PhoenixAssets.MixProject do
       version: @version,
       elixir: "~> 1.18",
       elixirc_paths: elixirc_paths(Mix.env()),
+      aliases: aliases(),
       start_permanent: Mix.env() == :prod,
       test_coverage: [tool: ExCoveralls],
       deps: deps(),
@@ -120,6 +121,22 @@ defmodule PhoenixAssets.MixProject do
       files:
         ~w(lib priv/doc_shell .formatter.exs mix.exs README.md RELEASING.md CHANGELOG.md LICENSE usage-rules.md)
     ]
+  end
+
+  defp aliases do
+    ["hex.build": [&build_doc_shell_assets/1, "hex.build"]]
+  end
+
+  defp build_doc_shell_assets(_) do
+    if File.regular?(Path.join(__DIR__, "npm/doc-shell/scripts/build-browser.mjs")) do
+      {_, status} =
+        System.cmd("pnpm", ["--filter", "@phoenix-assets/doc-shell", "build:browser"],
+          cd: __DIR__,
+          into: IO.stream(:stdio, :line)
+        )
+
+      if status != 0, do: Mix.raise("DocShell browser asset build failed")
+    end
   end
 
   defp docs do

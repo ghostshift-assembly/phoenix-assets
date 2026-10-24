@@ -65,6 +65,13 @@ mise exec -- pnpm install --frozen-lockfile
 mise exec -- mix check --no-retry
 ```
 
+DocShell browser bundles in `priv/doc_shell/` are generated and ignored by Git.
+The gate builds them before renderer tests. `mix hex.build` rebuilds them from
+the workspace before packaging; the Hex archive includes the bundles and their
+license notices. Published Hex consumers use those packaged files without Node
+or pnpm. For direct renderer development, run `pnpm build:doc-shell-assets` after
+changing browser source.
+
 The DocShell site renderer supports DocShell 0.5 and 1.0. The extraction-only
 integration also accepts 0.4. Packaged consumers check all three versions and a
 consumer without optional dependencies. While preparing an upstream candidate,

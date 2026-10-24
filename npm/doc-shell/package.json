@@ -37,7 +37,8 @@
     "access": "public"
   },
   "scripts": {
-    "build": "svelte-package -i src -o dist && node scripts/build-browser.mjs",
+    "build": "svelte-package -i src -o dist",
+    "build:browser": "node scripts/build-browser.mjs",
     "typecheck": "svelte-check --tsconfig ./tsconfig.json",
     "test": "vitest run --coverage",
     "check:offline": "node scripts/check-offline.mjs",

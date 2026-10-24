@@ -7,6 +7,7 @@
   "description": "Monorepo for the phoenix_assets npm packages.",
   "scripts": {
     "build": "pnpm -r build",
+    "build:doc-shell-assets": "pnpm --filter @phoenix-assets/doc-shell build:browser",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "lint": "biome check --error-on-warnings .",
