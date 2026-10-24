@@ -12,6 +12,28 @@ const scoped = (root: HTMLElement, selector: string) => [
   ...root.querySelectorAll<HTMLElement>(selector),
 ]
 
+const cycleModalFocus = (event: KeyboardEvent, dialog: HTMLElement) => {
+  const controls = scoped(
+    dialog,
+    "a[href], button, summary, input, select, textarea, [tabindex]",
+  ).filter(
+    (element) =>
+      element.tabIndex >= 0 &&
+      !element.matches(":disabled") &&
+      element.getClientRects().length > 0 &&
+      getComputedStyle(element).visibility !== "hidden",
+  )
+  const first = controls[0]
+  const last = controls.at(-1)
+  const active = document.activeElement
+  if (!first || (event.shiftKey ? active === first || active === dialog : active === last)) {
+    event.preventDefault()
+    const target = event.shiftKey ? last : first
+    if (target) target.focus()
+    else dialog.focus()
+  }
+}
+
 export const mountNavigation = (root: HTMLElement): BrowserController => {
   const controller = new AbortController()
   const media = window.matchMedia("(max-width: 48rem)")
@@ -117,27 +139,7 @@ export const mountNavigation = (root: HTMLElement): BrowserController => {
         "dialog[data-doc-nav]",
       )
       if (event.key !== "Tab" || !navigation || !modal.has(navigation)) return
-      const controls = scoped(
-        navigation,
-        "a[href], button, summary, input, select, textarea, [tabindex]",
-      ).filter(
-        (element) =>
-          element.tabIndex >= 0 &&
-          !element.matches(":disabled") &&
-          element.getClientRects().length > 0 &&
-          getComputedStyle(element).visibility !== "hidden",
-      )
-      const first = controls[0]
-      const last = controls.at(-1)
-      const active = document.activeElement
-      if (
-        !first ||
-        (event.shiftKey ? active === first || active === navigation : active === last)
-      ) {
-        event.preventDefault()
-        ;(event.shiftKey ? last : first)?.focus()
-        if (!first) navigation.focus()
-      }
+      cycleModalFocus(event, navigation)
     },
     { signal: controller.signal },
   )
@@ -440,6 +442,10 @@ export const mountSearch = (
         return
       }
       if (!dialog?.hasAttribute("open")) return
+      if (!inline && event.key === "Tab") {
+        cycleModalFocus(event, dialog)
+        return
+      }
       if (event.key === "Escape") {
         event.preventDefault()
         close()

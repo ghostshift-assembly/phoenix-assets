@@ -228,6 +228,17 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
         false,
       )
       const input = page.locator("[data-doc-search-input]")
+      await input.waitFor()
+      await page.keyboard.press("Shift+Tab")
+      await page.keyboard.press("Shift+Tab")
+      assert.equal(
+        await page
+          .locator("[data-doc-search-dialog]")
+          .evaluate((element) => element.contains(document.activeElement)),
+        true,
+        `${renderer}: search focus left its modal`,
+      )
+      await input.focus()
       await input.fill("setup")
       await page.locator("[data-doc-search-results] a").first().waitFor()
       assert.equal(await input.evaluate((element) => element === document.activeElement), true)
@@ -238,6 +249,16 @@ const pageId = new URLSearchParams(window.location.search).get("page") ?? "ancho
           .evaluate((element) => element === document.activeElement),
         true,
       )
+      for (const theme of ["light", "dark"]) {
+        await page
+          .getByRole("button", { name: theme === "light" ? "Light" : "Dark", exact: true })
+          .click()
+        await page.getByRole("button", { name: "Search documentation", exact: true }).click()
+        await input.fill("setup")
+        await page.locator("[data-doc-search-results] a").first().waitFor()
+        await page.screenshot({ path: join(screenshots, `${renderer}-search-${theme}.png`) })
+        await page.keyboard.press("Escape")
+      }
       await page
         .locator("[data-pa-doc-shell]")
         .last()
