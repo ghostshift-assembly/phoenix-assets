@@ -329,7 +329,10 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       """
     end
 
-    defp direction(locale) when locale in ["ar", "fa", "he", "ur"], do: "rtl"
+    defp direction(locale) when is_binary(locale) do
+      if Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, locale), do: "rtl", else: "ltr"
+    end
+
     defp direction(_), do: "ltr"
 
     defp current_branch?(item, route) do

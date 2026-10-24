@@ -18,6 +18,9 @@ let {
   searchContract?: PagefindContract
 } = $props()
 const page = $derived(site.pages[pageId])
+const homePath = $derived(
+  site.routes[site.base_path] ? site.base_path : (Object.keys(site.routes).sort()[0] ?? "/"),
+)
 let shellRoot = $state<HTMLElement>()
 
 $effect(() => {
@@ -36,12 +39,12 @@ $effect(() => {
     data-doc-theme="system"
     data-schema-version={site.schema_version}
     data-cohort-digest={site.cohort_digest}
-    dir={page.locale === "ar" || page.locale === "he" || page.locale === "fa" ? "rtl" : "ltr"}
+    dir={/^(ar|fa|he|ur)(?:[-_]|$)/i.test(page.locale) ? "rtl" : "ltr"}
     lang={page.locale}
   >
     <a class="skip-link" href="#doc-main">Skip to documentation</a>
     <header class="site-header">
-      <a href={site.base_path} class="brand">{site.title}</a>
+      <a href={homePath} class="brand">{site.title}</a>
       <Search entries={site.search} {navigate} contract={searchContract} />
       <div class="header-actions" aria-label="Reader preferences">
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value="system">System</button>
@@ -79,9 +82,9 @@ $effect(() => {
     </div>
   </div>
 {:else}
-  <section data-pa-doc-shell class="pa-state" role="status">
+  <section data-pa-doc-shell class="doc-shell pa-state" role="status">
     <h1>Page not found</h1><p>The requested documentation page is not part of this site generation.</p>
-    <button type="button" class="pa-button" onclick={() => navigate?.(site.base_path)}>Documentation home</button>
+    <a href={homePath} class="pa-button" onclick={(event) => { if (navigate && !event.ctrlKey && !event.metaKey && !event.shiftKey && !event.altKey) { event.preventDefault(); navigate(homePath) } }}>Documentation home</a>
   </section>
 {/if}
 

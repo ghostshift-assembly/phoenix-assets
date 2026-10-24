@@ -114,15 +114,27 @@ describe("rendered heading targets", () => {
 })
 
 describe("SiteShell browser controller ownership", () => {
+  it.each(["ar-SA", "FA-ir", "he-IL", "ur-PK"])("preserves RTL direction for %s", (locale) => {
+    const element = target()
+    const page = site.pages["anchors:guide"]
+    if (!page) throw new Error("guide fixture is absent")
+    const localized = { ...site, pages: { ...site.pages, [page.id]: { ...page, locale } } }
+    mounted.push(mount(SiteShell, { target: element, props: { site: localized, pageId: page.id } }))
+    flushSync()
+    expect(element.querySelector("[data-pa-doc-shell]")?.getAttribute("dir")).toBe("rtl")
+  })
+
   it("mounts controllers when a missing page becomes available", () => {
     const element = target()
     const props = $state({ site, pageId: "missing" })
     mounted.push(mount(SiteShell, { target: element, props }))
     flushSync()
     expect(element.textContent).toContain("Page not found")
+    expect(element.querySelector("a")?.getAttribute("href")).toBe("/docs/guide/")
 
     props.pageId = "anchors:guide"
     flushSync()
+    expect(element.querySelector("a.brand")?.getAttribute("href")).toBe("/docs/guide/")
     const root = element.querySelector<HTMLElement>(".pa-doc-shell")
     expect(root).not.toBeNull()
     if (root) assertControls(root)

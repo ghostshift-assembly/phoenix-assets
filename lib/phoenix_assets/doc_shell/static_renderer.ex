@@ -69,7 +69,9 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
     end
 
     defp document(title, locale, canonical_url, context, body) do
-      direction = if locale in ["ar", "fa", "he", "ur"], do: "rtl", else: "ltr"
+      direction =
+        if Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, locale), do: "rtl", else: "ltr"
+
       css = Map.fetch!(context.assets, "doc-shell.css")
       browser = Map.fetch!(context.assets, "doc-shell-browser.js")
       canonical = canonical_url || canonical(context.canonical_origin, context.current_route)

@@ -58,7 +58,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
   const application = join(root, "browser-dist")
   writeFileSync(
     join(root, "ssrfixture.svelte"),
-    '<script>import { SiteShell } from "@phoenix-assets/doc-shell"; import site from "./site.json";</script><SiteShell {site} pageId="anchors:guide" />',
+    '<script>import { SiteShell } from "@phoenix-assets/doc-shell"; import site from "./site.json"; let { pageId = "anchors:guide" } = $props();</script><SiteShell {site} {pageId} />',
   )
   writeFileSync(
     join(root, "ssr.config.mjs"),
@@ -71,7 +71,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
   const css = readdirSync(join(application, "assets")).filter((file) => file.endsWith(".css"))
   writeFileSync(
     join(root, "render-ssr.mjs"),
-    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const result = render(Fixture); writeFileSync("browser-dist/ssr.html", '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>');`,
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const result = render(Fixture); writeFileSync("browser-dist/ssr.html", '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'); const missing = render(Fixture, { props: { pageId: "missing" } }); writeFileSync("browser-dist/ssr404.html", '<!doctype html><html><body>' + missing.body + '</body></html>');`,
   )
   execFileSync("node", ["render-ssr.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")
@@ -85,6 +85,7 @@ window.decodeProducerCase = safeDecodeReportEnvelope
     if (path.startsWith("/assets/") && existsSync(resolve(application, `.${path}`)))
       file = resolve(application, `.${path}`)
     if (path === "/svelte-ssr/") file = join(application, "ssr.html")
+    if (path === "/svelte-ssr-404/") file = join(application, "ssr404.html")
     const allowed = [application, fixture].some(
       (directory) => file === directory || file.startsWith(directory + sep),
     )
@@ -237,6 +238,14 @@ window.decodeProducerCase = safeDecodeReportEnvelope
       cases.push(`${path}: JavaScript-disabled article, navigation, TOC and ordinary links`)
       await page.close()
     }
+    const missing = await offline.newPage()
+    await missing.goto(`${origin}/svelte-ssr-404/`)
+    const home = missing.getByRole("link", { name: "Documentation home", exact: true })
+    assert.equal(await home.getAttribute("href"), "/docs/guide/")
+    await home.click()
+    await missing.getByRole("heading", { name: "Projected anchors", exact: true }).waitFor()
+    cases.push("svelte: JavaScript-disabled 404 follows an admitted documentation route")
+    await missing.close()
     await offline.close()
     const page2 = await browser.newPage()
     await page2.goto(`${origin}/svelte/`)

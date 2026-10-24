@@ -150,6 +150,26 @@ defmodule PhoenixAssets.DocShellTest do
     end
   end
 
+  test "regional RTL locales agree between the HTML document and HEEx shell" do
+    site = site_fixture()
+    page = Map.fetch!(site.pages, "guide")
+    site = %{site | locales: ["en", "ur-PK"], pages: %{page.id => %{page | locale: "ur-PK"}}}
+    destination = temporary_path("rtl")
+    on_exit(fn -> File.rm_rf(destination) end)
+
+    assert {:ok, _} =
+             StaticExporter.export(
+               site: site,
+               renderer: StaticRenderer,
+               destination: destination,
+               canonical_origin: "https://docs.example.test"
+             )
+
+    html = destination |> Path.join("docs/guide/index.html") |> File.read!()
+    assert html =~ ~s(<html lang="ur-PK" dir="rtl">)
+    assert html =~ ~r/<div\b(?=[^>]*\bdir="rtl")(?=[^>]*\blang="ur-PK")[^>]*>/
+  end
+
   test "static exporter renders the HEEx shell with local hashed assets and no runtime" do
     site = site_fixture()
     destination = temporary_path("static")
