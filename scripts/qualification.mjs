@@ -37,6 +37,8 @@ const retainedEvidence = (output) => {
     "build-inputs.json",
     "consumer-full-package-lock.json",
     "consumer-http-package-lock.json",
+    "consumer-prior-package-lock.json",
+    "consumer-prior-dist",
     "consumer-full-dist",
     "consumer-http-dist",
     "consumer-browser-dist",

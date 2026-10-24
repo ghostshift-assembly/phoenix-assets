@@ -8,6 +8,7 @@ import {
   mkdtempSync,
   readdirSync,
   readFileSync,
+  renameSync,
   rmSync,
   writeFileSync,
 } from "node:fs"
@@ -386,13 +387,29 @@ export default defineConfig({
     const { qualifyBrowser } = await import("./browser-qualification.mjs")
     const browser = await qualifyBrowser(sourceRoot, root, output)
     cpSync(join(root, "browser-dist"), join(output, "consumer-browser-dist"), { recursive: true })
+    const peer = join(root, "node_modules/layerchart")
+    renameSync(peer, `${peer}.unselected`)
+    try {
+      const missing = spawnSync(join(root, "node_modules/.bin/vite"), ["build"], {
+        cwd: root,
+        encoding: "utf8",
+      })
+      if (missing.status === 0 || !/layerchart/i.test(`${missing.stdout}\n${missing.stderr}`))
+        throw new Error("missing reporting peer did not fail module resolution")
+    } finally {
+      renameSync(`${peer}.unselected`, peer)
+    }
     complete = true
     return {
       browser,
       installed: treeMeasurements(join(root, "node_modules")),
       emitted: treeMeasurements(join(root, "dist")),
       closure: JSON.parse(capture("npm", ["ls", "--all", "--json"], { cwd: root })),
-      cases: ["all selected exports", "reporting, collection and DocShell browser build"],
+      cases: [
+        "all selected exports",
+        "reporting, collection and DocShell browser build",
+        "missing LayerChart fails the selected reporting build",
+      ],
     }
   } finally {
     if (complete) rmSync(root, { force: true, recursive: true })
@@ -661,7 +678,94 @@ async function smokeArtifacts(root, output, options) {
   const runtime = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
   if (!runtime) throw new Error("Svelte runtime artifact is missing")
   const http = smokeCoreArtifact(root, join(output, runtime.file))
-  return { full, http, hex, producer }
+  const prior = qualifyPriorCohort(root, output, manifest)
+  return { full, http, hex, producer, prior }
+}
+
+function qualifyPriorCohort(sourceRoot, output, manifest) {
+  const root = mkdtempSync(join(tmpdir(), "phoenix-assets-rollback-"))
+  const runtime = readJson(join(sourceRoot, "npm/svelte/package.json"))
+  const archive = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
+  try {
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({
+        private: true,
+        type: "module",
+        dependencies: {
+          "@phoenix-assets/svelte": `file:${join(output, archive.file)}`,
+          svelte: runtime.peerDependencies.svelte,
+          layerchart: "2.9.0",
+        },
+      }),
+    )
+    const conflict = spawnSync(
+      "npm",
+      [
+        "install",
+        "--strict-peer-deps",
+        "--package-lock-only",
+        "--ignore-scripts",
+        "--no-audit",
+        "--no-fund",
+      ],
+      { cwd: root, encoding: "utf8" },
+    )
+    if (conflict.status === 0 || !/ERESOLVE/.test(conflict.stderr))
+      throw new Error("conflicting reporting peer was not rejected")
+    writeFileSync(
+      join(root, "package.json"),
+      JSON.stringify({
+        private: true,
+        type: "module",
+        dependencies: {
+          "@phoenix-assets/svelte": "1.2.1",
+          svelte: runtime.peerDependencies.svelte,
+        },
+      }),
+    )
+    rmSync(join(root, "package-lock.json"), { force: true })
+    run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund"], { cwd: root })
+    const installed = treeMeasurements(join(root, "node_modules"))
+    const closure = JSON.parse(capture("npm", ["ls", "--all", "--json"], { cwd: root }))
+    copyFileSync(join(root, "package-lock.json"), join(output, "consumer-prior-package-lock.json"))
+    writeFileSync(
+      join(root, "consumer.js"),
+      'export { runCommand, resolveLocale } from "@phoenix-assets/svelte"\n',
+    )
+    writeFileSync(
+      join(root, "vite.config.mjs"),
+      'export default { build: { lib: { entry: "consumer.js", formats: ["es"] } } }\n',
+    )
+    run(join(sourceRoot, "npm/vite/node_modules/.bin/vite"), ["build"], { cwd: root })
+    cpSync(join(root, "dist"), join(output, "consumer-prior-dist"), { recursive: true })
+    const emitted = treeMeasurements(join(root, "dist"))
+    // Reinstall the original exact lock and exercise its own public entrypoint.
+    rmSync(join(root, "node_modules"), { recursive: true, force: true })
+    run("npm", ["ci", "--ignore-scripts", "--no-audit", "--no-fund"], { cwd: root })
+    run(
+      "node",
+      [
+        "--input-type=module",
+        "-e",
+        'import assert from "node:assert/strict"; import { runCommand } from "@phoenix-assets/svelte"; assert.equal(typeof runCommand, "function")',
+      ],
+      { cwd: root },
+    )
+    return {
+      version: "1.2.1",
+      installed,
+      emitted,
+      closure,
+      cases: [
+        "conflicting LayerChart 2.9.0 rejected by strict peer installation",
+        "prior published package and exact lock restored with npm ci",
+        "restored public HTTP helper imports",
+      ],
+    }
+  } finally {
+    rmSync(root, { force: true, recursive: true })
+  }
 }
 
 function npmRegistryState(name, version, path) {
