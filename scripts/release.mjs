@@ -2,6 +2,7 @@ import { execFileSync, spawnSync } from "node:child_process"
 import { createHash } from "node:crypto"
 import {
   copyFileSync,
+  cpSync,
   existsSync,
   mkdirSync,
   mkdtempSync,
@@ -13,6 +14,14 @@ import {
 import { tmpdir } from "node:os"
 import { basename, dirname, join, resolve } from "node:path"
 import { fileURLToPath, pathToFileURL } from "node:url"
+
+import {
+  recordBuildInputs,
+  reviewQualification,
+  treeMeasurements,
+  verifyQualification,
+  writeQualification,
+} from "./qualification.mjs"
 
 const REPOSITORY = "ghostshift-assembly/phoenix-assets"
 const STALE_REPOSITORY = "futhr/phoenix" + "_assets"
@@ -230,6 +239,7 @@ function buildArtifacts(root, output, options) {
 
   writeManifest(root, output, version, paths, sourceDirty)
   verifyArtifacts(root, output, options)
+  recordBuildInputs(root, output)
 }
 
 export function verifyArtifacts(root, output, options = {}) {
@@ -291,8 +301,9 @@ export function verifyArtifacts(root, output, options = {}) {
   return manifest
 }
 
-function smokeNpmArtifacts(sourceRoot, output, manifest) {
+async function smokeNpmArtifacts(sourceRoot, output, manifest) {
   const root = mkdtempSync(join(tmpdir(), "phoenix-assets-npm-smoke-"))
+  let complete = false
   try {
     const dependencies = Object.fromEntries(
       manifest.artifacts
@@ -313,7 +324,7 @@ function smokeNpmArtifacts(sourceRoot, output, manifest) {
       join(root, "package.json"),
       `${JSON.stringify({ name: "phoenix-assets-release-smoke", private: true, type: "module", dependencies }, null, 2)}\n`,
     )
-    run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--package-lock=false"], {
+    run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund"], {
       cwd: root,
     })
 
@@ -370,8 +381,22 @@ export default defineConfig({
     )
     run("node", ["smoke.mjs"], { cwd: root })
     run(join(root, "node_modules/.bin/vite"), ["build"], { cwd: root })
+    copyFileSync(join(root, "package-lock.json"), join(output, "consumer-full-package-lock.json"))
+    cpSync(join(root, "dist"), join(output, "consumer-full-dist"), { recursive: true })
+    const { qualifyBrowser } = await import("./browser-qualification.mjs")
+    const browser = await qualifyBrowser(sourceRoot, root, output)
+    cpSync(join(root, "browser-dist"), join(output, "consumer-browser-dist"), { recursive: true })
+    complete = true
+    return {
+      browser,
+      installed: treeMeasurements(join(root, "node_modules")),
+      emitted: treeMeasurements(join(root, "dist")),
+      closure: JSON.parse(capture("npm", ["ls", "--all", "--json"], { cwd: root })),
+      cases: ["all selected exports", "reporting, collection and DocShell browser build"],
+    }
   } finally {
-    rmSync(root, { force: true, recursive: true })
+    if (complete) rmSync(root, { force: true, recursive: true })
+    else console.error(`Failed npm consumer retained for inspection: ${root}`)
   }
 }
 
@@ -394,18 +419,9 @@ function smokeCoreArtifact(sourceRoot, archive) {
         2,
       )}\n`,
     )
-    run(
-      "npm",
-      [
-        "install",
-        "--ignore-scripts",
-        "--no-audit",
-        "--no-fund",
-        "--package-lock=false",
-        "--omit=optional",
-      ],
-      { cwd: root },
-    )
+    run("npm", ["install", "--ignore-scripts", "--no-audit", "--no-fund", "--omit=optional"], {
+      cwd: root,
+    })
     writeFileSync(
       join(root, "consumer.mjs"),
       `
@@ -440,6 +456,37 @@ console.log("Packed HTTP runtime verified without Electric, TanStack or Phoenix 
 `,
     )
     run("node", ["consumer.mjs"], { cwd: root })
+    copyFileSync(
+      join(root, "package-lock.json"),
+      join(dirname(archive), "consumer-http-package-lock.json"),
+    )
+    const installed = treeMeasurements(join(root, "node_modules"))
+    const closure = JSON.parse(
+      capture("npm", ["ls", "--all", "--json", "--omit=optional"], { cwd: root }),
+    )
+    writeFileSync(
+      join(root, "consumer.js"),
+      'export { runCommand, resolveLocale } from "@phoenix-assets/svelte/core"\n',
+    )
+    writeFileSync(
+      join(root, "vite.config.mjs"),
+      'export default { build: { lib: { entry: "consumer.js", formats: ["es"] } } }\n',
+    )
+    run(join(sourceRoot, "npm/vite/node_modules/.bin/vite"), ["build"], { cwd: root })
+    cpSync(join(root, "dist"), join(dirname(archive), "consumer-http-dist"), { recursive: true })
+    return {
+      installed,
+      closure,
+      emitted: treeMeasurements(join(root, "dist")),
+      cases: [
+        "success",
+        "denied",
+        "transport loss without replay",
+        "auth and scope headers",
+        "locale and event helpers",
+        "no LayerChart, Electric, TanStack or Phoenix installation",
+      ],
+    }
   } finally {
     rmSync(root, { force: true, recursive: true })
   }
@@ -452,6 +499,7 @@ function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion) {
   const outer = join(root, "outer")
   const source = join(root, "source")
   const consumer = join(root, "consumer")
+  let evidence
   mkdirSync(outer)
   mkdirSync(source)
   mkdirSync(join(consumer, "lib"), { recursive: true })
@@ -549,6 +597,9 @@ end
       [commands] = Enum.filter(files, &(&1.kind == :commands))
       true = IO.iodata_to_binary(commands.contents) =~ ~s|from "@phoenix-assets/svelte/core"|
       false = Enum.any?(files, &(&1.kind == :electric))
+      File.write!("generated-digests.json", JSON.encode!(Map.new(files, fn file ->
+        {Path.basename(file.path), :crypto.hash(:sha256, IO.iodata_to_binary(file.contents)) |> Base.encode16(case: :lower)}
+      end)))
       try do
         PhoenixAssets.Types.Walker.render([])
         raise "unguarded Ash walker"
@@ -560,23 +611,57 @@ end
       ],
       consumerOptions,
     )
+    if (docShellVersion === "1.0.0")
+      run(
+        "mix",
+        [
+          "run",
+          "--no-start",
+          join(sourceRoot, "scripts/renderer-fixture.exs"),
+          join(output, "browser-static"),
+        ],
+        consumerOptions,
+      )
+    evidence = {
+      doc_shell: docShellVersion ?? null,
+      lock_sha256: hash(join(consumer, "mix.lock"), "sha256"),
+      config_sha256: hash(join(consumer, "mix.exs"), "sha256"),
+      generated: readJson(join(consumer, "generated-digests.json")),
+      result: "passed",
+    }
   } finally {
     rmSync(root, { force: true, recursive: true })
   }
   if (!docShellVersion) {
-    for (const version of ["0.4.0", "0.5.0", "1.0.0"]) {
-      smokeHexArtifact(sourceRoot, output, manifest, version)
-    }
+    return [
+      evidence,
+      ...["0.4.0", "0.5.0", "1.0.0"].flatMap((version) =>
+        smokeHexArtifact(sourceRoot, output, manifest, version),
+      ),
+    ]
   }
+  return [evidence]
 }
 
-function smokeArtifacts(root, output, options) {
+async function smokeArtifacts(root, output, options) {
   const manifest = verifyArtifacts(root, output, options)
-  smokeNpmArtifacts(root, output, manifest)
+  run(
+    "mix",
+    ["run", "--no-start", join(root, "scripts/qualify-producer.exs"), join(output, "producer")],
+    { cwd: root, env: { ...publishedDependenciesEnv(), MIX_ENV: "test" } },
+  )
+  const producer = readJson(join(output, "producer/producer-qualification.json"))
+  const retained = readJson(
+    join(root, "npm/svelte/test/fixtures/upstream-reporting/qualified/proof.json"),
+  )
+  for (const key of ["revision", "profile_sha256", "script_sha256", "cases_sha256"])
+    if (producer[key] !== retained[key]) throw new Error(`stale producer qualification: ${key}`)
+  const hex = smokeHexArtifact(root, output, manifest)
+  const full = await smokeNpmArtifacts(root, output, manifest)
   const runtime = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
   if (!runtime) throw new Error("Svelte runtime artifact is missing")
-  smokeCoreArtifact(root, join(output, runtime.file))
-  smokeHexArtifact(root, output, manifest)
+  const http = smokeCoreArtifact(root, join(output, runtime.file))
+  return { full, http, hex, producer }
 }
 
 function npmRegistryState(name, version, path) {
@@ -608,7 +693,10 @@ async function hexRegistryState(version, path) {
 }
 
 async function publishArtifacts(root, output, options) {
+  if (!options.dryRun)
+    validateRelease(root, { ...options, allowUntagged: false, requireClean: true })
   const manifest = verifyArtifacts(root, output, options)
+  verifyQualification(root, output, { requireReviewed: !options.dryRun })
   const npmArtifacts = manifest.artifacts.filter(({ ecosystem }) => ecosystem === "npm")
   const hexArtifact = manifest.artifacts.find(({ ecosystem }) => ecosystem === "hex")
   if (!hexArtifact) throw new Error("Hex artifact is missing")
@@ -657,6 +745,8 @@ function parseArgs(argv) {
     dryRun: args.includes("--dry-run"),
     network: args.includes("--network"),
     tag: value("--tag"),
+    expectedSha: value("--expected-sha"),
+    reviewer: value("--reviewer"),
   }
 }
 
@@ -678,7 +768,19 @@ async function main() {
       verifyArtifacts(root, output, releaseOptions)
       break
     case "smoke":
-      smokeArtifacts(root, output, releaseOptions)
+      await smokeArtifacts(root, output, releaseOptions)
+      break
+    case "qualify":
+      writeQualification(root, output, await smokeArtifacts(root, output, releaseOptions))
+      verifyQualification(root, output)
+      break
+    case "review-qualification":
+      verifyArtifacts(root, output, releaseOptions)
+      reviewQualification(root, output, options.expectedSha, options.reviewer)
+      break
+    case "verify-qualification":
+      verifyArtifacts(root, output, releaseOptions)
+      verifyQualification(root, output)
       break
     case "smoke-hex": {
       const temporary = mkdtempSync(join(tmpdir(), "phoenix-assets-hex-check-"))
@@ -712,7 +814,7 @@ async function main() {
       break
     default:
       throw new Error(
-        "usage: release.mjs <check|build|verify|smoke|smoke-hex|smoke-core|publish> [options]",
+        "usage: release.mjs <check|build|verify|qualify|review-qualification|verify-qualification|smoke|smoke-hex|smoke-core|publish> [options]",
       )
   }
 }

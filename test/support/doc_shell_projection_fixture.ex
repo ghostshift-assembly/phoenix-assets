@@ -22,7 +22,7 @@ defmodule PhoenixAssets.DocShellProjectionFixture do
     end
   end
 
-  def site! do
+  def site!(extra_content \\ []) do
     {:ok, descriptor} =
       Collection.new(%{
         id: "anchors",
@@ -43,12 +43,13 @@ defmodule PhoenixAssets.DocShellProjectionFixture do
         "document_id" => "guide",
         "kind" => "guide",
         "title" => "Projected anchors",
-        "ast" => [
-          heading("2026 Setup"),
-          heading("中文"),
-          heading("中文"),
-          heading("Supplied anchor", %{"id" => "章節.2026"})
-        ],
+        "ast" =>
+          [
+            heading("2026 Setup"),
+            heading("中文"),
+            heading("中文"),
+            heading("Supplied anchor", %{"id" => "章節.2026"})
+          ] ++ extra_content,
         "meta" => %{}
       }
     ]

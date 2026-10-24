@@ -25,8 +25,10 @@ client or sync backend. Existing Electric entrypoints remain compatible.
   replace backend qualification.
 
 The HTTP profile/import implementation is an additive unreleased source change.
-The additional installation, declaration, profile and producer-qualification gates
-below are planned. Historical checks below do not close them. Publication and
+The source now includes scoped socket factories, host command transports, explicit
+reporting peers, producer-generated limit cases and retained qualification receipts.
+The receipt names the exact executed consumer cases; historical checks below do
+not substitute for that evidence. Publication and
 host adoption require the exact-artifact evidence in [RELEASING](../../RELEASING.md);
 a source manifest with the same version as a registry package proves neither.
 

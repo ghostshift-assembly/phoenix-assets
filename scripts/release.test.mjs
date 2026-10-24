@@ -6,6 +6,12 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
 import {
+  recordBuildInputs,
+  reviewQualification,
+  verifyQualification,
+  writeQualification,
+} from "./qualification.mjs"
+import {
   collectReleaseErrors,
   isCanonicalRepositoryRemote,
   validateRelease,
@@ -215,7 +221,7 @@ function withArtifacts(callback) {
     }
     save()
     const verify = () => verifyArtifacts(root, output, { checkGit: false, allowUntagged: true })
-    callback({ manifest, output, save, verify })
+    callback({ root, manifest, output, save, verify })
   })
 }
 
@@ -267,5 +273,91 @@ test("rejects artifact byte tampering", () => {
   withArtifacts(({ output, verify }) => {
     writeFileSync(join(output, "phoenix_assets-1.2.3.tar"), "changed")
     assert.throws(verify, /checksum mismatch/)
+  })
+})
+
+test("qualification binds source, locks, peers, producer fixtures, toolchain and artifact bytes", () => {
+  withArtifacts(({ root, output }) => {
+    const inputs = [
+      "mix.lock",
+      "pnpm-lock.yaml",
+      "npm/svelte/package.json",
+      "generated.ts",
+      "producer-profile.json",
+    ]
+    for (const file of inputs) writeFileSync(join(root, file), "baseline")
+    execFileSync("git", ["add", "mix.exs", ...inputs], { cwd: root })
+    recordBuildInputs(root, output)
+    writeQualification(root, output, {
+      http: { result: "passed" },
+      full: { result: "passed" },
+      hex: [{ result: "passed" }],
+    })
+    assert.equal(
+      verifyQualification(root, output).schema_version,
+      "phoenix-assets/qualification/v1",
+    )
+    for (const file of inputs) {
+      writeFileSync(join(root, file), "changed while display version stays fixed")
+      assert.throws(() => verifyQualification(root, output), /stale qualification: source/)
+      writeFileSync(join(root, file), "baseline")
+    }
+    const artifact = join(output, "phoenix-assets-svelte-1.2.3.tgz")
+    const originalArtifact = readFileSync(artifact)
+    writeFileSync(artifact, "other renderer bytes")
+    assert.throws(() => verifyQualification(root, output), /stale qualification: artifacts/)
+    writeFileSync(artifact, originalArtifact)
+    const pointerPath = join(output, "qualification.json")
+    const pointer = JSON.parse(readFileSync(pointerPath, "utf8"))
+    const path = join(output, pointer.file)
+    const original = readFileSync(path)
+    writeFileSync(path, "tampered receipt")
+    assert.throws(() => verifyQualification(root, output), /checksum mismatch/)
+    writeFileSync(path, original)
+    const evidence = JSON.parse(original)
+    evidence.toolchain.node = "v0.0.0"
+    const bytes = JSON.stringify(evidence)
+    const sha256 = createHash("sha256").update(bytes).digest("hex")
+    const file = `qualification-${sha256}.json`
+    writeFileSync(join(output, file), bytes)
+    writeFileSync(pointerPath, JSON.stringify({ file, sha256 }))
+    assert.throws(() => verifyQualification(root, output), /stale qualification: toolchain/)
+  })
+})
+
+test("publication requires review of the exact retained screenshots", () => {
+  withArtifacts(({ root, output }) => {
+    const directory = join(output, "browser-screenshots")
+    mkdirSync(directory)
+    const bytes = Buffer.from("synthetic screenshot identity")
+    writeFileSync(join(directory, "fixture.png"), bytes)
+    const screenshots = { "fixture.png": createHash("sha256").update(bytes).digest("hex") }
+    recordBuildInputs(root, output)
+    writeQualification(root, output, {
+      http: { result: "passed" },
+      hex: [{ result: "passed" }],
+      full: { browser: { screenshots, screenshot_review: { status: "pending" } } },
+    })
+    const pointer = JSON.parse(readFileSync(join(output, "qualification.json"), "utf8"))
+    assert.throws(
+      () => verifyQualification(root, output, { requireReviewed: true }),
+      /requires review/,
+    )
+    assert.throws(
+      () => reviewQualification(root, output, "0".repeat(64), "reviewer"),
+      /exact qualification/,
+    )
+    assert.throws(
+      () => reviewQualification(root, output, pointer.sha256, ""),
+      /reviewer is required/,
+    )
+    reviewQualification(root, output, pointer.sha256, "test reviewer")
+    assert.equal(
+      verifyQualification(root, output, { requireReviewed: true }).consumers.full.browser
+        .screenshot_review.reviewer,
+      "test reviewer",
+    )
+    writeFileSync(join(directory, "fixture.png"), "changed screenshot")
+    assert.throws(() => verifyQualification(root, output), /stale qualification: evidence/)
   })
 })

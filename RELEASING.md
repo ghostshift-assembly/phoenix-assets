@@ -6,66 +6,48 @@ verified bytes.
 The release manifest binds every checksum to the source commit and version.
 Its contract remains `phoenix-assets/release/v1`.
 
-## Consumer qualification evidence — planned extension
+## Retained consumer qualification
 
-The existing release manifest and verification process own these gates. Keep
-`phoenix-assets/release/v1` stable; attach a versioned qualification sidecar by
-content digest to the retained release evidence, rather than silently adding
-unrecognized wire fields. No second registry, lifecycle or report-envelope field
-is introduced. These additional gates are specified; current scripts do not yet
-collect all of this evidence.
+`release.mjs qualify` tests the five built archives in fresh consumers and writes
+`phoenix-assets/qualification/v1` evidence beside the unchanged release manifest.
+`qualification.json` names the content-addressed receipt by SHA-256. It binds
+tracked source, locks, peers, public producer fixtures, toolchain, archives,
+consumer locks, emitted output and browser screenshots. Changing any bound input
+invalidates reuse even when package versions stay fixed.
 
-For each selected profile record declared package constraints/overrides, exact
-lock and resolved source/integrity, toolchain/configuration/generation digests,
-extracted tarball identity, actual entrypoint/import graph, installed dependency
-closure and measured installed/emitted bytes. Record selected processes/routes
-separately. A dormant installed tool is not an activated integration. Use PHA.02
-GEN/ISO/PROF/RPT acceptance and PHA.01/PHA.03 for the respective render/build duties.
+The HTTP consumer installs Svelte and `/core` without Electric, TanStack, Phoenix
+or LayerChart. The full consumer installs the explicitly selected optional peers,
+checks exports and builds reporting, collection and DocShell entrypoints. Hex
+consumers compile without optional dependencies and with DocShell 0.4, 0.5 and 1.0.
+The DocShell 1.0 consumer exports a static site without starting an endpoint.
+Chromium checks both installed renderers, local optional enhancements, responsive
+themes, search focus, RTL, reduced motion and JavaScript-disabled content. The
+receipt names the exact cases; it does not establish every possible host profile.
 
-Reporting qualification also records upstream contract/schema and fixture-format
-versions, immutable public producer repository/revision or publication identity,
-per-file fixture/generated-grammar digests, advertised capabilities/limits, exact
-renderer package/version/tarball digest, toolchain/profile and case results. The
-producer owns that corpus and its semantic verification. Retaining verified public
-bytes supports offline tests; never substitute a private checkout or a locally
-copied enum list. A checksum identifies bytes; publisher trust still follows this
-release process and the consuming channel's trust policy.
+Reporting uses the retained public `refpath/refpath` producer revision recorded
+in `npm/svelte/test/fixtures/upstream-reporting/profile.json`. Qualification runs
+its actual validator and encoder, verifies the source and recipe digests, and
+replays the generated boundary cases through the extracted browser decoder.
+The ordinary test suite also replays the retained corpus offline.
 
-Keep declared, source-implemented, locally tested, extracted-artifact qualified,
-published and operating claims separate. Each host records its selected Hex/npm
-companions and any upstream contract versions. One coordinated tag does not prove
-all hosts upgraded, use all packages, or run the same tuple. Running claims need
-host observations of loaded backend/build and served frontend artifacts. Library
-release checks cannot establish them. Known older qualified cohorts remain valid
-within their supported contracts; new source-only features remain unavailable there.
+Screenshot generation leaves review pending. Inspect the retained images, then
+record review with `review-qualification --expected-sha <receipt-sha> --reviewer
+<identity>`. This creates a new receipt without replacing the original evidence.
+Production publication requires reviewed evidence; a dry run may retain pending
+review. A command cannot accept a regenerated visual baseline automatically.
 
-- **REL-1:** change a lock, override, peer, generated contract or tarball while
-  holding display versions fixed. Reject reuse of the prior qualification. Record
-  the mismatched subject and retain evidence; requalify the exact selected bytes.
-- **REL-2:** advance the selected upstream producer profile without changing local
-  copied constants. Detect the stale join; run PHA.02 RPT-1/2 on the extracted
-  renderer and record each verdict. Compatible new producer data can qualify the
-  same renderer bytes; skipped cases and known validation gaps do not count as passes.
-- **REL-3:** qualify fresh narrow and reporting consumers separately under PHA.02
-  ISO/PROF. The optional LayerChart peer changes existing installation obligations:
-  use the breaking-release process, an explicit host migration and rollback proof.
-  Do not republish existing versions or change a host's lock implicitly. Until
-  these pass, retain the current published dependency behavior and state the gap.
-- **REL-4:** inspect both published build-tool packages and production application
-  archives. If PHA.03's reusable-gap gate admits a build extension, published
-  build-tool packages retain that implementation. No extension is mandatory merely
-  to qualify a release. Neither artifact contains host-generated private
-  correspondence, credentials or pairing material. Production app outputs exclude dev injection/routes/modules
-  under PHA.03. Ordinary source maps remain subject to the host's publication
-  policy. An `enabled: false` flag alone is not artifact inspection.
+The next coordinated release includes breaking installation changes: reporting
+hosts must explicitly select `layerchart@2.9.1`, and Svelte consumers must select
+Svelte `^5.57.2`. Rebuild with those exact peers and retain the prior package and
+lock together for rollback. The shared lint package now uses Biome 2.6.2; migrate
+host configuration with Biome's migration command before adopting that package.
+HTTP-only hosts do not acquire a reporting or sync dependency.
 
-Missing or mismatched qualification blocks the affected support/publication claim.
-An interrupted publisher reuses the original artifact identity under Recovery
-below. A host restores an older exact package/lock cohort only if current contract
-and trust policy still permit it; no component is silently replaced under an
-accepted digest. A missing selected peer is a build prerequisite failure, not a
-successful runtime table fallback. Public measurement and unrelated qualified
-asset profiles do not acquire a reporting or browser-development prerequisite.
+Installed dependency counts/bytes and emitted browser bytes are separate
+measurements in the receipt. Installed tools do not prove activated services.
+No local receipt proves publication, a running deployment or backend sync
+compatibility. Hosts retain authority over runtime codecs, actor/tenant scope,
+credentials, mutation reconciliation and production artifact policy.
 
 ## Local qualification
 
@@ -118,13 +100,15 @@ Build from the clean tagged commit, after local qualification:
 mise exec -- mix git_ops.release
 mise exec -- node scripts/release.mjs check --tag vX.Y.Z --network
 mise exec -- node scripts/release.mjs build --tag vX.Y.Z --artifact-dir dist/release
-mise exec -- node scripts/release.mjs smoke --tag vX.Y.Z --artifact-dir dist/release
+mise exec -- node scripts/release.mjs qualify --tag vX.Y.Z --artifact-dir dist/release
 mise exec -- node scripts/release.mjs publish --tag vX.Y.Z --artifact-dir dist/release --dry-run
 ```
 
 Use the actual tag in place of `vX.Y.Z`. Untagged preparation can use
 `--allow-untagged`; production publication requires the exact tag and a clean
-worktree. Review the five artifacts, `release-manifest.json` and `SHA256SUMS`.
+worktree. Review the five artifacts, `release-manifest.json`, `SHA256SUMS` and retained
+qualification evidence. Install Chromium with `pnpm exec playwright install chromium`
+before local browser qualification.
 Retain this directory so interrupted publication can reuse the same bytes.
 
 ## Publish the locally verified bytes
@@ -135,7 +119,9 @@ environment; never commit them. npm must grant write access to the
 `@phoenix-assets` packages. Complete any registry-required authentication.
 
 ```bash
-mise exec -- node scripts/release.mjs verify --tag vX.Y.Z --artifact-dir dist/release
+mise exec -- node scripts/release.mjs verify-qualification --tag vX.Y.Z --artifact-dir dist/release
+# After inspecting browser-screenshots/, use the SHA-256 from qualification.json:
+mise exec -- node scripts/release.mjs review-qualification --tag vX.Y.Z --artifact-dir dist/release --expected-sha <receipt-sha> --reviewer <identity>
 mise exec -- node scripts/release.mjs publish --tag vX.Y.Z --artifact-dir dist/release
 mise exec -- mix hex.publish docs --yes
 ```
@@ -155,8 +141,10 @@ failure, rerun the same local `publish` command with the retained artifact
 directory. Do not rebuild artifacts, move the tag or bump a version to recover
 an interrupted upload. Defective published bytes require a new release.
 
-The manually dispatched Release workflow uses the same identity checks and
-artifact smokes. It is reserved for releases rather than normal iteration. Its
+The manually dispatched Release workflow first builds and retains a dry-run
+artifact with its receipt and screenshots. After review, a publication dispatch
+names that exact run ID, artifact ID and reviewed qualification SHA-256. It
+downloads and verifies those bytes without rebuilding them. It is reserved for releases rather than normal iteration. Its
 `release` environment holds `HEX_API_KEY` and, when
 needed, `NPM_TOKEN`. npm trusted publishing may instead use that workflow's
 OIDC identity. Protected branch/tag settings and release reviewers are
