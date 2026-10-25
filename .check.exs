@@ -41,6 +41,8 @@
     {:svelte_filenames, command: "pnpm check:svelte-filenames"},
     {:doc_shell_offline,
      command: "pnpm --filter @phoenix-assets/doc-shell check:offline", deps: [:pnpm_install]},
+    {:doc_shell_stories,
+     command: "pnpm --filter @phoenix-assets/doc-shell check:stories", deps: [:pnpm_install]},
 
     ## Scope gate: no consuming platform's name or vocabulary in lib/ or npm/.
     ## Needs no install -- plain Node, like the doc-shell offline guard.

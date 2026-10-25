@@ -97,10 +97,12 @@ jobs:
         env:
           ARTIFACT_ID: ${{ steps.upload.outputs.artifact-id }}
         run: |
-          echo "Artifact ID: $ARTIFACT_ID" >> "$GITHUB_STEP_SUMMARY"
-          echo "Run ID: $GITHUB_RUN_ID" >> "$GITHUB_STEP_SUMMARY"
-          cat dist/release/qualification.json >> "$GITHUB_STEP_SUMMARY"
-          echo "Review the retained screenshots before dispatching publication with these exact IDs and qualification SHA-256." >> "$GITHUB_STEP_SUMMARY"
+          {
+            echo "Artifact ID: $ARTIFACT_ID"
+            echo "Run ID: $GITHUB_RUN_ID"
+            cat dist/release/qualification.json
+            echo "Review the retained screenshots before dispatching publication with these exact IDs and qualification SHA-256."
+          } >> "$GITHUB_STEP_SUMMARY"
 
   publish:
     name: Publish the retained reviewed artifacts
