@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v2.0.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v2.0.0...v2.0.1) (2026-10-25)
+
+
+
+
+### Bug Fixes:
+
+* ci: build DocShell assets before floor runtime tests by futhr
+
 ## [v2.0.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.2.1...v2.0.0) (2026-10-25)
 ### Breaking Changes:
 
