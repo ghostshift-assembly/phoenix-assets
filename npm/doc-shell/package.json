@@ -1,6 +1,6 @@
 {
   "name": "@phoenix-assets/doc-shell",
-  "version": "1.2.1",
+  "version": "2.0.0",
   "description": "Renderer-neutral Svelte documentation shell for DocShell artifacts.",
   "author": "Tobias Bohwalli <hi@futhr.io>",
   "type": "module",

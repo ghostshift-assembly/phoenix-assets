@@ -5,6 +5,67 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v2.0.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.2.1...v2.0.0) (2026-10-25)
+### Breaking Changes:
+
+* doc-shell: preserve API fallbacks and credential safety by futhr
+
+* doc-shell: ship local enhancements and preserve reader fallbacks by futhr
+
+* reporting: require an explicit qualified LayerChart peer by futhr
+
+* deps: update qualified Hex and frontend dependencies by futhr
+
+* deps: refresh frontend and backend dependencies by futhr
+
+
+
+### Features:
+
+* typespec: preserve declared JSON field names when selected by futhr
+
+* runtime: support scoped sockets and host command transports by futhr
+
+* Show highlighted documentation search excerpts by futhr
+
+* Support inline documentation search by futhr
+
+* runtime: isolate HTTP clients from optional integrations by futhr
+
+### Bug Fixes:
+
+* release: enforce story coverage and fix workflow lint by futhr
+
+* doc-shell: retain reading width in nested API schemas by futhr
+
+* doc-shell: keep search focus inside its modal by futhr
+
+* doc-shell: complete modal navigation and reader fallbacks by futhr
+
+* doc-shell: preserve regional direction and no-script home links by futhr
+
+* tooling: support SvelteKit 3 configuration and pin pnpm runtime by futhr
+
+* doctor: require a nonempty production SPA entrypoint by futhr
+
+* doc-shell: preserve directive labels and diagram contrast by futhr
+
+* doc-shell: emit executable import-map JSON in HEEx by futhr
+
+* reporting: qualify and honor the public producer limits by futhr
+
+* enums: reject ambiguous groups before generating JSON by futhr
+
+* doc-shell: share search and complete reader controls by futhr
+
+* typespec: render bounded integer types as numbers by futhr
+
+* doc-shell: refresh live search DOM and report package version by futhr
+
+* Restore article position after inline search by futhr
+
+* deps: use patched bandit in http fixtures by futhr
+
 ## [v1.2.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v1.2.0...v1.2.1) (2026-10-10)
 
 
