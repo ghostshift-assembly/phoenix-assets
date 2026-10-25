@@ -86,7 +86,9 @@ dependency installation cannot change the tagged source tree.
 
 Also run warnings-as-errors compilation and ExUnit on Elixir 1.18 / OTP 27,
 and the complete gate on Elixir 1.20 / OTP 29. Keep each toolchain's build and
-PLT caches separate. The full gate includes both coverage floors, dependency
+PLT caches separate. Run `pnpm build:doc-shell-assets` before the floor's renderer
+tests; those generated assets are absent from a clean checkout.
+The full gate includes both coverage floors, dependency
 audits, docs, Dialyzer, package exports and a consumer of the built Hex tarball.
 The Hex metadata must not constrain `phoenix_sync` or `electric`; each host
 owns its backend. Development tests qualify the immutable Phoenix.Sync fork,

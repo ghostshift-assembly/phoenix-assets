@@ -96,6 +96,8 @@ jobs:
 
       - run: mix deps.get
       - run: pnpm install --frozen-lockfile
+      - run: pnpm build:doc-shell-assets
+        if: matrix.check == 'elixir'
 
       # Floor leg: compile (warnings as errors) + ExUnit only. Formatting,
       # static analysis, and the frontend run once, on the latest toolchain.
