@@ -1,5 +1,5 @@
 import { fileURLToPath } from "node:url"
-import { describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { parsePo, poLoaderPlugin } from "../src/po-loader"
 
 const fixture = fileURLToPath(new URL("./fixtures/messages.po", import.meta.url))
@@ -79,17 +79,28 @@ describe("parsePo", () => {
 
 describe("poLoaderPlugin", () => {
   const plugin = poLoaderPlugin()
-  const load = plugin.load as unknown as (id: string) => { code: string; map: null } | null
+  const addWatchFile = vi.fn()
+  const loadHook = plugin.load as unknown as (
+    this: { addWatchFile: (file: string) => void },
+    id: string,
+  ) => { code: string; map: null } | null
+  const load = (id: string) => loadHook.call({ addWatchFile }, id)
+
+  beforeEach(() => {
+    addWatchFile.mockClear()
+  })
 
   it("loads a PO file as an ES module before Vite parses it", () => {
     expect(load(`${fixture}?import`)).toEqual({
       code: `export const messages = JSON.parse(${JSON.stringify(JSON.stringify({ hello: "Hello" }))})`,
       map: null,
     })
+    expect(addWatchFile).toHaveBeenCalledExactlyOnceWith(fixture)
   })
 
   it("ignores non-PO modules", () => {
     expect(load(`${fixture}.ts`)).toBeNull()
+    expect(addWatchFile).not.toHaveBeenCalled()
   })
 })
 

@@ -36,6 +36,10 @@ import type { Article } from "$phoenix/types"
 The virtual modules resolve to the output of `mix phoenix_assets.gen`.
 `mix phoenix_assets.gen --check` detects stale checked-in output.
 
+Imported gettext `.po` catalogs are watched for edits, including files outside
+the Vite project root. Editing a catalog invalidates its generated message
+module without restarting the development server.
+
 ## Exports
 
 | Export | What it is |

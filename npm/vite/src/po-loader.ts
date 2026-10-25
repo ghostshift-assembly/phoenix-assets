@@ -13,6 +13,7 @@ export function poLoaderPlugin(): Plugin {
     load(id) {
       const file = poFile(id)
       if (!file) return null
+      this.addWatchFile(file)
       const code = readFileSync(file, "utf8")
       return {
         code: `export const messages = JSON.parse(${JSON.stringify(JSON.stringify(parsePo(code)))})`,
