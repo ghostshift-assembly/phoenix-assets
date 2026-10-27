@@ -18,6 +18,14 @@ skills, with matching directory names. When using Claude, create missing links
 and repair repository-owned links. Preserve unrelated local entries and client
 settings; remove obsolete repository-owned aliases.
 
+Use [contract-change](.agents/skills/contract-change/SKILL.md) for source DSL,
+generator, virtual-module and runtime changes;
+[diagnose](.agents/skills/diagnose/SKILL.md) for observed failures; and
+[package-proof](.agents/skills/package-proof/SKILL.md) for delivery evidence.
+The writing skill retains claim/terminology review. Host application layout,
+authorization and product state remain outside these workflows' implementation
+ownership.
+
 ## Working agreements
 
 - Never push branches, tags, commits, or other Git refs to a remote through a
@@ -194,6 +202,11 @@ coverage floors), and any new public module needs a `@moduledoc`.
 For guidance-only changes, validate the affected metadata, references, Git
 tracking and ignore boundaries, and discovery links using existing tools. Do
 not install dependencies or run unrelated application suites for those changes.
+Do not compile or build browser/package assets solely for instructions. Inspect
+free disk, script effects and output paths before authorized archive/build proof;
+clean only disposable outputs created by that run, preserving shared caches,
+candidate producers and retained artifacts. Required failed/unavailable release
+or optional-consumer evidence stays unverified.
 
 Report actual review and executed checks separately from configured gates,
 declarations, and planned work. State checks that were not run and material
