@@ -71,7 +71,7 @@ defmodule PhoenixAssets.MixProject do
        ref: "330f0602009b7b8aca7e3140b492b5408ee276ec",
        only: [:dev, :test]},
       {:gettext, "~> 1.0", optional: true},
-      {:tidewave, "~> 0.5", optional: true},
+      {:tidewave, "~> 0.9.2", optional: true},
       {:igniter, "~> 0.6", optional: true},
       {:git_ops, "~> 2.6", only: [:dev], runtime: false},
       {:ex_check, "~> 0.17", only: [:dev], runtime: false},
@@ -81,7 +81,7 @@ defmodule PhoenixAssets.MixProject do
       {:mix_audit, "~> 2.1", only: [:dev, :test], runtime: false},
       {:excoveralls, "~> 0.18", only: :test, runtime: false},
       {:simple_sat, "~> 0.1", only: :test},
-      {:bandit, "~> 1.13.1", only: :test},
+      {:bandit, "~> 1.14.1", only: :test},
       # The install-task test drives igniter's Phoenix generator, which is only
       # compiled when phx_new resolves as a dependency -- a globally installed
       # archive does not satisfy it.
