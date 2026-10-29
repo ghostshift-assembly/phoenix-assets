@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import ApiReference from "../src/api-reference.svelte"
 import DocShell from "../src/doc-shell.svelte"
 import Search from "../src/search.svelte"
+import Sidebar from "../src/sidebar.svelte"
 import SiteShell from "../src/site-shell.svelte"
 import type { DocShellPresentation, DocShellSite, SearchEntry } from "../src/types.js"
 import presentationV2Fixture from "./fixtures/doc-shell-v2.json"
@@ -51,6 +52,32 @@ function assertControls(root: HTMLElement): void {
 }
 
 describe("rendered heading targets", () => {
+  it("opens the current route's navigation group without empty links or nested landmarks", () => {
+    const element = target()
+    mounted.push(
+      mount(Sidebar, {
+        target: element,
+        props: {
+          items: [
+            {
+              id: "group",
+              title: "Reading",
+              path: "",
+              children: [{ id: "guide", title: "Guide", path: "/guide/", children: [] }],
+            },
+          ],
+          currentPath: "/guide/",
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("details")?.open).toBe(true)
+    expect(element.querySelector("summary")?.textContent).toBe("Reading")
+    expect(element.querySelectorAll('nav[aria-label="Documentation"]')).toHaveLength(1)
+    expect(element.querySelector('a[href=""]')).toBeNull()
+    expect(element.querySelector('[aria-current="page"]')?.textContent).toBe("Guide")
+  })
+
   it("keeps every API operation and its ordinary anchor readable without selecting a panel", () => {
     const element = target()
     mounted.push(mount(ApiReference, { target: element, props: { spec: apiFixture } }))

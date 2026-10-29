@@ -13,7 +13,8 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
                  figure figcaption details summary dl dt dd kbd mark sub sup del s)
     @void_elements ~w(br hr)
     @directives ~w(accordion badge callout card card-grid code-group frame response-fields
-                   snippet step steps tabs tree update)
+                   snippet step steps tabs tree update file-tree link-card openapi-operation
+                   openapi-schema)
     @attributes ~w(id title class colspan rowspan scope start)
     @id ~r/\A[\p{L}\p{N}][\p{L}\p{N}_.:-]*\z/u
 
@@ -184,6 +185,15 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         render_children(content),
         "</details>"
       ]
+    end
+
+    defp render_directive("link-card", attrs, content) do
+      label = string(attrs["title"]) || "Link card"
+
+      element("section", [{"class", "doc-directive doc-link-card"}], [
+        element("strong", [], render_link(attrs, [label])),
+        element("div", [], render_children(content))
+      ])
     end
 
     defp render_directive(tag, attrs, content) do

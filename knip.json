@@ -17,5 +17,5 @@
       "project": "*.{ts,svelte,css}"
     }
   },
-  "ignoreBinaries": ["elixir"]
+  "ignoreBinaries": ["elixir", "mix"]
 }

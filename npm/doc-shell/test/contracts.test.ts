@@ -52,7 +52,7 @@ describe("DocShell contract helpers", () => {
   })
 
   it("publishes the complete directive registry", () => {
-    expect(directiveNames).toHaveLength(14)
+    expect(directiveNames).toHaveLength(18)
     expect(isDirective("callout")).toBe(true)
     expect(isDirective("script")).toBe(false)
   })

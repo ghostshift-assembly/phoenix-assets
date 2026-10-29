@@ -2,6 +2,9 @@ import type { SearchFilters, SearchRecord } from "./types.js"
 
 const normalize = (value: string) => value.normalize("NFC").toLocaleLowerCase("und")
 
+export const searchLabel = (locale: string): string =>
+  /^ar(?:[-_]|$)/i.test(locale) ? "بحث في الوثائق" : "Search documentation"
+
 const audienceMatches = (record: SearchRecord, expected: string | string[]) => {
   const actual = Array.isArray(record.audience) ? record.audience : [record.audience]
   const values = Array.isArray(expected) ? expected : [expected]

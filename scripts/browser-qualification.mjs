@@ -13,14 +13,18 @@ import {
 import { createServer } from "node:http"
 import { extname, join, resolve, sep } from "node:path"
 import { chromium } from "@playwright/test"
+import { qualifyConformance } from "./conformance-qualification.mjs"
+import { startHosted } from "./hosted-qualification.mjs"
 import { qualifySearch } from "./search-qualification.mjs"
 
 /** Exercises the installed renderer and public producer corpus in Chromium. */
-export async function qualifyBrowser(sourceRoot, root, output) {
+export async function qualifyBrowser(sourceRoot, root, output, hostedConsumer) {
   const fixture = join(output, "browser-static")
   const searchFixture = join(output, "browser-search")
+  const conformanceFixture = join(output, "browser-conformance")
   assert.ok(existsSync(join(fixture, "site.json")), "extracted Hex renderer fixture is missing")
   copyFileSync(join(fixture, "site.json"), join(root, "site.json"))
+  copyFileSync(join(conformanceFixture, "site.json"), join(root, "corpus-site.json"))
   writeFileSync(
     join(root, "search-fixtures.json"),
     JSON.stringify(
@@ -53,6 +57,7 @@ import { PortableReport, decodeReportEnvelope, safeDecodeReportEnvelope } from "
 import "@phoenix-assets/doc-shell/theme.css"
 import site from "./site.json"
 import searchFixtures from "./search-fixtures.json"
+import corpusSite from "./corpus-site.json"
 import api from "./api.json"
 import envelope from "./envelope.json"
 import samples from "./qualified-envelopes.json"
@@ -60,10 +65,11 @@ window.decodeProducerCase = safeDecodeReportEnvelope
 const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
 const apiPage = new URLSearchParams(window.location.search).has("api")
 const searchFixture = searchFixtures[new URLSearchParams(window.location.search).get("search")]
+const corpusPage = new URLSearchParams(window.location.search).get("corpus")
 </script>
 {#if apiPage}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference spec={api} /></main></div>{:else}
-<SiteShell site={searchFixture?.site ?? site} pageId={searchFixture ? "guides:english" : pageId} searchContract={searchFixture?.contract.algorithm === "pagefind/v1" ? searchFixture.contract : undefined} />
-{#if !searchFixture && pageId === "anchors:guide"}
+<SiteShell site={corpusPage ? corpusSite : searchFixture?.site ?? site} pageId={corpusPage ?? (searchFixture ? "guides:english" : pageId)} searchContract={searchFixture?.contract.algorithm === "pagefind/v1" ? searchFixture.contract : undefined} />
+{#if !corpusPage && !searchFixture && pageId === "anchors:guide"}
 <section class="doc-shell" aria-label="Portable reporting"><PortableReport envelope={decodeReportEnvelope(envelope)} /></section>
 {#each samples as sample}<section class="doc-shell" aria-label={sample.name}><PortableReport envelope={decodeReportEnvelope(sample.value)} /></section>{/each}
 {/if}
@@ -72,7 +78,7 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
   )
   writeFileSync(
     join(root, "index.html"),
-    '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><script type="module" src="/fixture.js"></script></body></html>',
+    '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><script type="module" src="/fixture.js"></script></body></html>',
   )
   writeFileSync(
     join(root, "fixture.js"),
@@ -80,13 +86,17 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
   )
   writeFileSync(
     join(root, "vite.config.mjs"),
-    'import { svelte } from "@sveltejs/vite-plugin-svelte"; export default { plugins: [svelte()], build: { outDir: "browser-dist" } };\n',
+    'import { svelte } from "@sveltejs/vite-plugin-svelte"; export default { plugins: [svelte()], build: { outDir: "browser-dist", rollupOptions: { input: { index: "index.html", live: "live-client.js" }, external: ["/phoenix/phoenix.mjs", "/live/phoenix_live_view.esm.js"] } } };\n',
+  )
+  writeFileSync(
+    join(root, "live-client.js"),
+    'import { Socket } from "/phoenix/phoenix.mjs"; import { LiveSocket } from "/live/phoenix_live_view.esm.js"; import { PhoenixAssetsDocShell } from "@phoenix-assets/doc-shell/browser"; const socket = new LiveSocket("/live", Socket, { hooks: { PhoenixAssetsDocShell }, params: { _csrf_token: document.querySelector("meta[name=csrf-token]").content } }); socket.connect(); window.fixtureSocket = socket;',
   )
   execFileSync(join(root, "node_modules/.bin/vite"), ["build"], { cwd: root, stdio: "inherit" })
   const application = join(root, "browser-dist")
   writeFileSync(
     join(root, "ssrfixture.svelte"),
-    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell {site} {pageId} />{/if}',
+    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import corpusSite from "./corpus-site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false, corpus = false } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell site={corpus ? corpusSite : site} {pageId} />{/if}',
   )
   writeFileSync(
     join(root, "ssr.config.mjs"),
@@ -99,19 +109,28 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
   const css = readdirSync(join(application, "assets")).filter((file) => file.endsWith(".css"))
   writeFileSync(
     join(root, "render-ssr.mjs"),
-    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } }))); writeFileSync("browser-dist/api-ssr.html", html(render(Fixture, { props: { api: true } })));`,
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } }))); writeFileSync("browser-dist/api-ssr.html", html(render(Fixture, { props: { api: true } })));`,
   )
   execFileSync("node", ["render-ssr.mjs"], { cwd: root, stdio: "inherit" })
+  writeFileSync(
+    join(root, "render-corpus.mjs"),
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import { mkdirSync, writeFileSync } from "node:fs"; mkdirSync("browser-dist/conformance-ssr", { recursive: true }); for (const pageId of Object.keys(site.pages)) { const result = render(Fixture, { props: { pageId, corpus: true } }); writeFileSync("browser-dist/conformance-ssr/" + pageId + ".html", '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + '</head><body style="margin:0">' + result.body + '</body></html>'); }`,
+  )
+  execFileSync("node", ["render-corpus.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")
   mkdirSync(screenshots, { recursive: true })
   const server = createServer((request, response) => {
     const path = decodeURIComponent(new URL(request.url, "http://localhost").pathname)
     const adapter = ["json", "pagefind"].find((adapter) => path.startsWith(`/${adapter}/`))
-    const base = adapter
-      ? join(searchFixture, adapter)
-      : path.startsWith("/svelte/")
-        ? application
-        : fixture
+    const base = path.startsWith("/conformance-ssr/")
+      ? application
+      : path.startsWith("/conformance/")
+        ? conformanceFixture
+        : adapter
+          ? join(searchFixture, adapter)
+          : path.startsWith("/svelte/")
+            ? application
+            : fixture
     let file = resolve(base, `.${path.startsWith("/svelte/") ? path.slice(7) : path}`)
     if (path.startsWith("/svelte/assets/")) file = resolve(application, `.${path.slice(7)}`)
     // Vite's own hashed assets use /assets; static exporter names do not collide.
@@ -120,7 +139,7 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
     if (path === "/svelte-ssr/") file = join(application, "ssr.html")
     if (path === "/svelte-ssr-404/") file = join(application, "ssr404.html")
     if (path === "/svelte-api-ssr/") file = join(application, "api-ssr.html")
-    const allowed = [application, fixture, searchFixture].some(
+    const allowed = [application, fixture, searchFixture, conformanceFixture].some(
       (directory) => file === directory || file.startsWith(directory + sep),
     )
     if (!allowed || !existsSync(file)) {
@@ -146,10 +165,26 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
   await new Promise((done) => server.listen(0, "127.0.0.1", done))
   const origin = `http://127.0.0.1:${server.address().port}`
   let browser
+  let hosted
   const cases = []
   try {
     browser = await chromium.launch({ headless: true })
-    cases.push(...(await qualifySearch(browser, origin, searchFixture)))
+    if (hostedConsumer) hosted = await startHosted(sourceRoot, hostedConsumer, output, application)
+    cases.push(...(await qualifySearch(browser, origin, searchFixture, hosted?.origin)))
+    cases.push(...(await qualifyConformance(browser, origin, output, hosted?.origin)))
+    if (hostedConsumer) {
+      execFileSync(
+        "mix",
+        [
+          "run",
+          "--no-start",
+          join(sourceRoot, "scripts/compare-surfaces.exs"),
+          join(output, "renderer-surfaces.json"),
+        ],
+        { cwd: hostedConsumer.consumer, env: hostedConsumer.env, stdio: "inherit" },
+      )
+      cases.push("DocShell public semantic-surface validation and hosted/static comparison")
+    }
     for (const renderer of ["heex", "svelte"]) {
       const path = renderer === "heex" ? "/docs/guide/" : "/svelte/"
       const context = await browser.newContext({
@@ -514,6 +549,7 @@ const searchFixture = searchFixtures[new URLSearchParams(window.location.search)
     }
   } finally {
     await browser?.close()
+    await hosted?.stop()
     await new Promise((done) => server.close(done))
   }
 }

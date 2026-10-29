@@ -100,7 +100,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           <a :if={@brand == []} href={@home_path}>{@context.site_title}</a>
           {render_slot(@brand)}
         </div>
-        <.search search={@context.search} />
+        <.search search={@context.search} label={search_label(Map.get(@context, :locale))} />
         <div class="doc-theme-controls" aria-label="Reader theme">
           <button type="button" class="pa-button" data-doc-theme-value="system">System</button>
           <button type="button" class="pa-button" data-doc-theme-value="light">Light</button>
@@ -146,6 +146,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     attr(:presentation, :atom, values: [:dialog, :inline], default: :dialog)
     attr(:trigger, :boolean, default: true)
     attr(:filter_values, :map, default: %{})
+    attr(:label, :string, default: "Search documentation")
     slot(:header)
     slot(:controls)
 
@@ -182,9 +183,9 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
       ~H"""
       <div class="doc-search" data-pagefind-ignore>
-        <button :if={@trigger} type="button" class="pa-button" data-doc-search-open aria-haspopup={@presentation == :dialog && "dialog"}>Search documentation</button>
-        <section :if={@presentation == :inline} class="doc-search-inline" data-doc-search-dialog data-doc-search-presentation="inline" data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label="Search documentation"><.search_content {assigns} /></section>
-        <dialog :if={@presentation == :dialog} class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label="Search documentation"><.search_content {assigns} /></dialog>
+        <button :if={@trigger} type="button" class="pa-button" data-doc-search-open aria-haspopup={@presentation == :dialog && "dialog"}>{@label}</button>
+        <section :if={@presentation == :inline} class="doc-search-inline" data-doc-search-dialog data-doc-search-presentation="inline" data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label={@label}><.search_content {assigns} /></section>
+        <dialog :if={@presentation == :dialog} class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label={@label}><.search_content {assigns} /></dialog>
         <noscript>
           <details><summary>Browse the page index</summary><ul><li :for={record <- @records}><a href={record.route}>{record.title}</a></li></ul></details>
         </noscript>
@@ -194,9 +195,9 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     defp search_content(assigns) do
       ~H"""
-          <header :if={@header == []}><h2>Search documentation</h2><button type="button" class="pa-button" data-doc-search-close>Close</button></header>
+          <header :if={@header == []}><h2>{@label}</h2><button type="button" class="pa-button" data-doc-search-close>Close</button></header>
           {render_slot(@header)}
-          <label for="doc-search-query">Search</label>
+          <label for="doc-search-query">{@label}</label>
           <input id="doc-search-query" class="pa-field" type="search" role="combobox" autocomplete="off" aria-controls="doc-search-results" aria-expanded="true" data-doc-search-input />
           {render_slot(@controls)}
           <details class="doc-search-filters"><summary>Filters</summary><div aria-label="Search filters">
@@ -249,7 +250,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @spec provenance(map()) :: Phoenix.LiveView.Rendered.t()
     def provenance(assigns) do
       ~H"""
-      <footer class="doc-provenance">
+      <footer class="doc-provenance" role="contentinfo" aria-label="Page provenance">
         <span :if={@page.last_modified}>Updated {@page.last_modified}</span>
         <a :if={@page.source_url} href={@page.source_url}>View source</a>
         <a :if={@page.edit_url} href={@page.edit_url}>Edit this page</a>
@@ -372,6 +373,14 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     defp filter_label("collection"), do: "Package"
     defp filter_label(value), do: String.capitalize(value)
+
+    defp search_label(locale) when is_binary(locale) do
+      if Regex.match?(~r/\Aar(?:[-_]|\z)/i, locale),
+        do: "بحث في الوثائق",
+        else: "Search documentation"
+    end
+
+    defp search_label(_), do: "Search documentation"
 
     defp home_path(context) do
       Enum.find_value(context.navigation, "/", &navigation_home_path/1)

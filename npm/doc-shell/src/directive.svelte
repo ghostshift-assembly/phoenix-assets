@@ -1,20 +1,26 @@
 <script lang="ts">
 import type { Snippet } from "svelte"
 import type { DirectiveName } from "./directives.js"
+import { safeLinkTarget } from "./url.js"
 
 interface Props {
   name: DirectiveName
   title?: string
+  href?: string
   children?: Snippet
 }
-const { name, title, children }: Props = $props()
+const { name, title, href, children }: Props = $props()
+const label = $derived(
+  title ?? name.replaceAll("-", " ").replace(/^./, (value) => value.toUpperCase()),
+)
+const link = $derived(name === "link-card" ? safeLinkTarget(href) : undefined)
 </script>
 
 <section class:badge={name === "badge"} class="directive directive-{name}" data-directive={name}>
   {#if name === "accordion"}
     <details><summary>{title ?? "Details"}</summary>{#if children}<div class="directive-content">{@render children()}</div>{/if}</details>
   {:else}
-    {#if title}<strong>{title}</strong>{/if}
+    <strong>{#if link}<a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined}>{label}</a>{:else}{label}{/if}</strong>
     {#if children}<div class="directive-content">{@render children()}</div>{/if}
   {/if}
 </section>

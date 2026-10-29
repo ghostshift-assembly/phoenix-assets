@@ -28,7 +28,7 @@ $effect(() => {
 </script>
 
 <div class="code-block" data-language={language}>
-  <button type="button" onclick={() => void copyText(code).then(() => { copyState = "Copied" }, () => { copyState = "Copy unavailable; select source" })}>{copyState}</button>
+  <button type="button" aria-label={copyState === "Copy" ? "Copy code" : copyState} onclick={() => void copyText(code).then(() => { copyState = "Copied" }, () => { copyState = "Copy unavailable; select source" })}>{copyState}</button>
   {#if html}<div class="highlighted">{@html html}</div>{:else}<pre><code>{code}</code></pre>{/if}
 </div>
 

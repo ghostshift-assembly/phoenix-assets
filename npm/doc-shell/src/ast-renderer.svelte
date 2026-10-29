@@ -33,7 +33,7 @@ const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
   {:else if node.tag === "step"}<li>{#if node.attrs?.title}<h3>{node.attrs.title}</h3>{/if}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></li>
   {:else if node.tag === "mermaid"}<MermaidDiagram code={extractText(node.content)} />
   {:else if isDirective(node.tag)}
-    <Directive name={node.tag} title={node.attrs?.title}>{#snippet children()}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} />{/snippet}</Directive>
+    <Directive name={node.tag} title={node.attrs?.title} href={node.attrs?.href}>{#snippet children()}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} />{/snippet}</Directive>
   {:else if node.tag === "pre"}
     {const info = $derived(preCodeInfo(node))}
     {#if info?.language === "mermaid"}<MermaidDiagram code={info.code} />{:else if info}<CodeBlock code={info.code} language={info.language} />{:else}<pre><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></pre>{/if}

@@ -13,8 +13,16 @@ interface Props {
   ) => Array<SearchEntry | SiteSearchEntry> | Promise<Array<SearchEntry | SiteSearchEntry>>
   presentation?: "dialog" | "inline"
   contract?: PagefindContract
+  label?: string
 }
-const { entries, navigate, search, presentation = "dialog", contract }: Props = $props()
+const {
+  entries,
+  navigate,
+  search,
+  presentation = "dialog",
+  contract,
+  label = "Search documentation",
+}: Props = $props()
 const id = $props.id()
 let root = $state<HTMLElement>()
 const facets = $derived(
@@ -85,13 +93,13 @@ function toRecord(entry: SearchEntry | SiteSearchEntry): SearchRecord {
 </script>
 <svelte:window onkeydown={shortcut} />
 <div bind:this={root} class="doc-search">
-  <button type="button" class="pa-button" data-doc-search-open>Search documentation</button>
+  <button type="button" class="pa-button" data-doc-search-open>{label}</button>
   <svelte:element this={presentation === "dialog" ? "dialog" : "section"}
     class="doc-search-panel" class:doc-search-inline={presentation === "inline"}
     data-doc-search-dialog data-doc-search-owned data-doc-search-presentation={presentation}
-    aria-label="Search documentation">
-    <label for={`${id}-query`}>Search documentation</label>
-    <input id={`${id}-query`} data-doc-search-input role="combobox" aria-controls={`${id}-results`} aria-expanded="true" placeholder="Search documentation…" />
+    aria-label={label}>
+    <label for={`${id}-query`}>{label}</label>
+    <input id={`${id}-query`} data-doc-search-input role="combobox" aria-controls={`${id}-results`} aria-expanded="true" placeholder={`${label}…`} />
     {#each facets as facet (facet.name)}
       <label>{facet.name}<select data-doc-search-filter={facet.name}><option value="">All</option>{#each facet.values as value (value)}<option {value}>{value}</option>{/each}</select></label>
     {/each}

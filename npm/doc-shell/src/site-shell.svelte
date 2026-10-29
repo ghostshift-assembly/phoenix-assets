@@ -2,6 +2,7 @@
 import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import type { PagefindContract } from "./browser/search.js"
+import { searchLabel } from "./browser/search.js"
 import Search from "./search.svelte"
 import Sidebar from "./sidebar.svelte"
 import type { DocShellSite } from "./types.js"
@@ -39,13 +40,14 @@ $effect(() => {
     data-doc-theme="system"
     data-schema-version={site.schema_version}
     data-cohort-digest={site.cohort_digest}
+    data-content-digest={page.content_digest}
     dir={/^(ar|fa|he|ur)(?:[-_]|$)/i.test(page.locale) ? "rtl" : "ltr"}
     lang={page.locale}
   >
     <a class="skip-link" href="#doc-main">Skip to documentation</a>
     <header class="site-header">
       <a href={homePath} class="brand">{site.title}</a>
-      <Search entries={site.search} {navigate} contract={searchContract} />
+      <Search entries={site.search} {navigate} contract={searchContract} label={searchLabel(page.locale)} />
       <div class="header-actions" aria-label="Reader preferences">
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value="system">System</button>
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value="light">Light</button>
@@ -70,7 +72,7 @@ $effect(() => {
           {#if page.previous}<a rel="prev" href={page.previous.path}>← {page.previous.title}</a>{/if}
           {#if page.next}<a rel="next" href={page.next.path}>{page.next.title} →</a>{/if}
         </nav>{/if}
-        <footer class="provenance">
+        <footer class="provenance" role="contentinfo" aria-label="Page provenance">
           {#if page.last_modified}<span>Updated {page.last_modified}</span>{/if}
           {#if page.source_url}<a href={page.source_url}>View source</a>{/if}
           {#if page.edit_url}<a href={page.edit_url}>Edit this page</a>{/if}
@@ -86,7 +88,7 @@ $effect(() => {
     <a class="skip-link" href="#doc-main">Skip to documentation</a>
     <header class="site-header">
       <a href={homePath} class="brand">{site.title}</a>
-      <Search entries={site.search} {navigate} contract={searchContract} />
+      <Search entries={site.search} {navigate} contract={searchContract} label={searchLabel(site.default_locale)} />
       <div class="header-actions" aria-label="Reader preferences">
         <button type="button" class="pa-button" data-doc-theme-value="system">System</button>
         <button type="button" class="pa-button" data-doc-theme-value="light">Light</button>

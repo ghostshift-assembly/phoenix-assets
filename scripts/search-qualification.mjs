@@ -77,6 +77,18 @@ export async function qualifySearch(browser, origin, fixture, hostedOrigin) {
             .evaluate((element) => element === document.activeElement),
           true,
         )
+        if (renderer === "liveview") {
+          for (const revision of [1, 2, 3]) {
+            await page.getByRole("button", { name: "Refresh fixture", exact: true }).click()
+            await page.locator(`#fixture-hook[data-revision="${revision}"]`).waitFor()
+            await page.locator("[data-doc-search-open]").click()
+            await page.locator("[data-doc-search-input]").fill("portable")
+            await page.locator("[data-doc-search-results] a").first().waitFor()
+            assert.equal(await page.locator("[data-doc-search-results]").count(), 1)
+            await page.keyboard.press("Escape")
+          }
+          cases.push(`liveview/${adapter}: three DOM replacements refresh search and restore focus`)
+        }
         assert.deepEqual(errors, [], `${renderer}/${adapter}: browser errors`)
       } finally {
         await context.close()

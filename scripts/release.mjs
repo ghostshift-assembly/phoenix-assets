@@ -302,7 +302,7 @@ export function verifyArtifacts(root, output, options = {}) {
   return manifest
 }
 
-async function smokeNpmArtifacts(sourceRoot, output, manifest) {
+async function smokeNpmArtifacts(sourceRoot, output, manifest, hostedConsumer) {
   const root = mkdtempSync(join(tmpdir(), "phoenix-assets-npm-smoke-"))
   let complete = false
   try {
@@ -385,7 +385,7 @@ export default defineConfig({
     copyFileSync(join(root, "package-lock.json"), join(output, "consumer-full-package-lock.json"))
     cpSync(join(root, "dist"), join(output, "consumer-full-dist"), { recursive: true })
     const { qualifyBrowser } = await import("./browser-qualification.mjs")
-    const browser = await qualifyBrowser(sourceRoot, root, output)
+    const browser = await qualifyBrowser(sourceRoot, root, output, hostedConsumer)
     cpSync(join(root, "browser-dist"), join(output, "consumer-browser-dist"), { recursive: true })
     const peer = join(root, "node_modules/layerchart")
     renameSync(peer, `${peer}.unselected`)
@@ -509,7 +509,7 @@ console.log("Packed HTTP runtime verified without Electric, TanStack or Phoenix 
   }
 }
 
-function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion) {
+function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion, resources) {
   const artifact = manifest.artifacts.find(({ ecosystem }) => ecosystem === "hex")
   if (!artifact) throw new Error("Hex artifact is missing")
   const root = mkdtempSync(join(tmpdir(), "phoenix-assets-hex-smoke-"))
@@ -544,7 +544,7 @@ function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion) {
       `
 defmodule Consumer.MixProject do
   use Mix.Project
-  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${docShellVersion ? `, {:doc_shell, "== ${docShellVersion}"}, {:phoenix_live_view, "~> 1.1"}` : ""}]]
+  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${docShellVersion ? `, {:doc_shell, "== ${docShellVersion}"}, {:phoenix_live_view, "~> 1.1"}` : ""}${docShellVersion === "1.0.0" && resources ? ', {:bandit, "~> 1.14.1"}' : ""}]]
 end
 `,
     )
@@ -649,6 +649,16 @@ end
         ],
         consumerOptions,
       )
+      run(
+        "mix",
+        [
+          "run",
+          "--no-start",
+          join(sourceRoot, "scripts/conformance-fixture.exs"),
+          join(output, "browser-conformance"),
+        ],
+        consumerOptions,
+      )
     }
     evidence = {
       doc_shell: docShellVersion ?? null,
@@ -657,14 +667,17 @@ end
       generated: readJson(join(consumer, "generated-digests.json")),
       result: "passed",
     }
+    if (docShellVersion === "1.0.0" && resources)
+      resources.push({ root, consumer, env: consumerEnv })
   } finally {
-    rmSync(root, { force: true, recursive: true })
+    if (!resources?.some((resource) => resource.root === root))
+      rmSync(root, { force: true, recursive: true })
   }
   if (!docShellVersion) {
     return [
       evidence,
       ...["0.4.0", "0.5.0", "1.0.0"].flatMap((version) =>
-        smokeHexArtifact(sourceRoot, output, manifest, version),
+        smokeHexArtifact(sourceRoot, output, manifest, version, resources),
       ),
     ]
   }
@@ -684,13 +697,18 @@ async function smokeArtifacts(root, output, options) {
   )
   for (const key of ["revision", "profile_sha256", "script_sha256", "cases_sha256"])
     if (producer[key] !== retained[key]) throw new Error(`stale producer qualification: ${key}`)
-  const hex = smokeHexArtifact(root, output, manifest)
-  const full = await smokeNpmArtifacts(root, output, manifest)
-  const runtime = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
-  if (!runtime) throw new Error("Svelte runtime artifact is missing")
-  const http = smokeCoreArtifact(root, join(output, runtime.file))
-  const prior = qualifyPriorCohort(root, output, manifest)
-  return { full, http, hex, producer, prior }
+  const resources = []
+  try {
+    const hex = smokeHexArtifact(root, output, manifest, undefined, resources)
+    const full = await smokeNpmArtifacts(root, output, manifest, resources[0])
+    const runtime = manifest.artifacts.find(({ name }) => name === "@phoenix-assets/svelte")
+    if (!runtime) throw new Error("Svelte runtime artifact is missing")
+    const http = smokeCoreArtifact(root, join(output, runtime.file))
+    const prior = qualifyPriorCohort(root, output, manifest)
+    return { full, http, hex, producer, prior }
+  } finally {
+    for (const resource of resources) rmSync(resource.root, { force: true, recursive: true })
+  }
 }
 
 function qualifyPriorCohort(sourceRoot, output, manifest) {
