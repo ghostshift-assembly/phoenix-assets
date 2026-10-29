@@ -10,7 +10,10 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "lcov"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
-      include: ["src/{ast,capabilities,directives,highlighter,openapi,url}.ts", "src/browser/*.ts"],
+      include: [
+        "src/{admission,ast,capabilities,directives,highlighter,openapi,url}.ts",
+        "src/browser/*.ts",
+      ],
       exclude: ["src/browser/entry.ts"],
     },
   },
