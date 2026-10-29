@@ -25,7 +25,7 @@ Select the affected owner tests and actual consumer boundary:
 
 An isolated checkout compile, extracted Hex/npm consumer, real host/backend,
 published registry and deployment are distinct proof. Preserve the
-[CI](../../../.github/workflows/ci.yml) floor/current/PR/full lanes: PR excludes
+[CI](../../../.github/workflows/ci.yml) OTP compatibility/current/PR/full lanes: PR excludes
 some expensive checks and cannot stand in for the complete release gate.
 Application code still requires the full gate in AGENTS.
 

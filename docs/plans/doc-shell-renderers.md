@@ -420,3 +420,18 @@ artifact/compatibility tests; the candidate lane passes twelve artifact tests,
 including the complete static export matrix. The browser runner also exercises
 native keyboard disclosure and semantic-anchor links with JavaScript disabled.
 `Canonical.encode/1` examples now explicitly unwrap its `{:ok, binary}` result.
+
+
+### Elixir 1.20 support policy
+
+The maintainer requested that both projects use Elixir 1.20. The package
+requirement is now `~> 1.20`; both checkouts already pin 1.20.4/OTP 29. CI and
+release guidance cover Elixir 1.20 on OTP 28 and 29. Older Elixir qualification
+records above are historical and no longer define the supported matrix. No new
+older-Elixir test result is claimed by this policy change.
+
+
+Both Elixir 1.20.4 lanes pass: OTP 28.5.0.7 compiles with warnings as errors and
+passes 505 backend checks; OTP 29.0.4 passes the full gate, both coverage floors
+and all 25 required checks. Workflow YAML parses and the matrix contains only
+Elixir 1.20. Historical earlier-Elixir results were preserved as observations.

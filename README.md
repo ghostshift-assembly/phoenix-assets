@@ -98,7 +98,7 @@ runtime helpers, the documentation shell, and shared frontend lint tooling.
 
 ## Requirements
 
-- Elixir 1.18+ and Phoenix 1.8+.
+- Elixir 1.20+ and Phoenix 1.8+.
 - Development supervision uses MuonTrap and requires macOS, Linux, or WSL2.
   Linux cgroups stop the whole process tree; macOS stops the immediate child.
   Production

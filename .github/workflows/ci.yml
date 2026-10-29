@@ -32,7 +32,7 @@ jobs:
       fail-fast: false
       # One automatic change lane; both supported toolchains remain local/release gates.
       matrix:
-        include: ${{ fromJSON((github.event_name == 'workflow_dispatch' || inputs.full_matrix) && '[{"elixir":"1.18","otp":"27","check":"elixir"},{"elixir":"1.20","otp":"29","check":"full"}]' || '[{"elixir":"1.20","otp":"29","check":"pr"}]') }}
+        include: ${{ fromJSON((github.event_name == 'workflow_dispatch' || inputs.full_matrix) && '[{"elixir":"1.20","otp":"28","check":"elixir"},{"elixir":"1.20","otp":"29","check":"full"}]' || '[{"elixir":"1.20","otp":"29","check":"pr"}]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

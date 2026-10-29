@@ -13,7 +13,7 @@ defmodule PhoenixAssets.MixProject do
       description: description(),
       source_url: @source_url,
       version: @version,
-      elixir: "~> 1.18",
+      elixir: "~> 1.20",
       elixirc_paths: elixirc_paths(Mix.env()),
       aliases: aliases(),
       start_permanent: Mix.env() == :prod,

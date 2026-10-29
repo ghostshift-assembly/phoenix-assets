@@ -97,16 +97,16 @@ Before tagging, resolve the published dependencies with `mix deps.get` and commi
 the resulting lockfile. The hosted release uses `mix deps.get --check-locked` so
 dependency installation cannot change the tagged source tree.
 
-Also run warnings-as-errors compilation and ExUnit on Elixir 1.18 / OTP 27,
+Also run warnings-as-errors compilation and ExUnit on Elixir 1.20 / OTP 28,
 and the complete gate on Elixir 1.20 / OTP 29. Keep each toolchain's build and
-PLT caches separate. Run `pnpm build:doc-shell-assets` before the floor's renderer
+PLT caches separate. Run `pnpm build:doc-shell-assets` before the OTP 28 renderer
 tests; those generated assets are absent from a clean checkout.
-Use an absolute `MIX_BUILD_ROOT` for the floor so Rebar resolves dependency
+Use an absolute `MIX_BUILD_ROOT` for the OTP compatibility leg so Rebar resolves dependency
 headers correctly and dev/test retain separate compilations:
 
 ```bash
-MIX_BUILD_ROOT="$PWD/_build/floor-runtime" mise exec erlang@27.3.4.15 elixir@1.18.4-otp-27 -- mix compile --warnings-as-errors
-MIX_BUILD_ROOT="$PWD/_build/floor-runtime" mise exec erlang@27.3.4.15 elixir@1.18.4-otp-27 -- mix test
+MIX_BUILD_ROOT="$PWD/_build/otp-28-runtime" mise exec erlang@28.5.0.7 elixir@1.20.4-otp-28 -- mix compile --warnings-as-errors
+MIX_BUILD_ROOT="$PWD/_build/otp-28-runtime" mise exec erlang@28.5.0.7 elixir@1.20.4-otp-28 -- mix test
 ```
 
 The full gate includes both coverage floors, dependency
