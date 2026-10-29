@@ -105,7 +105,8 @@ lib/mix/tasks/             phoenix_assets.install/.gen/.doctor/.clean/.graph, pl
 test/                      ExUnit; test/support holds Ash fixtures; the headline
                            test is test/phoenix_assets/integration/kitchen_sink_test.exs
 npm/vite, npm/svelte       TypeScript packages (Biome + Vitest)
-npm/doc-shell              Svelte documentation UI for the doc-shell/v1 contract
+npm/doc-shell              Svelte documentation UI for doc-shell/v2, legacy v1,
+                           and doc-shell-site/v1 contracts
 npm/lint                   shared Biome base config + Tailwind v4 linter for host apps
 ```
 
@@ -195,6 +196,14 @@ For DocShell renderer work, read the
 [specification](docs/specs/PHA.01-doc-shell-renderers.md) and follow the
 [plan](docs/plans/doc-shell-renderers.md) in dependency order. The DocShell
 artifact and site contracts remain upstream-owned.
+
+The plan links the shared completion checklist in `doc_shell`. New portable
+presentation settings, hosted publication pairing and artifact profiles land
+upstream before renderer adoption here. Phoenix Assets owns visual controls,
+slots/snippets, scoped CSS and diagnostic previews. Consumers/producers retain
+source selection, route/brand/translation content, authorization, product task
+state, native readers and geometry/semantic algorithms. Completion requires the
+named cross-repository and external target evidence, not a green baseline alone.
 
 Code changes require `mix check` green end-to-end (Elixir, frontend, and both
 coverage floors), and any new public module needs a `@moduledoc`.

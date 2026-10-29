@@ -10,13 +10,83 @@ qualification are recorded separately.
 | PHA-P01 | source implemented; qualification below | DSH-P03/P06 | Import the upstream conformance corpus and add a renderer capability manifest | PHA-V01/V03; schema and fixture drift fail CI |
 | PHA-P02 | source implemented; qualification below | PHA-P01 | Split URL, search, theme, navigation, copy, tabs and enhancement lifecycle into `@phoenix-assets/doc-shell/browser` | PHA-V02; Svelte renderer remains green |
 | PHA-P03 | source implemented; qualification below | PHA-P01/P02 | Add optional DocShell dependency and `PhoenixAssets.DocShell.Ast` | PHA-V01/V07/V08; no-optional compile remains green |
-| PHA-P04 | source implemented; qualification below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
+| PHA-P04 | fixed corpus implemented; customization gaps below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
 | PHA-P05 | source implemented; qualification below | PHA-P03/P04 | Add directive, code, Mermaid fallback and browser enhancement components | PHA-V03/V05–V08 |
 | PHA-P06 | source implemented; qualification below | PHA-P03–P05 | Add OpenAPI reference and disabled-by-default request panel | PHA-V03/V07/V08 |
 | PHA-P07 | source implemented; qualification below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
-| PHA-P09 | source implemented; qualification below | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
+| PHA-P09 | fixed corpus implemented; selectors and broader accessibility evidence open | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
+| PHA-P11 | planned; upstream contract first | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
+| PHA-P12 | source gaps identified; implementation planned | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
+| PHA-P13 | planned; upstream pairing first | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
+| PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
+| PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
+| PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
+
+## Coordinated completion
+
+The [shared completion checklist](https://github.com/futhr/doc_shell/blob/main/docs/plans/documentation-sites.md#coordinated-completion)
+records the twelve-step dependency order across both repositories. DSH-P10 and
+DSH-P15/P16 own new shared data/validation; DSH-P11–P14 own portable-artifact
+contracts and qualification inputs. Phoenix Assets owns the Svelte/HEEx/browser
+implementations and visual preview. The new rows above are planned work, not
+implemented APIs or a passing release receipt.
+
+Implement shared shapes upstream first, add behavior/refusal fixtures, then
+consume those exact shapes here. Preserve existing DocShell 0.4 extraction and
+0.5/1.0 renderer compatibility at their supported scope; a new selected
+capability must declare its actual prerequisite rather than appearing to work
+against an older upstream package. Preserve the existing Vite path/stub fixes
+and their regressions while completing the DocShell work.
+
+The artifact producer owns semantics, geometry and comparison images. Native
+readers and their lifecycle belong to the native consumer. Phoenix Assets
+provides neither of those implementations nor an approval workflow. Human
+assistive tasks and native target checks remain external qualification items.
+PHA.03 remains conditional on its own admission evidence.
+
+### Consumer boundary review (2026-10-29)
+
+Static review covered configuration/generated contracts, command/auth/socket
+seams, reporting, DocShell and the supervised dev tools, plus DocShell's
+projection/profile/export/web boundaries. No consumer-specific runtime feature
+to move out was identified in those paths. The text boundary gate complements
+this review; it cannot establish semantic ownership by itself.
+The upstream review replaced a consumer name in a changelog API example/test
+locator with `graph://release-notes/example`; no runtime platform branch was found.
+
+Reporting `columns`/`order`/`spans` and its responsive table/chart layout belong
+to the existing upstream report renderer, not an application dashboard policy.
+DocShell CSS and controls are scoped to editorial rendering. Token/header,
+socket and profile callbacks carry host-selected values; they do not choose
+tenant scope, authorize operations or define product state. Example field
+names and retained producer fixtures are not runtime dependencies on consumers.
+
+The coordinated work must not introduce consumer task archetypes, application
+breakpoint profiles, business vocabulary, runtime inspection, repository
+discovery, deployment policy or producer algorithms. Host route/identity/label
+inputs stay inert; HEEx slots and Svelte snippets stay in their renderers.
+
+AshOaskit 0.4.5 is the released OpenAPI adapter baseline already selected in
+DocShell's lockfile, recorded in its shared checklist. Phoenix Assets has no
+direct AshOaskit dependency; qualify the admitted OpenAPI output without
+copying Ash schema generation or forcing the adapter onto other consumers.
+
+### Tracker and boundary checks (2026-10-29)
+
+The coordinated docs pass verified 41 tracked Markdown/Livebook files, 99
+local/repository reference paths and 29 anchors across both checkouts. The
+twelve shared steps and DSH-P01–P17/PHA-P01–P16 definitions resolve without
+duplicate tracker IDs. The existing boundary gate passes for 182 files; the
+upstream consumer-name check passes for 72 production files. Canonical skill
+links still resolve and remain ignored. Production syntax comparisons for
+this pass's comment/doc edits show no executable changes; dependency manifests
+and locks are unchanged.
+
+This pass did not rerun application suites, notebooks, browsers, benchmarks or
+archive/native/human qualification. The earlier Vite fixes and their tests
+remain in the worktree; their recorded results below retain their prior scope.
 
 ## Qualification scope
 
@@ -50,17 +120,38 @@ including separate review of retained screenshots. Source status alone is not
 release qualification. Host routes, branding, translation catalogues, backend
 authorization and deployment remain outside this fixture cohort.
 
-## Executed source checks (2026-10-29)
+The site shells do not yet provide locale/release selectors. Hosted HEEx exposes
+brand/footer slots, but the static adapter supplies empty slots and Svelte
+`SiteShell` has no equivalent slots. The fixed corpus does not exercise those
+missing surfaces. Its zoom check uses an equivalent viewport; selected contrast
+and keyboard assertions do not close a complete accessibility assessment.
+These gaps remain open under PHA.01 instead of being inferred from a passing receipt.
+Navigation badges/collapse defaults, splash/hero rendering, full banner and SEO
+metadata, hosted publication pairing and portable-artifact rendering also need
+the implementation and evidence assigned in PHA-P11–P16.
+
+## Prior executed source checks (2026-10-29)
+
+These results predate the coordinated tracker/ownership update. That update
+uses source/reference/tracking checks only; it does not requalify archives,
+the full runtime matrix or future features.
 
 `mix check --no-retry --no-parallel` passes on Elixir 1.20.4 / OTP 29.0.4,
 Node 24.21.0 and pnpm 12.15.0: 425 backend checks (18 doctests, 407 tests),
-92.1% backend line coverage, 371 frontend tests and 17 release-script tests.
+92.1% backend line coverage, 374 frontend tests and 17 release-script tests.
 All configured required checks pass, including both Hex audits, the production
 npm audit, package exports, optional-free Hex and HTTP consumers, and the
 DocShell offline/story checks. Optional absent-package tools remain skipped.
 
-Warnings-as-errors library compilation and the same 425 backend checks also pass
-on Elixir 1.18.4 / OTP 27.3.4.15 with separate dev/test build directories.
+The source audit added real Vite regressions for the default generated directory,
+first generation after a stub import, and updates with default/custom paths.
+The path and first-boot tests failed before their fixes. DocShell admission now
+participates in its coverage gate: 141 DocShell tests pass with 93.93% package
+line coverage and 98.27% admission line coverage.
+
+Earlier on the same date, warnings-as-errors library compilation and the 425
+backend checks passed on Elixir 1.18.4 / OTP 27.3.4.15 with separate dev/test build
+directories. That floor leg was not rerun for the Vite fixes and prose audit.
 The clean dependency compile emits Mint's optional `CAStore.file_path/0` warning;
 this is not a warning-free claim for every dependency. Archive receipts and
 screenshot review remain separate from these source results.
@@ -89,8 +180,8 @@ retained with the Hex assets.
 
 ## Bundle budgets
 
-The implementation records compressed and uncompressed sizes for the base CSS,
-browser core, search, syntax languages, Mermaid, and OpenAPI request panel.
-Search, highlighting, Mermaid and request execution load on first use. A normal
-article must not load Mermaid or request-panel code. Budget changes require a
-measured fixture and an explicit review in the same change.
+`Assets.budgets/0` declares per-file raw/gzip limits for CSS, browser core,
+highlighting and Mermaid chunks. Search and request controllers ship in the
+base browser core; Pagefind indexes, syntax highlighting and Mermaid assets
+load on use. Request controls remain inert until explicitly enabled and mounted.
+Budget changes require a measured fixture and an explicit review in the same change.

@@ -43,6 +43,11 @@ and recovery. PHA.01 owns DocShell rendering and PHA.03 owns conditional develop
 build facts. The library does not acquire host policy, application state, endpoint
 payload authority, durable business effects or collector responsibilities.
 
+The [coordinated DocShell work](../plans/doc-shell-renderers.md#coordinated-completion)
+uses this same boundary. New presentation inputs and artifact capabilities must
+retain optional installation and host-owned routing, authority and lifecycle;
+the work does not admit product task/layout policy or a new inspection service.
+
 ## Declaration and endpoint evidence
 
 Generation projects declarations; doctor checks configured route/method wiring.
@@ -158,8 +163,8 @@ platform or host policy registry is added here.
 
 ## Reporting producer qualification
 
-The existing reporting adapter follows its upstream public contract. Its planned
-qualification must consume identified producer fixtures and a generated
+The existing reporting adapter follows its upstream public contract. Its
+qualification consumes identified producer fixtures and a generated
 closed-grammar/limits profile, with
 exact public revision and per-file digests, rather than qualifying against a second
 local transcription of enum constants. The producer generates or verifies those
@@ -221,8 +226,11 @@ with auth headers while Electric, TanStack and Phoenix peers are absent.
 Extracted Hex consumers compile without optional dependencies and with DocShell
 0.4 plus LiveView. Both initialize the HTTP preset and generate commands using
 `/core`. The 0.4 consumer exposes the AST adapter while all five 0.5 presentation
-adapters remain absent. Existing renderer tests exercise the 0.5 integration;
-the broader renderer specification retains its partial implementation status.
+adapters remain absent. At that date, renderer tests exercised the 0.5 integration
+and the broader renderer implementation was partial. The current source status
+and artifact-specific evidence boundary are recorded in
+[PHA.01](PHA.01-doc-shell-renderers.md) and its
+[implementation plan](../plans/doc-shell-renderers.md).
 
 That qualification used a temporary user-authorized exception for test-only
 Bandit 1.12.5 and `EEF-CVE-2026-105659`. The dependency update below removes it.

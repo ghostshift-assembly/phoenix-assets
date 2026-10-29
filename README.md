@@ -31,6 +31,13 @@ make this a general UI or application-feature library. Runtime observation,
 browser pairing, source-edit workflows, business measurement and product layout
 belong to their host or dedicated contract/provider owners.
 
+DocShell completion is coordinated with the upstream `doc_shell` package.
+The [renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
+records the remaining selectors, customization, page metadata, publication-pair
+adoption, portable-artifact rendering and qualification work. Its linked
+upstream checklist owns shared contracts and validation. These planned features
+are not supplied by the current package merely because a baseline CI run passes.
+
 ## What it provides
 
 - Routes, Ash resources, Electric shapes, commands, session data, PubSub topics,
@@ -60,8 +67,9 @@ Storybook reads the same Vite configuration as the application.
 
 Tailwind v4 runs inside Vite through the official `@tailwindcss/vite` plugin.
 The host owns `src/app.css` and its `@theme`; no JavaScript config is required. The
-integration wires the plugin into the Vite config and contributes a doctor check
-for the CSS entry. `@phoenix-assets/lint` flags arbitrary values such as
+installer scaffolds the Vite plugin import; the integration records its config
+in the graph and contributes a doctor check for the CSS entry.
+`@phoenix-assets/lint` flags arbitrary values such as
 `w-[180px]` when the host design system provides a named equivalent such as
 `w-45`. Its Svelte CLI accepts the standard module and instance script
 composition. A host can opt into a single-script policy with glob exceptions.
@@ -183,9 +191,11 @@ with the asset substrate; its optional site renderer supports DocShell 0.5 and
 Tuning an integration uses configuration:
 
 ```elixir
-config :phoenix_assets, :dev, storybook: [enabled: false]   # run it via `mix storybook`
+config :phoenix_assets, :dev, storybook: [enabled: false]   # run Storybook on demand
 config :phoenix_assets, :stack, locales: ["sv", "en"], default_locale: "sv"
 ```
+
+Run Storybook on demand with `pnpm exec storybook dev -p 6006` from `assets/`.
 
 Configure the generated-contract alias with SvelteKit so the separate type
 check resolves the same modules as Vite. SvelteKit 3 reads Vite plugin options;
@@ -223,7 +233,7 @@ end
 ```
 
 ```bash
-mix phoenix_assets.gen          # write assets/src/generated/*
+mix phoenix_assets.gen          # write assets/src/lib/generated/*
 mix phoenix_assets.gen --check  # CI drift gate; fails when the checked-in output is stale
 ```
 
@@ -269,10 +279,11 @@ domain evidence around the shared components.
 <PhoenixAssets.Components.svelte_page name="Dashboard" props={%{user: @user}} />
 ```
 
-In development these point at the Vite dev server. In production they emit the
-hashed file with its stylesheet links, module preloads, and Subresource Integrity
-from the manifest. `Components.speculation_rules/1` emits a Speculation
-Rules prefetch block for the page routes in the asset graph. Set
+These components require the optional `phoenix_live_view` dependency. In
+development they point at the Vite dev server. In production they emit the
+hashed file with its stylesheet links and module preloads, adding Subresource
+Integrity when the manifest supplies it. `Components.speculation_rules/1` emits
+a Speculation Rules prefetch block for the page routes in the asset graph. Set
 `config :phoenix_assets, :build, asset_url:` for a CDN, or add
 `plug PhoenixAssets.EarlyHints, entry: "src/app.ts"` for HTTP 103 Early Hints.
 
@@ -317,9 +328,10 @@ The coordinated Hex/npm release process is documented in [RELEASING.md](RELEASIN
 
 ## Fleet library lockstep
 
-Changes to `phoenix_assets`, `ash_oaskit`, or `doc_shell` are validated across
-all consuming fleet platforms. A version bump moves consumers together, and any
-consumer `override:` pin is updated in the same change.
+Validate changes to `phoenix_assets`, `ash_oaskit`, or `doc_shell` across
+the consuming fleet platforms. Coordinate consumer version bumps and update
+any consumer `override:` pin in the same change. Library source and CI alone
+do not establish that each host has adopted or qualified that version.
 
 ## License
 

@@ -18,7 +18,8 @@ defmodule PhoenixAssets.Plugin do
 
         @impl true
         def dev_processes(ctx, _state) do
-          [PhoenixAssets.DevProcess.new(id: :storybook, command: ~w(pnpm storybook dev -p 6006), cd: ctx.asset_root)]
+          command = [PhoenixAssets.Context.bin_path(ctx, "storybook"), "dev", "-p", "6006"]
+          [PhoenixAssets.DevProcess.new(id: :storybook, command: command, cd: ctx.asset_root)]
         end
       end
 

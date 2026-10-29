@@ -38,9 +38,9 @@ defmodule PhoenixAssets.Localize do
   @stack_keys [:gettext_backend, :gettext_dir, :locales, :default_locale, :locale_names]
 
   # Keyed by primary subtag, so "en-GB" and "pt-BR" resolve through their
-  # language. Deliberately covers the languages the fleet ships rather than all
-  # of ISO 639 -- an unknown code falls back to itself, which is honest, and
-  # `locale_names:` overrides anything here.
+  # language. This is a bounded set of built-in display labels rather than an
+  # ISO 639 registry. Unknown codes fall back to themselves; `locale_names:`
+  # supplies host overrides.
   @english_names %{
     "ar" => "Arabic",
     "cs" => "Czech",
@@ -210,10 +210,8 @@ defmodule PhoenixAssets.Localize do
     |> IO.iodata_to_binary()
   end
 
-  # A language picker needs a name to show, and three platforms each ended up
-  # hand-maintaining the same table because the contract carried only codes.
-  # `:cldr` is not a dependency here, so the names come from the BEAM's own
-  # locale data where it has them, and fall back to the code itself.
+  # Emit the built-in display labels plus host overrides with the locale codes.
+  # These static tables use no CLDR or runtime locale-data dependency.
   defp render_names(locales, overrides) do
     names = Map.new(locales, &{&1, display_names(&1, overrides)})
 

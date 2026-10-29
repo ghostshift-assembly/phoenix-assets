@@ -1,8 +1,12 @@
 # PHA.01: DocShell renderers for Svelte and LiveView
 
 Specification version: 0.3.2. Contract: accepted. Implementation status:
-implemented for the fixed conformance cohort; release qualification is
-artifact-specific.
+implemented for the fixed conformance cohort, with the source gaps listed below;
+release qualification is artifact-specific.
+The [renderer completion tracker](../plans/doc-shell-renderers.md#coordinated-completion)
+and its linked upstream checklist assign the remaining work in dependency order.
+New shared presentation, publication-pair and artifact contracts land in
+DocShell before their renderer implementation; planned rows are not current APIs.
 
 ## Purpose
 
@@ -32,6 +36,13 @@ composition separate. Phoenix Assets does not add product archetypes,
 application container thresholds, card/dashboard policy or workflow state to
 the DocShell contract.
 
+Planned customization carries host-supplied inert identity, labels and links.
+Hosts choose the brand, locale/release destinations and disclosure policy;
+the library must not infer them from application names, sessions or repository
+layout. Framework slots/snippets, CSS and visual previews remain renderer-owned.
+The native reader, artifact producer and host retain their implementation and
+qualification duties under the upstream checklist.
+
 ## Package boundary
 
 The existing npm package remains:
@@ -41,11 +52,12 @@ The existing npm package remains:
 ```
 
 The LiveView renderer belongs to the `phoenix_assets` Hex package under
-`PhoenixAssets.DocShell`. It is available only when compatible `doc_shell`,
-`phoenix_html`, and `phoenix_live_view` packages are installed. The entire
-namespace is conditionally compiled. A consumer that omits those optional
-dependencies must compile without warnings and must not resolve frontend-only
-dependencies.
+`PhoenixAssets.DocShell`. HEEx/static rendering requires compatible `doc_shell`,
+`phoenix_html`, and `phoenix_live_view` packages. Each adapter is conditionally
+compiled against the modules it uses: the AST adapter needs DocShell AST and
+Phoenix HTML; the asset and Pagefind adapters need their DocShell presentation
+modules. A consumer that omits optional dependencies must compile without
+warnings and must not resolve frontend-only dependencies.
 
 The asset substrate also accepts DocShell 0.4 for hosts using its extraction
 contract. Site presentation adapters compile only when their required 0.5
@@ -123,23 +135,27 @@ PhoenixAssets.DocShell.Ast
 PhoenixAssets.DocShell.ApiReference
 PhoenixAssets.DocShell.StaticRenderer
 PhoenixAssets.DocShell.Assets
+PhoenixAssets.DocShell.Pagefind
 ```
 
 `PhoenixAssets.DocShell.Components` provides documented function components
 for:
 
 - complete documentation page and shell;
-- header, brand slot, theme and locale controls;
+- header, brand slot and theme controls;
 - desktop sidebar, mobile navigation, groups, badges and current-page state;
 - search button, dialog or inline section, filters and results;
 - breadcrumbs, page title, version/status context and announcement banner;
 - table of contents and anchored headings;
 - previous/next links, last-updated, source and edit links;
-- callout, card, link card, card grid, badge, file tree, steps and tabs;
-- code block, copy control, plain-code fallback and diagram container;
-- backlinks; and
-- OpenAPI tags, operation, parameters, request/response examples, recursive
-  schema and optional request panel.
+- code block and copy control; and
+- backlinks.
+
+`PhoenixAssets.DocShell.Ast` renders callouts, cards, link cards, card grids,
+badges, file trees, steps, tabs and diagram fallbacks from admitted content.
+`PhoenixAssets.DocShell.ApiReference` provides function components for OpenAPI
+tags, operations, parameters, request/response examples, recursive schemas and
+the optional request panel. These are separate APIs from `Components`.
 
 Public components declare `attr` and `slot` contracts and have typespecs and
 module documentation. They accept `DocShell.Presentation.Site`, `Page`, and
@@ -167,8 +183,10 @@ hashed local assets, and an optional base path.
 
 The static renderer does not start an endpoint, supervision tree, PubSub,
 LiveView socket, or asset development server. It does not read application
-sessions. Host code passes title, brand slots rendered ahead of time, canonical
-origin, footer links, and asset manifest as inert values.
+sessions. Its current renderer context supplies title, canonical origin,
+navigation, search, locale, route, digests and asset URLs as inert values.
+Brand/footer slots are available when calling the hosted HEEx page component;
+the static adapter currently supplies empty slots.
 
 LiveView and static output may differ in framework transport attributes. They
 must have the same visible content, landmarks, accessible names, heading tree,
@@ -329,3 +347,16 @@ Unit and component tests prove renderer source behavior. Playwright tests prove
 the tested browser and viewport cohort. Automated accessibility checks support
 review but do not claim WCAG certification. Registry publication and adoption
 by a host remain separate evidence.
+
+The fixed corpus does not close every requirement above. The projected Svelte
+and HEEx site shells display locale/direction and package-version context, but
+do not expose locale or release selectors. Only the legacy Svelte `DocShell`
+component exposes the locale-switcher callback. Static brand/footer customization
+and Svelte `SiteShell` brand/footer slots are also absent. Those extensions must
+respect the upstream context and host-owned route contracts.
+
+Browser qualification tests a 400%-zoom-equivalent viewport rather than changing
+browser zoom itself. It checks selected text contrast and keyboard behavior;
+it does not establish contrast for every control/state or a complete WCAG 2.2 AA
+assessment. PHA-V05/V06 and the broader customization requirements remain open
+at that scope, even when the fixed-corpus receipt passes.

@@ -5,9 +5,9 @@ defmodule PhoenixAssets.DevIntelligence.TidewaveTools do
   Surfaces the dev-process state, recent logs, restart control, and a doctor run
   as plain functions. Nothing here registers an MCP tool -- Tidewave reaches them
   through its generic eval, the same way a developer would from `iex`. This is
-  the one dev-intelligence integration the stack ships; the broader overlay,
-  Tower, and BeamLens bridges are intentionally out of scope until a host needs
-  them.
+  the dev-intelligence integration the stack ships. Application runtime
+  inspection, browser pairing and source-edit workflows remain host/provider
+  responsibilities; a shared build-only extension needs PHA.03 admission evidence.
 
   ## Opting in
 

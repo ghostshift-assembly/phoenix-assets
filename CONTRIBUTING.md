@@ -24,9 +24,12 @@ mix check
 ```
 
 It runs compile (warnings as errors), formatter, `credo --strict`, `doctor`
-(documentation coverage), `mix_audit`, `dialyzer`, ExUnit with coverage (≥85%),
+(documentation coverage), ExDoc, both Hex dependency audits, `dialyzer`, ExUnit
+with coverage (≥85%),
 and the frontend checks: Biome (strict lint and format), `tsc`, Vitest with coverage (≥80%),
-knip, and the package-export checks. Because it drives the frontend tools,
+knip, package-export and release checks, the production npm audit, extracted
+Hex/HTTP consumers, scope and filename checks, and DocShell offline/story checks.
+Because it drives the frontend tools,
 `mix check` needs Node and pnpm on `PATH`. To fix formatting first, run
 `mix format` and `pnpm format`.
 
@@ -51,6 +54,7 @@ commits local; maintainers perform Git pushes manually.
 3. Open a PR that explains why the change is needed and references any issue
    (`Closes #123`).
 4. Ordinary PR CI runs the current-runtime lane on Elixir 1.20/OTP 29, omitting
-   Dialyzer, the Hex consumer, and package-export checks. Manual or full-matrix
+   Dialyzer, the Hex consumer, and package-export checks. The HTTP consumer also
+   skips because it depends on package-export checks. Manual or full-matrix
    CI adds the compile-and-test floor leg (1.18/OTP 27) and the complete gate.
    Run the full local gate before merging code changes.

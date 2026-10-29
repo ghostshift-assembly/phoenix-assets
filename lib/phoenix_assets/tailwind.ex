@@ -4,7 +4,8 @@ defmodule PhoenixAssets.Tailwind do
 
   Tailwind v4 runs inside Vite through its official plugin, so this integration
   has no dev process of its own; it records the Tailwind Vite patch in the asset
-  graph and contributes doctor checks (the CSS entry exists, the plugin is wired).
+  graph and contributes a doctor check that the CSS entry exists. The installer
+  scaffolds the Vite plugin import; existing hosts configure that import themselves.
 
   """
 

@@ -1,8 +1,8 @@
 # @phoenix-assets/doc-shell
 
-Svelte documentation UI for renderer-neutral `doc-shell/v2` and legacy
-`doc-shell/v1` presentations. The producer can be the `doc_shell` Hex package,
-a host projector, or a build step that writes JSON. Each produces a
+Svelte documentation UI for renderer-neutral `doc-shell/v2`, legacy
+`doc-shell/v1`, and projected `doc-shell-site/v1` sites. The producer can be the
+`doc_shell` Hex package, a host projector, or a build step that writes JSON. Each produces a
 `DocShellPresentation`.
 
 DocShell 1.0 keeps module member references in navigation metadata; full member
@@ -20,8 +20,22 @@ as opaque and does not reconstruct member bodies from those references.
 <DocShell {presentation} currentId="intro" currentPath="/docs/intro" />
 ```
 
-The package contains no app aliases. Customize its neutral defaults using the
-`DocShellTheme` prop or the documented `--doc-*` CSS custom properties. Search
+For a projected site, use `SiteShell` with a `DocShellSite` and `pageId`.
+It preserves the producer's routes, headings, navigation and page digests.
+`@phoenix-assets/doc-shell/browser` exports the Svelte-free controllers used by
+the optional HEEx/static integration in `phoenix_assets`; see
+[PHA.01](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/specs/PHA.01-doc-shell-renderers.md)
+for that integration's dependencies and conformance scope.
+
+The [coordinated tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
+records remaining selector/customization, page metadata, publication-pair and
+portable-artifact work. These planned options are not current component props.
+Shared contracts land in DocShell first; this package owns rendering and visual
+preview. Hosts supply brand content, labels and routes, and retain authorization
+and product state. Native readers and producer algorithms are separate owners.
+
+The package contains no app aliases. `DocShell` accepts a `DocShellTheme` through
+its `theme` prop; both shells use the `--doc-*` CSS custom properties. Search
 matches the supplied records with the built-in deterministic matcher. The
 exported `Search` component accepts a replacement `search` callback. Navigation
 uses the host's `navigate` callback when supplied.

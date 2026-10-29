@@ -19,8 +19,8 @@ const extensions = new Set([".ex", ".exs", ".ts", ".svelte", ".js", ".mjs", ".cs
 // Consuming platforms. If a new one joins the fleet, add it here.
 const platforms = ["apace", "bytly", "diggymon", "orbit", "orvane", "refpath", "rivure", "votera"]
 
-// Business vocabulary. The reporting subpath is the one sanctioned UI exception
-// and its whole guarantee is that it decodes a generic envelope -- the moment it
+// Business vocabulary. The reporting subpath is a bounded upstream-contract renderer
+// whose guarantee is that it decodes a generic envelope -- the moment it
 // can name a domain concept, it has stopped being renderer-neutral.
 const domainTerms = [
   "invoice",

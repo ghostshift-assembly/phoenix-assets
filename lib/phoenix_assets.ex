@@ -20,9 +20,9 @@ defmodule PhoenixAssets do
 
   ## Platform support
 
-  Development supervision -- Vite and Storybook as OS children with process-group
-  teardown -- requires a POSIX platform (macOS, Linux, or WSL2), because it relies
-  on MuonTrap, which is POSIX-only. Production manifest serving and contract
+  Development supervision requires a POSIX platform (macOS, Linux, or WSL2),
+  because it relies on MuonTrap. Linux cgroups can stop the full process tree;
+  macOS stops the immediate child. Production manifest serving and contract
   generation are platform-independent.
   """
 
@@ -62,7 +62,7 @@ defmodule PhoenixAssets do
   end
 
   @doc """
-  Whether development features (supervised Vite/Storybook, the dev overlay, the
+  Whether development features (supervised Vite/Storybook, the status plug, the
   generated-file watcher) are active.
 
   Defaults to `false` so production never spawns dev processes. Enable with:

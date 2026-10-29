@@ -58,7 +58,7 @@ Use configuration to tune an existing integration. Write a preset only when the
 set or order of integrations changes.
 
 ```elixir
-# Storybook off the supervised dev tree (run it on demand via `mix storybook`)
+# Storybook off the supervised dev tree (run it on demand from assets/)
 config :phoenix_assets, :dev, storybook: [enabled: false]   # or: [port: 6007]
 
 # Pin your market locales instead of scanning priv/gettext
@@ -67,6 +67,8 @@ config :phoenix_assets, :stack,
   default_locale: "sv",
   gettext_backend: MyAppWeb.Gettext
 ```
+
+Run `pnpm exec storybook dev -p 6006` from `assets/` for on-demand Storybook.
 
 ## Declaration modules (the backend contract)
 
@@ -135,7 +137,7 @@ config :phoenix_assets, :stack,
 
 ## Generated contracts
 
-`mix phoenix_assets.gen` writes typed TypeScript into `assets/src/generated/`:
+`mix phoenix_assets.gen` writes typed TypeScript into `assets/src/lib/generated/` by default:
 `routes.ts` (endpoint helpers for `/shapes/*` and `/api/*`; page routes remain
 owned by SvelteKit), `env.ts`, `electric.ts`, `commands.ts`,
 `session.ts`, `pubsub.ts`, `locales.ts`, `types.ts`. The frontend imports them through `$phoenix/*` virtual
@@ -201,10 +203,12 @@ consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING.
   the extracted HTTP consumer qualifies its installed and emitted closure under
   RELEASING. This source declaration does not change an already installed host.
   `/reporting` re-exports components, including when used to import its runtime decoder.
-- `@phoenix-assets/doc-shell`: the renderer-neutral documentation UI for the
-  `doc-shell/v2` and legacy `doc-shell/v1` presentation contracts. Only needed
-  if you render docs in-app; theme it through the `--doc-*` custom properties
-  rather than app aliases.
+- `@phoenix-assets/doc-shell`: Svelte documentation UI for `doc-shell/v2`,
+  legacy `doc-shell/v1`, and `doc-shell-site/v1`. `SiteShell` consumes a
+  projected site and page ID; `/browser` exposes the Svelte-free controllers.
+  The optional `PhoenixAssets.DocShell.*` modules render HEEx and static sites
+  with DocShell 0.5 or 1.0 plus LiveView. Theme the renderers through the
+  `--doc-*` custom properties; hosts supply routes, identity and authorization.
 
 ## Host-owned application composition
 
@@ -230,6 +234,14 @@ host application's authenticated work shell. Its reading, navigation, search
 and provenance behavior follows the upstream DocShell contract. Mounting it in
 an application does not import DocShell layout or authorization semantics into
 product routes.
+
+The [coordinated renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
+separates implemented APIs from the remaining DocShell work. Selectors, static
+branding settings, complete page metadata, hosted publication pairing and
+portable-artifact rendering require the upstream contracts and selected renderer
+versions listed there. Do not invent those options or put host routing,
+authorization, product task state, native readers or producer algorithms into
+this package to fill a missing integration.
 
 ## Linting and formatting in host applications
 
