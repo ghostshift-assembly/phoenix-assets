@@ -138,6 +138,20 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
         if (renderer === "liveview") await page.locator(".phx-connected").waitFor()
         for (const width of [320, 768, 1280]) {
           await page.setViewportSize({ width, height: 900 })
+          const reading = page
+            .getByRole("navigation", { name: "Continue reading", exact: true })
+            .getByRole("link")
+          if ((await reading.count()) === 2) {
+            const a = await reading.nth(0).boundingBox()
+            const b = await reading.nth(1).boundingBox()
+            assert.ok(
+              a &&
+                b &&
+                (Math.max(a.x, b.x) - Math.min(a.x + a.width, b.x + b.width) >= 4 ||
+                  Math.max(a.y, b.y) - Math.min(a.y + a.height, b.y + b.height) >= 4),
+              `${renderer}/${id}/${width}: adjacent reading links must remain separated`,
+            )
+          }
           if (width <= 768 && source.headings.length) {
             const contents = await page.locator(".toc, .doc-toc").boundingBox()
             const article = await page.locator("[data-content-digest] main").boundingBox()

@@ -49,6 +49,61 @@
 :where(.doc-shell) a {
   color: var(--doc-accent);
 }
+:where(.doc-shell) .doc-reading-flow,
+:where(.doc-shell) .doc-provenance {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+}
+:where(.doc-shell) .doc-reading-flow {
+  justify-content: space-between;
+  margin-block: 3rem 1.5rem;
+  padding-block: 1rem;
+  border-block: 1px solid var(--doc-border);
+}
+:where(.doc-shell) .doc-provenance {
+  color: var(--doc-muted);
+}
+:where(.doc-shell) .doc-directive,
+:where(.doc-shell) .doc-mermaid {
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  margin: 1rem 0;
+  padding: 0.875rem;
+}
+:where(.doc-shell) .doc-callout,
+:where(.doc-shell) .doc-update {
+  border-inline-start: 0.25rem solid var(--doc-accent);
+  background: var(--doc-surface);
+}
+:where(.doc-shell) .doc-badge {
+  display: inline-block;
+  margin: 0.2rem;
+  padding: 0.15rem 0.5rem;
+  font-size: 0.75rem;
+}
+:where(.doc-shell) .doc-tabs [role="tablist"] {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+:where(.doc-shell) .doc-tabs [role="tabpanel"] {
+  padding: 0.75rem;
+  border: 1px solid var(--doc-border);
+}
+:where(.doc-shell) .doc-code {
+  margin: 1rem 0;
+  overflow: auto;
+  border-radius: var(--doc-radius);
+  background: var(--doc-surface);
+}
+:where(.doc-shell .doc-code) pre {
+  margin: 0;
+  padding: 1rem;
+}
+:where(.doc-shell) .doc-mermaid {
+  overflow: auto;
+}
 :where(.doc-shell) .doc-page-header h1 {
   font-size: clamp(2rem, 6vw, 3.5rem);
   line-height: 1.08;

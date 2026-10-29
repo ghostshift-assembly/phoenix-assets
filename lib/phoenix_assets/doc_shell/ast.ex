@@ -146,7 +146,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         escape_attribute(language),
         "\"><button type=\"button\" class=\"pa-button\" data-pa-variant=\"secondary\" data-doc-copy=\"",
         id,
-        "\" aria-label=\"Copy code\">Copy</button><button type=\"button\" data-doc-enhance=\"highlight\" hidden>Highlight code</button><pre><code id=\"",
+        "\" aria-label=\"Copy code\">Copy</button><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"highlight\" hidden>Highlight code</button><pre><code id=\"",
         id,
         "\">",
         escape(source),
@@ -158,7 +158,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       source = text_content(content)
 
       [
-        "<figure class=\"doc-mermaid\" data-doc-mermaid><button type=\"button\" data-doc-enhance=\"mermaid\" hidden>Render diagram</button><pre><code>",
+        "<figure class=\"doc-mermaid\" data-doc-mermaid><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"mermaid\" hidden>Render diagram</button><pre><code>",
         escape(source),
         "</code></pre><figcaption>Diagram source</figcaption></figure>"
       ]
@@ -225,7 +225,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
           panel_id = "#{group}-panel-#{index}"
 
           [
-            "<button type=\"button\" role=\"tab\" id=\"",
+            "<button type=\"button\" class=\"pa-button\" role=\"tab\" id=\"",
             tab_id,
             "\" aria-controls=\"",
             panel_id,
