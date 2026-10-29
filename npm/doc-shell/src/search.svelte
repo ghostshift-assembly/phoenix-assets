@@ -36,7 +36,7 @@ const facets = $derived(
         ),
       ].sort(),
     }))
-    .filter((facet) => facet.values.length > 1),
+    .filter((facet) => facet.values.length > 0),
 )
 $effect(() => {
   if (!root) return

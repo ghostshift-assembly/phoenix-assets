@@ -25,7 +25,8 @@ if Code.ensure_loaded?(DocShell.Presentation.SearchAdapter) do
            {:ok, executable} <- executable(options[:executable]),
            :ok <- validate_version(executable),
            {:ok, prefix} <- prefix(options[:path] || "pagefind"),
-           {:ok, assets} <- run(records, executable, prefix, options[:timeout] || 30_000) do
+           {:ok, assets, indexes} <-
+             build_indexes(records, executable, prefix, options[:timeout] || 30_000) do
         entry = Enum.find(assets, &String.ends_with?(&1.path, "/pagefind.js"))
 
         if entry do
@@ -38,6 +39,7 @@ if Code.ensure_loaded?(DocShell.Presentation.SearchAdapter) do
                "builder" => "pagefind",
                "version" => @version,
                "path" => entry.path,
+               "indexes" => indexes,
                "filters" => @filters,
                "digests" => Map.new(assets, &{&1.path, digest(&1.bytes)})
              }
@@ -113,6 +115,24 @@ if Code.ensure_loaded?(DocShell.Presentation.SearchAdapter) do
 
     defp prefix(value), do: {:error, {:invalid_pagefind_path, value}}
 
+    defp build_indexes(records, executable, prefix, timeout) do
+      records
+      |> Enum.group_by(& &1.locale)
+      |> Enum.sort()
+      |> Enum.reduce_while({:ok, [], %{}}, fn {locale, localized}, {:ok, assets, indexes} ->
+        directory = Path.join(prefix, digest(locale) |> String.replace_prefix("sha256:", ""))
+
+        case run(localized, executable, directory, timeout) do
+          {:ok, generated} ->
+            path = "../" <> Path.basename(directory) <> "/pagefind.js"
+            {:cont, {:ok, assets ++ generated, Map.put(indexes, locale, path)}}
+
+          {:error, _} = error ->
+            {:halt, error}
+        end
+      end)
+    end
+
     defp run(records, executable, prefix, timeout) do
       token = Integer.to_string(System.unique_integer([:positive, :monotonic]), 36)
       root = Path.join(System.tmp_dir!(), "phoenix-assets-pagefind-#{token}")
@@ -174,7 +194,10 @@ if Code.ensure_loaded?(DocShell.Presentation.SearchAdapter) do
         "route" => record.route,
         "section" => record.section || "",
         "collection" => record.collection,
-        "version" => record.version
+        "version" => record.version,
+        "locale" => record.locale,
+        "kind" => record.kind,
+        "status" => record.status || ""
       }
 
       Enum.map(values, fn {name, value} ->

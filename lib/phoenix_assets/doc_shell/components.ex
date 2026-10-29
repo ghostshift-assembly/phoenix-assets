@@ -10,7 +10,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     use Phoenix.Component
 
-    @search_browser_contract_keys ~w(schema_version algorithm path filters version)
+    @search_browser_contract_keys ~w(schema_version algorithm path indexes filters version)
 
     alias PhoenixAssets.DocShell.{Assets, Ast}
 

@@ -140,6 +140,36 @@ describe("deterministic browser search", () => {
     await expect(search?.("guide")).rejects.toThrow("Invalid Pagefind browser module")
   })
 
+  it("selects lazy locale indexes independently and recovers after a failed load", async () => {
+    const contract = {
+      schema_version: "doc-shell-search-query/v1",
+      algorithm: "pagefind/v1",
+      path: "/docs/pagefind/en/pagefind.js",
+      indexes: { en: "../en/pagefind.js", sv: "../sv/pagefind.js" },
+    }
+    const load = vi.fn().mockImplementation(async (path: string) => ({
+      search: async () => ({
+        results: [{ data: async () => ({ url: path, meta: {}, excerpt: "result" }) }],
+      }),
+    }))
+    load.mockRejectedValueOnce(new Error("offline"))
+    const search = createContractPagefindSearch(contract, load, "https://docs.example.test")
+    expect(load).not.toHaveBeenCalled()
+    await expect(search?.("guide", { locale: "sv" })).rejects.toThrow("offline")
+    await expect(search?.("guide", { locale: "sv" })).resolves.toMatchObject([
+      { url: "/docs/pagefind/sv/pagefind.js" },
+    ])
+    expect(load).toHaveBeenCalledTimes(2)
+    await expect(search?.("guide")).resolves.toHaveLength(2)
+    expect(load).toHaveBeenCalledTimes(3)
+    await expect(search?.("guide", { locale: "unknown" })).resolves.toEqual([])
+    for (const indexes of [{ sv: "https://other.example/index.js" }, {}, { sv: 123 }]) {
+      expect(
+        admitPagefindContract({ ...contract, indexes }, "https://docs.example.test"),
+      ).toBeUndefined()
+    }
+  })
+
   it("loads the admitted Pagefind module from the controller only after a query", async () => {
     const root = fixture()
     const dialog = root.querySelector<HTMLDialogElement>("[data-doc-search-dialog]")

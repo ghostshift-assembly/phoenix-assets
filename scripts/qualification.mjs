@@ -44,6 +44,7 @@ const retainedEvidence = (output) => {
     "consumer-browser-dist",
     "producer",
     "browser-static",
+    "browser-search",
     "browser-screenshots",
   ])
     visit(join(output, name), name)

@@ -13,12 +13,30 @@ import {
 import { createServer } from "node:http"
 import { extname, join, resolve, sep } from "node:path"
 import { chromium } from "@playwright/test"
+import { qualifySearch } from "./search-qualification.mjs"
 
 /** Exercises the installed renderer and public producer corpus in Chromium. */
 export async function qualifyBrowser(sourceRoot, root, output) {
   const fixture = join(output, "browser-static")
+  const searchFixture = join(output, "browser-search")
   assert.ok(existsSync(join(fixture, "site.json")), "extracted Hex renderer fixture is missing")
   copyFileSync(join(fixture, "site.json"), join(root, "site.json"))
+  writeFileSync(
+    join(root, "search-fixtures.json"),
+    JSON.stringify(
+      Object.fromEntries(
+        ["json", "pagefind"].map((adapter) => [
+          adapter,
+          {
+            site: JSON.parse(readFileSync(join(searchFixture, adapter, "site.json"), "utf8")),
+            contract: JSON.parse(
+              readFileSync(join(searchFixture, adapter, "search-contract.json"), "utf8"),
+            ),
+          },
+        ]),
+      ),
+    ),
+  )
   copyFileSync(join(sourceRoot, "npm/doc-shell/test/fixtures/openapi.json"), join(root, "api.json"))
   const producer = join(sourceRoot, "npm/svelte/test/fixtures/upstream-reporting")
   copyFileSync(join(producer, "envelope.json"), join(root, "envelope.json"))
@@ -34,16 +52,18 @@ import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"
 import { PortableReport, decodeReportEnvelope, safeDecodeReportEnvelope } from "@phoenix-assets/svelte/reporting"
 import "@phoenix-assets/doc-shell/theme.css"
 import site from "./site.json"
+import searchFixtures from "./search-fixtures.json"
 import api from "./api.json"
 import envelope from "./envelope.json"
 import samples from "./qualified-envelopes.json"
 window.decodeProducerCase = safeDecodeReportEnvelope
 const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
 const apiPage = new URLSearchParams(window.location.search).has("api")
+const searchFixture = searchFixtures[new URLSearchParams(window.location.search).get("search")]
 </script>
 {#if apiPage}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference spec={api} /></main></div>{:else}
-<SiteShell {site} {pageId} />
-{#if pageId === "anchors:guide"}
+<SiteShell site={searchFixture?.site ?? site} pageId={searchFixture ? "guides:english" : pageId} searchContract={searchFixture?.contract.algorithm === "pagefind/v1" ? searchFixture.contract : undefined} />
+{#if !searchFixture && pageId === "anchors:guide"}
 <section class="doc-shell" aria-label="Portable reporting"><PortableReport envelope={decodeReportEnvelope(envelope)} /></section>
 {#each samples as sample}<section class="doc-shell" aria-label={sample.name}><PortableReport envelope={decodeReportEnvelope(sample.value)} /></section>{/each}
 {/if}
@@ -86,7 +106,12 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
   mkdirSync(screenshots, { recursive: true })
   const server = createServer((request, response) => {
     const path = decodeURIComponent(new URL(request.url, "http://localhost").pathname)
-    const base = path.startsWith("/svelte/") ? application : fixture
+    const adapter = ["json", "pagefind"].find((adapter) => path.startsWith(`/${adapter}/`))
+    const base = adapter
+      ? join(searchFixture, adapter)
+      : path.startsWith("/svelte/")
+        ? application
+        : fixture
     let file = resolve(base, `.${path.startsWith("/svelte/") ? path.slice(7) : path}`)
     if (path.startsWith("/svelte/assets/")) file = resolve(application, `.${path.slice(7)}`)
     // Vite's own hashed assets use /assets; static exporter names do not collide.
@@ -95,7 +120,7 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
     if (path === "/svelte-ssr/") file = join(application, "ssr.html")
     if (path === "/svelte-ssr-404/") file = join(application, "ssr404.html")
     if (path === "/svelte-api-ssr/") file = join(application, "api-ssr.html")
-    const allowed = [application, fixture].some(
+    const allowed = [application, fixture, searchFixture].some(
       (directory) => file === directory || file.startsWith(directory + sep),
     )
     if (!allowed || !existsSync(file)) {
@@ -124,6 +149,7 @@ const apiPage = new URLSearchParams(window.location.search).has("api")
   const cases = []
   try {
     browser = await chromium.launch({ headless: true })
+    cases.push(...(await qualifySearch(browser, origin, searchFixture)))
     for (const renderer of ["heex", "svelte"]) {
       const path = renderer === "heex" ? "/docs/guide/" : "/svelte/"
       const context = await browser.newContext({

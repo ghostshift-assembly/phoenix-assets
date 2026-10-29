@@ -209,11 +209,11 @@ const pagefindRecord = (result: PagefindResult): SearchRecord => {
     section: result.meta.section,
     text: result.excerpt,
     locale: result.meta.locale ?? "",
-    audience: result.meta.audience,
+    audience: result.filters?.audience ?? result.meta.audience,
     kind: result.meta.kind ?? "",
     collection: result.meta.collection ?? "",
     version: result.meta.version ?? "",
-    tags: [],
+    tags: result.filters?.tag ?? [],
     status: result.meta.status,
   }
 }

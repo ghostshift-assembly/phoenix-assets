@@ -628,7 +628,7 @@ end
       ],
       consumerOptions,
     )
-    if (docShellVersion === "1.0.0")
+    if (docShellVersion === "1.0.0") {
       run(
         "mix",
         [
@@ -639,6 +639,17 @@ end
         ],
         consumerOptions,
       )
+      run(
+        "mix",
+        [
+          "run",
+          "--no-start",
+          join(sourceRoot, "scripts/search-fixture.exs"),
+          join(output, "browser-search"),
+        ],
+        consumerOptions,
+      )
+    }
     evidence = {
       doc_shell: docShellVersion ?? null,
       lock_sha256: hash(join(consumer, "mix.lock"), "sha256"),

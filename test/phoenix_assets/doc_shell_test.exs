@@ -327,7 +327,8 @@ defmodule PhoenixAssets.DocShellTest do
     assert Map.new(output.assets, &{&1.path, binary_digest(&1.bytes)}) ==
              output.contract["digests"]
 
-    assert Enum.any?(output.assets, &String.starts_with?(&1.path, "pagefind/wasm."))
+    assert Enum.any?(output.assets, &String.contains?(&1.path, "/wasm."))
+    assert Map.keys(output.contract["indexes"]) == ["en"]
   end
 
   defp site_fixture do
