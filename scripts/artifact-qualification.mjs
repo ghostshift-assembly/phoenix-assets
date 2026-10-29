@@ -18,7 +18,7 @@ import { chromium } from "@playwright/test"
 
 const sourceRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..")
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex")
-const modes = ["document", "light", "dark", "monochrome", "enlarged"]
+const modes = ["document", "site", "missing", "light", "dark", "monochrome", "enlarged"]
 
 /** Observe actual no-JavaScript HTML from independent Svelte SSR and HEEx readers. */
 export async function qualifyArtifactReaders(output, packageDirectory, peerDirectory) {
@@ -36,9 +36,17 @@ export async function qualifyArtifactReaders(output, packageDirectory, peerDirec
   writeFileSync(
     entry,
     `import { render } from "svelte/server"
-import { ArtifactDocument, ArtifactPreview } from "@phoenix-assets/doc-shell"
-export const document = (props, mode) => render(mode === "document" ? ArtifactDocument : ArtifactPreview,
-  { props: mode === "document" ? props : { ...props, mode } }).body
+import { ArtifactDocument, ArtifactPreview, SiteShell } from "@phoenix-assets/doc-shell"
+export const document = (fixture, mode) => {
+  const props = fixture.props
+  if (mode === "site" || mode === "missing") return render(SiteShell, { props: {
+    site: fixture.site, pageId: mode === "missing" ? "missing" : fixture.pageId,
+    artifactAssets: props.assets, canonicalContent: props.canonicalContent, canonicalReceipt: props.canonicalReceipt,
+    assetUrls: Object.fromEntries(Object.keys(props.assets).map((name) => [name, "../assets/" + name]))
+  } })
+  return render(mode === "document" ? ArtifactDocument : ArtifactPreview,
+    { props: mode === "document" ? props : { ...props, mode } })
+}
 `,
   )
   const renderer = await createServer({
@@ -46,7 +54,7 @@ export const document = (props, mode) => render(mode === "document" ? ArtifactDo
     configFile: false,
     publicDir: false,
     logLevel: "error",
-    plugins: [svelte()],
+    plugins: [svelte({ emitCss: false })],
     resolve: { alias: { "@phoenix-assets/doc-shell": join(library, "index.js") } },
     server: { middlewareMode: true },
     appType: "custom",
@@ -60,13 +68,19 @@ export const document = (props, mode) => render(mode === "document" ? ArtifactDo
       fixture.svelte = {}
       const folder = join(output, "svelte", fixture.id)
       mkdirSync(folder, { recursive: true })
+      for (const [name, asset] of Object.entries(fixture.props.assets)) {
+        const assetPath = resolve(output, "svelte/assets", name)
+        assert.ok(assetPath.startsWith(`${resolve(output, "svelte/assets")}${sep}`))
+        mkdirSync(dirname(assetPath), { recursive: true })
+        writeFileSync(assetPath, Buffer.from(asset.base64, "base64"))
+      }
       for (const mode of modes) {
         const filename = `${mode}.html`
-        const body = module.document(fixture.props, mode)
-        assert.ok(!/<script\b/i.test(body), "SSR artifact output contains a script")
+        const result = module.document(fixture, mode)
+        assert.ok(!/<script\b/i.test(result.body), "SSR artifact output contains a script")
         writeFileSync(
           join(folder, filename),
-          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Artifact reader</title><link rel="stylesheet" href="../assets/theme.css"></head><body><main>${body}</main></body></html>`,
+          `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${result.head || "<title>Artifact reader</title>"}<link rel="stylesheet" href="../assets/theme.css"></head><body>${mode === "site" || mode === "missing" ? result.body : `<main>${result.body}</main>`}</body></html>`,
         )
         fixture.svelte[mode] = relative(output, join(folder, filename))
       }
@@ -139,14 +153,18 @@ export const document = (props, mode) => render(mode === "document" ? ArtifactDo
           // A file reader needs the exporter-declared file mode. HTTP checks both modes.
           if (transport === "file" && !fixture.id.includes("-file-")) continue
           for (const mode of modes) {
+            // SiteShell is an HTTP/hosted component; the HEEx exporter owns file URL rewriting.
+            if (transport === "file" && (mode === "site" || mode === "missing")) continue
             const surfaces = {}
             for (const reader of ["heex", "svelte"]) {
               const path =
                 reader === "svelte"
                   ? fixture.svelte[mode]
-                  : mode === "document"
+                  : mode === "document" || mode === "site"
                     ? fixture.native_document
-                    : fixture.native_previews[mode]
+                    : mode === "missing"
+                      ? fixture.native_missing
+                      : fixture.native_previews[mode]
               const page = await context.newPage()
               try {
                 const url =
@@ -154,6 +172,123 @@ export const document = (props, mode) => render(mode === "document" ? ArtifactDo
                     ? pathToFileURL(join(output, path)).href
                     : `${origin}/${path}`
                 await page.goto(url)
+                if (mode === "site" || mode === "missing") {
+                  assert.equal(
+                    await page
+                      .locator(reader === "svelte" ? ".site-layout" : ".doc-layout")
+                      .evaluate((root) => getComputedStyle(root).display),
+                    "grid",
+                    "SSR component CSS is missing",
+                  )
+                  assert.ok(await page.getByText("New", { exact: true }).isVisible())
+                  for (const text of [
+                    "Contract docs",
+                    "Portable documentation fixture",
+                    "Search unavailable in passive mode; use page links.",
+                  ])
+                    assert.ok(
+                      (await page.locator("body").innerText()).includes(text),
+                      `${path}: ${text}`,
+                    )
+                  assert.ok(
+                    await page
+                      .getByRole("navigation", { name: "Reader language", exact: true })
+                      .isVisible(),
+                  )
+                  assert.ok(
+                    await page
+                      .getByRole("navigation", { name: "Reader version", exact: true })
+                      .isVisible(),
+                  )
+                  assert.equal(
+                    await page
+                      .getByRole("link", { name: "English", exact: true })
+                      .getAttribute("aria-current"),
+                    "true",
+                  )
+                  assert.equal(
+                    await page
+                      .getByRole("link", { name: "Stable", exact: true })
+                      .getAttribute("aria-current"),
+                    "true",
+                  )
+                  assert.equal(
+                    await page.locator('meta[name="description"]').getAttribute("content"),
+                    mode === "site" ? "Page search description" : "Shared site description",
+                  )
+                  assert.equal(
+                    await page.locator('meta[name="robots"]').getAttribute("content"),
+                    mode === "site" ? "noindex" : "nofollow",
+                  )
+                  if (mode === "site") {
+                    assert.equal(
+                      await page.locator('link[rel="canonical"]').getAttribute("href"),
+                      `https://docs.example.test${fixture.site.pages[fixture.pageId].route}`,
+                    )
+                    assert.ok(
+                      (await page.locator("body").innerText()).includes(
+                        "Read the admitted generation",
+                      ),
+                    )
+                    if (fixture.pageId === "chart") {
+                      assert.ok((await page.locator("body").innerText()).includes("Start reading"))
+                      await page.getByAltText("Chart thumbnail").evaluate((image) => image.decode())
+                    }
+                  }
+                }
+                if (mode === "site" || mode === "missing") {
+                  const navigation = page.locator("aside details").first()
+                  assert.equal(await navigation.count(), 1)
+                  const before = await navigation.getAttribute("open")
+                  const summary = navigation.locator(":scope > summary")
+                  await summary.focus()
+                  await summary.press("Space")
+                  assert.notEqual(await navigation.getAttribute("open"), before)
+                  await summary.press("Space")
+                  assert.equal(await navigation.getAttribute("open"), before)
+                  const destination = page.getByRole("link", { name: "English", exact: true })
+                  await destination.focus()
+                  await destination.press("Enter")
+                  await page.waitForLoadState()
+                  assert.equal(
+                    await page.locator("figure[data-doc-artifact] figcaption").innerText(),
+                    "Sample mass",
+                  )
+                  await page.goto(url)
+                  const swedish = page.getByRole("link", { name: "Svenska", exact: true })
+                  await swedish.focus()
+                  await swedish.press("Enter")
+                  await page.waitForLoadState()
+                  assert.equal(await page.locator("h1").innerText(), "Dokumentation")
+                  assert.equal(
+                    await page.locator("[data-pa-doc-shell][lang]").getAttribute("lang"),
+                    "sv",
+                  )
+                  await page.goto(url)
+                  if (
+                    fixture.id.startsWith("root-web-") &&
+                    (mode === "site" || fixture.pageId === "chart")
+                  ) {
+                    const filename = `${fixture.id}-${reader}-${mode}.png`
+                    const image = await page.screenshot({
+                      path: join(output, "artifact-screenshots", filename),
+                      fullPage: true,
+                    })
+                    screenshots[filename] = digest(image)
+                  }
+                }
+                if (mode === "missing") {
+                  assert.equal(await page.locator("h1").innerText(), "Document unavailable")
+                  assert.equal(
+                    await page.locator("script,button,dialog,iframe,object,embed").count(),
+                    0,
+                  )
+                  surfaces[reader] = { title: await page.locator("h1").innerText() }
+                  cases.push(
+                    `${transport}:${fixture.id}:${reader}:passive-404,settings,selectors,SEO`,
+                  )
+                  continue
+                }
                 const figure = page.locator("figure[data-doc-artifact]")
                 await figure.waitFor()
                 const observation = await figure.evaluate(async (root) => {
@@ -203,7 +338,7 @@ export const document = (props, mode) => render(mode === "document" ? ArtifactDo
                   await page.locator("script,button,dialog,iframe,object,embed").count(),
                   0,
                 )
-                if (mode !== "document") {
+                if (mode !== "document" && mode !== "site") {
                   const disclosure = page.locator(".preview-diagnostics > details").first()
                   const summary = disclosure.locator(":scope > summary")
                   await summary.focus()

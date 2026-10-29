@@ -447,3 +447,57 @@ and its subpaths external. Rebuilding the same extracted npm consumer and
 running its real `render-ssr.mjs` succeeds for document, missing-page and API
 output. No library context checks were bypassed. The full local gate also passes;
 the failed archive cohort remains distinct from the subsequent qualified cut.
+
+
+## Requirement evidence map
+
+This maps each PHA.01 requirement to its owning implementation and executable
+proof. A source test is not an archive, native-application or human result. Fresh
+archive receipts retain their own exact source/producer/peer identities.
+
+| Requirement | Owner and executable proof | Qualification boundary |
+| --- | --- | --- |
+| PHA-S01 | Upstream presentation/profile contracts; frozen canonical, hosted-pair and artifact corpora checked by `conformance.test.ts`, `hosted-pair.test.ts`, `artifacts.test.ts` and native counterpart suites | Producer meaning and host authority remain outside |
+| PHA-S02 | `src/browser/*`; `browser.test.ts`, lifecycle and request tests; `Assets.validate/0` and export checks | Extracted browser import/bundle proof belongs to the release lane |
+| PHA-S03 | Conditional `DocShell.Components`, `Ast`, `ApiReference`, `Settings`; `doc_shell_test.exs` and candidate integration suites | New upstream APIs explicitly refuse on older producers |
+| PHA-S04 | `StaticRenderer` and the same `Components.page/1`; `doc_shell_conformance_test.exs`, exporter tests and `mix run --no-start` fixtures | Hosted endpoint proof is separate from no-start output |
+| PHA-S05 | Closed AST/fallback paths and passive receipt context; `components.svelte.test.ts` and `ast-regressions.svelte.test.ts`, artifact DOM/native tests and no-JavaScript browser lanes | Native application reading remains external |
+| PHA-S06 | Shared browser controllers, JSON/Pagefind, directives and OpenAPI adapters; browser/search/conformance qualification scripts | Expanded host settings are also checked by the artifact/site reader lane |
+| PHA-S07 | Semantic shell, native links/disclosures, focus and responsive/theme CSS; browser/conformance keyboard, contrast, reflow and RTL cases | Human assistive tasks and actual device/native observations remain unverified |
+| PHA-S08 | `Assets` and `build-browser.mjs`; local-import, no-map, size/gzip, content-hash and offline checks | Archived assets must be measured again for each cut |
+| PHA-S09 | Upstream `Conformance` corpus and capability fixtures; source/native tests plus `conformance-qualification.mjs` | Independent extracted/hosted reader observations are archive-specific |
+| PHA-S10 | Module guards, runtime API guards and browser subpath; `package_test.exs`, `smoke-hex`, exports and fresh consumer checks | Optional-free and selected-producer modes are distinct |
+| PHA-S11 | Scoped editorial CSS, host slots/snippets, inert settings and generic artifact preview | Ownership review plus boundary gate; no product task/state/layout or producer algorithm was added |
+| PHA-V01 | `scripts/release.mjs smoke-hex`: optional-free and DocShell 0.4/0.5/1.0 consumers; current candidate receipt tests | Published compatibility does not imply new receipt support |
+| PHA-V02 | Browser entry/import checks, shared controller tests and packaged `Assets.validate/0` | No Svelte dependency is introduced through the browser entry |
+| PHA-V03 | `doc_shell_conformance_test.exs`, upstream frozen cohort and extracted Svelte/static/hosted surface comparisons | The expanded settings/artifact observations extend the baseline corpus |
+| PHA-V04 | Shared HEEx page body, source digest assertions, hosted fixture and surface validator | Byte-identical framework HTML is not required |
+| PHA-V05 | Browser/search/conformance keyboard tests; passive reader disclosure, selector and anchor tasks | Automated interaction does not replace a human screen-reader task |
+| PHA-V06 | Browser/conformance 320/768/1280 layouts, reduced motion, themes, RTL and zoom-equivalent reflow; passive preview modes | Actual high-zoom/device observations retain their own status |
+| PHA-V07 | JavaScript-disabled SSR/HEEx cases, API fallback and offline file artifact reader | Svelte SiteShell is hosted HTTP HTML; the HEEx exporter owns file URL rewriting |
+| PHA-V08 | AST/URL/OpenAPI refusal suites, original canonical proofs, stale pair/receipt cases and shared SVG/PNG vectors | Media structure checks do not qualify producer geometry or PNG pixels |
+| PHA-V09 | `search-qualification.mjs`, lazy Pagefind requests and equivalent JSON/Pagefind filter tasks in all three surfaces | Archive/producer/locale identities must match the receipt |
+| PHA-V10 | Baseline browser screenshots plus artifact/site/preview screenshots and explicit visual inspection | New or changed image bytes need review; old archive receipts cannot be reused |
+| PHA-V11 | `Assets.validate/0`, offline guard, package export checks and bundle budgets in the full gate | Fresh archive bytes are the release subject |
+| PHA-V12 | No-start Hex static fixture, local server/file readers and JavaScript-disabled network checks | No endpoint/socket/Node runtime is needed to read the static files |
+| PHA-V13 | Ownership review, scoped CSS, customization and boundary checks | Host-owned arbitrary CSS and product policy remain outside this renderer |
+
+
+### Passive 404 and expanded settings qualification
+
+A DOM regression first failed because a missing Svelte page exposed a search
+button despite the admitted site's no-JavaScript restriction. SiteShell now
+retains that restriction on 404 output without loading inactive page assets.
+Ordinary legacy sites keep their existing controls. The full gate passes 505
+backend checks at 87.5% coverage and 556 frontend tests (323 DocShell).
+
+The reader runner now includes emitted Svelte component CSS and asserts the
+actual desktop grid before testing behavior. Earlier shared-stylesheet-only
+screenshots do not qualify the complete Svelte shell layout. The expanded run
+passes 152 cases with real component CSS and 26 reviewed screenshots, covering
+brand/footer data, badge/collapse navigation, keyboard locale/release links,
+an actual Swedish destination, hero/banner/media, canonical/description/robots
+metadata, passive 404 and the existing artifact/preview tasks. Eighteen changed
+images were inspected; eight byte-identical HEEx preview images retain their
+previous image review. This remains checkout evidence until repeated against
+the coordinated archive cohort.

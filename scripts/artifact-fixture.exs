@@ -52,6 +52,68 @@ fixtures =
         {page.id, page}
       end)
 
+    chart_route = pages["chart"].route
+    drawing_route = pages["drawing"].route
+
+    pages =
+      Map.new(pages, fn {id, page} ->
+        decorated = %{
+          page
+          | canonical_url: "https://docs.example.test" <> page.route,
+            metadata: %{
+              "seo" => %{"description" => "Page search description", "robots" => ["noindex"]}
+            },
+            banner: %{
+              "label" => "Contract preview",
+              "text" => "Read the admitted generation",
+              "href" => chart_route
+            }
+        }
+
+        decorated =
+          if id == "chart",
+            do: %{
+              decorated
+              | template: :splash,
+                hero: %{
+                  "title" => "Start reading",
+                  "description" => "Choose a complete document",
+                  "actions" => [%{"label" => "Read drawing", "href" => drawing_route}],
+                  "image" => %{"asset" => "chart.svg", "alt" => "Chart thumbnail"}
+                }
+            },
+            else: decorated
+
+        {id, decorated}
+      end)
+
+    swedish_content = [
+      %{
+        "tag" => "p",
+        "attrs" => %{},
+        "content" => ["En fullständig dokumentationssida."],
+        "meta" => %{}
+      }
+    ]
+
+    {:ok, swedish_digest} = Canonical.digest(swedish_content)
+    swedish_route = String.trim_trailing(base, "/") <> "/sv/"
+
+    pages =
+      Map.put(pages, "sv", %Page{
+        id: "sv",
+        collection_id: "examples",
+        document_id: "sv",
+        kind: "guide",
+        route: swedish_route,
+        title: "Dokumentation",
+        locale: "sv",
+        template: :document,
+        content: swedish_content,
+        content_digest: swedish_digest,
+        package_version: "1.0.0"
+      })
+
     site = %Site{
       schema_version: Site.schema_version(),
       generation_id: "artifact-qualification",
@@ -60,7 +122,7 @@ fixtures =
       title: "Artifact examples",
       base_path: base,
       default_locale: "en",
-      locales: Enum.uniq(Enum.map(inputs, & &1["observations"]["locale"])),
+      locales: ["en", "sv"],
       pages: pages,
       routes: Map.new(pages, fn {id, page} -> {page.route, id} end),
       navigation:
@@ -69,7 +131,42 @@ fixtures =
         end),
       search: [],
       redirects: %{},
-      metadata: %{}
+      metadata: %{},
+      presentation: %{
+        "brand" => %{"label" => "Contract docs", "href" => chart_route},
+        "footer" => %{
+          "text" => "Portable documentation fixture",
+          "links" => [%{"label" => "Read chart", "href" => chart_route}]
+        },
+        "labels" => %{
+          "language" => "Reader language",
+          "release" => "Reader version",
+          "not_found" => "Document unavailable",
+          "search_requires_js" => "Search unavailable in passive mode; use page links."
+        },
+        "locales" => [
+          %{"id" => "en", "label" => "English", "href" => chart_route},
+          %{"id" => "sv", "label" => "Svenska", "href" => swedish_route}
+        ],
+        "releases" => [
+          %{"id" => "stable", "label" => "Stable", "href" => chart_route, "current" => true},
+          %{"id" => "previous", "label" => "Previous", "href" => drawing_route}
+        ],
+        "metadata" => %{"description" => "Shared site description", "robots" => ["nofollow"]}
+      }
+    }
+
+    site = %{
+      site
+      | navigation: [
+          %NavigationItem{
+            id: "profiles",
+            title: "Examples",
+            path: "",
+            meta: %{"badge" => "New", "collapsed" => true},
+            children: site.navigation
+          }
+        ]
     }
 
     assets =
@@ -119,6 +216,18 @@ fixtures =
         &{&1.path, %{"media_type" => &1.media_type, "base64" => Base.encode64(&1.bytes)}}
       )
 
+    admitted_site = %{
+      site
+      | pages:
+          Map.new(site.pages, fn {id, page} ->
+            {id,
+             %{
+               page
+               | metadata: Map.put(page.metadata, "artifact_presentation", binding["pages"][id])
+             }}
+          end)
+    }
+
     for input <- inputs do
       page = pages[input["id"]]
       receipt = binding["pages"][page.id]
@@ -159,6 +268,9 @@ fixtures =
 
       %{
         "id" => "#{name}-#{reader}-#{page.id}",
+        "site" => admitted_site,
+        "pageId" => page.id,
+        "native_missing" => Path.join(folder, "404.html"),
         "native_document" => Path.join([folder, relative, "index.html"]),
         "native_previews" => previews,
         "observations" => input["observations"],

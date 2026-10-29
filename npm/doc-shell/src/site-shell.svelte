@@ -66,6 +66,20 @@ const page = $derived.by(() => {
   }
   return current
 })
+// A 404 has no selected page or assets; retain the admitted site's passive restriction.
+const missingPagePassive = $derived(
+  Object.values(site.pages).some(({ metadata }) => {
+    const receipt = metadata.artifact_presentation as Partial<ArtifactReceipt> | undefined
+    const available = receipt?.constraints?.available_runtime
+    const forbidden = receipt?.constraints?.forbidden_runtime
+    return (
+      receipt?.schema_version === "doc-shell-artifact-presentation/v1" &&
+      Array.isArray(available) &&
+      Array.isArray(forbidden) &&
+      (!available.includes("browser_js") || forbidden.includes("browser_js"))
+    )
+  }),
+)
 const artifactPage = $derived<ArtifactPage>(
   page
     ? admitArtifactPage(
@@ -74,7 +88,7 @@ const artifactPage = $derived<ArtifactPage>(
         artifactAssets,
         { canonicalContent, canonicalReceipt },
       )
-    : { blocks: new Map(), passive: false },
+    : { blocks: new Map(), passive: missingPagePassive },
 )
 provideArtifacts(() => artifactPage)
 const localeCurrent = (choice: PresentationDestination) => {

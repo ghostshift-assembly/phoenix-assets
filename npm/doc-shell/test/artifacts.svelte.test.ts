@@ -158,7 +158,7 @@ describe("verified artifact views", () => {
     expect(root.querySelector("button")).toBeNull()
     expect(highlight).not.toHaveBeenCalled()
   })
-  it("adopts projected receipt metadata with native navigation and honest passive controls", () => {
+  it.each(["present", "missing"])("keeps passive site controls honest on a %s page", (state) => {
     const { props } = fixtureProps(0)
     const site = JSON.parse(JSON.stringify(siteFixture)) as DocShellSite
     const pageId = Object.keys(site.pages)[0]
@@ -175,14 +175,16 @@ describe("verified artifact views", () => {
         target: root,
         props: {
           site,
-          pageId,
+          pageId: state === "present" ? pageId : "missing",
           artifactAssets: props.assets,
           canonicalContent: props.canonicalContent,
         },
       }),
     )
     flushSync()
-    expect(root.querySelector("figure[data-doc-artifact]")).not.toBeNull()
+    expect(root.querySelector("button, dialog, script")).toBeNull()
+    if (state === "present") expect(root.querySelector("figure[data-doc-artifact]")).not.toBeNull()
+    else expect(root.querySelector("h1")?.textContent).toBe("Page not found")
     expect(root.querySelector("aside[data-doc-passive] a[href]")).not.toBeNull()
     expect(root.querySelector("[data-doc-search-disabled]")?.textContent).toContain(
       "navigation links",
