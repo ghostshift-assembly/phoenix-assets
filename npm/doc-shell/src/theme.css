@@ -215,6 +215,15 @@
   flex-wrap: wrap;
   gap: 0.25rem;
 }
+
+:where(.doc-shell) .doc-site-selector ul,
+:where(.doc-shell) .doc-host-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  padding: 1rem;
+  list-style: none;
+}
 :where(.doc-shell) .doc-layout {
   display: grid;
   grid-template-columns: minmax(12rem, 16rem) minmax(0, 1fr) minmax(10rem, 14rem);
@@ -247,6 +256,12 @@
 :where(.doc-shell) svg {
   max-width: 100%;
   height: auto;
+}
+:where(.doc-shell) .doc-brand img {
+  max-height: 2rem;
+  max-width: 8rem;
+  margin-inline-end: 0.5rem;
+  vertical-align: middle;
 }
 :where(.doc-shell) .doc-mobile-nav {
   display: none;

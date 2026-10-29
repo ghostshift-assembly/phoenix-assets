@@ -322,11 +322,14 @@ export const mountSearch = (
     if (status) {
       status.textContent =
         list.dataset.docSearchState === "error"
-          ? "Search unavailable. Try again."
+          ? (dialog?.dataset.docSearchErrorLabel ?? "Search unavailable. Try again.")
           : list.dataset.docSearchState === "ready"
             ? results.length === 0
-              ? "No results"
-              : `${results.length} ${results.length === 1 ? "result" : "results"}`
+              ? (dialog?.dataset.docSearchEmptyLabel ?? "No results")
+              : (results.length === 1
+                  ? (dialog?.dataset.docSearchResultLabel ?? "{count} result")
+                  : (dialog?.dataset.docSearchResultsLabel ?? "{count} results")
+                ).replaceAll("{count}", String(results.length))
             : ""
     }
   }
@@ -354,7 +357,7 @@ export const mountSearch = (
 
     list.dataset.docSearchState = "loading"
     list.setAttribute("aria-busy", "true")
-    if (status) status.textContent = "Searching…"
+    if (status) status.textContent = dialog?.dataset.docSearchLoadingLabel ?? "Searching…"
     const pending = options?.search
       ? Promise.resolve().then(() => options.search?.(query, filters()) ?? [])
       : pagefind?.(query, filters()).then((found) => found.map(pagefindRecord))

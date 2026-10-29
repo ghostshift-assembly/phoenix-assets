@@ -236,12 +236,12 @@ an application does not import DocShell layout or authorization semantics into
 product routes.
 
 The [coordinated renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
-separates implemented APIs from the remaining DocShell work. Selectors, static
-branding settings, complete page metadata, hosted publication pairing and
-portable-artifact rendering require the upstream contracts and selected renderer
-versions listed there. Do not invent those options or put host routing,
-authorization, product task state, native readers or producer algorithms into
-this package to fill a missing integration.
+separates implemented APIs from the remaining DocShell work. Inert settings
+supply selector links, brand/footer data, shell/search labels and SEO metadata.
+Hosted publication consumption, complete page presentation, artifact rendering
+and fresh qualification retain their recorded prerequisites. Keep host routing,
+authorization, product task state, native readers and producer algorithms at
+their owners when filling an integration gap.
 
 ## Linting and formatting in host applications
 
@@ -316,3 +316,10 @@ Generated file paths must stay below `asset_root` and cannot traverse symlinks
 inside it. The configured root itself may be a symlink. Failed generation now
 raises from `Generated.stale?/1`; use `Generated.generate(ctx, check: true)` to
 handle tagged errors explicitly.
+
+For checkout DocShell settings, supply the upstream `presentation` object on the
+site or renderer context. `SiteShell` accepts local `brand`/`footer` snippets and
+`assetUrls`; HEEx keeps its slots. Hosts supply exact locale/release destinations,
+translations, brand content and robots policy. Nonempty HEEx settings require
+the unreleased upstream settings validator; older supported producers keep
+empty/default behavior. New controls still need fresh browser/package qualification.

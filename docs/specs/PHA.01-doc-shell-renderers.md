@@ -36,7 +36,7 @@ composition separate. Phoenix Assets does not add product archetypes,
 application container thresholds, card/dashboard policy or workflow state to
 the DocShell contract.
 
-Planned customization carries host-supplied inert identity, labels and links.
+The optional upstream presentation settings carry host-supplied inert identity, labels and links.
 Hosts choose the brand, locale/release destinations and disclosure policy;
 the library must not infer them from application names, sessions or repository
 layout. Framework slots/snippets, CSS and visual previews remain renderer-owned.
@@ -348,12 +348,15 @@ the tested browser and viewport cohort. Automated accessibility checks support
 review but do not claim WCAG certification. Registry publication and adoption
 by a host remain separate evidence.
 
-The fixed corpus does not close every requirement above. The projected Svelte
-and HEEx site shells display locale/direction and package-version context, but
-do not expose locale or release selectors. Only the legacy Svelte `DocShell`
-component exposes the locale-switcher callback. Static brand/footer customization
-and Svelte `SiteShell` brand/footer slots are also absent. Those extensions must
-respect the upstream context and host-owned route contracts.
+The projected Svelte and HEEx site shells consume the upstream inert
+`presentation` settings for locale/release links, brand/footer data, shell/search
+labels and SEO metadata. Svelte exposes local `brand` and `footer` snippets and
+an `assetUrls` map; HEEx retains local slots. Static export obtains settings
+through renderer context. Nonempty HEEx settings require the upstream validator;
+older DocShell releases keep their default rendering. Targeted candidate tests
+exercise these additions, while package/browser qualification remains pending.
+Code/diagram/request enhancement labels and the remaining page presentation
+features stay tracked under PHA-P11/P12.
 
 Browser qualification tests a 400%-zoom-equivalent viewport rather than changing
 browser zoom itself. It checks selected text contrast and keyboard behavior;

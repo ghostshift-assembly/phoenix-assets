@@ -13,7 +13,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
     alias DocShell.Presentation.{Page, Renderer, Site}
     alias DocShell.Presentation.Renderer.{Capabilities, Capability, Context}
     alias Phoenix.HTML
-    alias PhoenixAssets.DocShell.{Assets, Components}
+    alias PhoenixAssets.DocShell.{Assets, Components, Settings}
 
     @impl true
     def render_page(%Page{} = page, %Context{} = context) do
@@ -27,14 +27,16 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
             __changed__: nil
           })
 
-        {:ok, document(page.title, page.locale, page.canonical_url, context, body)}
+        {:ok,
+         document(page.title, page.locale, page.canonical_url, context, body, page.description)}
       end
     end
 
     @impl true
     def render_not_found(%Site{} = site, %Context{} = context) do
       body = Components.not_found(%{site: site, context: context, __changed__: nil})
-      {:ok, document("Page not found", context.locale, nil, context, body)}
+      title = Settings.label(Settings.get(context), "not_found", "Page not found")
+      {:ok, document(title, context.locale, nil, context, body, nil)}
     end
 
     @impl true
@@ -68,13 +70,16 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
       }
     end
 
-    defp document(title, locale, canonical_url, context, body) do
+    defp document(title, locale, canonical_url, context, body, description) do
       direction =
         if Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, locale), do: "rtl", else: "ltr"
 
       css = Map.fetch!(context.assets, "doc-shell.css")
       browser = Map.fetch!(context.assets, "doc-shell-browser.js")
       canonical = canonical_url || canonical(context.canonical_origin, context.current_route)
+      settings = Settings.get(context)
+      metadata = Map.get(settings, "metadata", %{})
+      description = description || metadata["description"]
 
       [
         "<!doctype html><html lang=\"",
@@ -87,6 +92,14 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
         escape(context.site_title),
         "</title>",
         canonical_link(canonical),
+        meta("name", "description", description),
+        meta("property", "og:title", title),
+        meta("property", "og:site_name", context.site_title),
+        meta("property", "og:locale", locale),
+        meta("property", "og:description", description),
+        meta("property", "og:url", canonical),
+        meta("property", "og:image", metadata["image"]),
+        meta("name", "robots", robots(metadata["robots"])),
         "<link rel=\"stylesheet\" href=\"",
         escape_attribute(css),
         "\"><script type=\"module\" src=\"",
@@ -103,6 +116,14 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
 
     defp canonical_link(url),
       do: ["<link rel=\"canonical\" href=\"", escape_attribute(url), "\">"]
+
+    defp robots(nil), do: nil
+    defp robots([]), do: nil
+    defp robots(tokens), do: Enum.join(tokens, ", ")
+    defp meta(_, _, nil), do: []
+
+    defp meta(attribute, name, value),
+      do: ["<meta ", attribute, "=\"", name, "\" content=\"", escape_attribute(value), "\">"]
 
     defp escape(value), do: value |> HTML.html_escape() |> HTML.Safe.to_iodata()
 

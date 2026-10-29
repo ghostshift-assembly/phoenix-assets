@@ -17,7 +17,7 @@ qualification are recorded separately.
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
 | PHA-P09 | fixed corpus implemented; selectors and broader accessibility evidence open | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
-| PHA-P11 | planned; upstream contract first | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
+| PHA-P11 | settings, links, seams and shell/search labels implemented; enhancement labels and qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source gaps identified; implementation planned | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | planned; upstream pairing first | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
 | PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
@@ -30,8 +30,7 @@ The [shared completion checklist](https://github.com/futhr/doc_shell/blob/main/d
 records the twelve-step dependency order across both repositories. DSH-P10 and
 DSH-P15/P16 own new shared data/validation; DSH-P11–P14 own portable-artifact
 contracts and qualification inputs. Phoenix Assets owns the Svelte/HEEx/browser
-implementations and visual preview. The new rows above are planned work, not
-implemented APIs or a passing release receipt.
+implementations and visual preview. The row statuses distinguish implemented source from remaining work and release qualification.
 
 Implement shared shapes upstream first, add behavior/refusal fixtures, then
 consume those exact shapes here. Preserve existing DocShell 0.4 extraction and
@@ -185,3 +184,21 @@ highlighting and Mermaid chunks. Search and request controllers ship in the
 base browser core; Pagefind indexes, syntax highlighting and Mermaid assets
 load on use. Request controls remain inert until explicitly enabled and mounted.
 Budget changes require a measured fixture and an explicit review in the same change.
+
+### Coordinated settings evidence
+
+Upstream `doc_shell` at `72b46cd` provides settings validation, context propagation
+and hosted pair admission. Its full `mix check` passed on Elixir 1.20.4/OTP 29.0.4:
+403 checks (16 doctests, 32 properties, 355 tests), 95.4% line coverage, Dialyzer,
+documentation coverage and no-optional compilation. This is checkout evidence.
+
+Downstream settings adoption passes 17 targeted HEEx checks against that sibling
+candidate. The full `mix check --no-retry --no-parallel` also passes with the locked
+producer: 427 backend checks (18 doctests, 409 tests), 92.0% line coverage, and 390
+frontend tests (37 Vite, 157 DocShell, 186 Svelte, 10 lint). DocShell frontend line
+coverage is 94.2%; the settings validator has 98.18%. Exports, audits, release tests,
+HTTP-only and extracted Hex consumers, including supported older DocShell releases,
+passed. A narrow absent-module annotation prevents compiler warnings when an older
+producer lacks the new settings API; nonempty unsupported settings still refuse.
+Fresh coordinated archive receipts and browser screenshots remain pending; the
+previous retained qualification receipt does not cover these edits.

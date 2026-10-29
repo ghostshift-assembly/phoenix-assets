@@ -14,6 +14,7 @@ interface Props {
   presentation?: "dialog" | "inline"
   contract?: PagefindContract
   label?: string
+  labels?: Record<string, string>
 }
 const {
   entries,
@@ -22,6 +23,7 @@ const {
   presentation = "dialog",
   contract,
   label = "Search documentation",
+  labels = {},
 }: Props = $props()
 const id = $props.id()
 let root = $state<HTMLElement>()
@@ -97,15 +99,20 @@ function toRecord(entry: SearchEntry | SiteSearchEntry): SearchRecord {
   <svelte:element this={presentation === "dialog" ? "dialog" : "section"}
     class="doc-search-panel" class:doc-search-inline={presentation === "inline"}
     data-doc-search-dialog data-doc-search-owned data-doc-search-presentation={presentation}
+    data-doc-search-error-label={labels.search_error}
+    data-doc-search-empty-label={labels.search_empty}
+    data-doc-search-result-label={labels.search_result}
+    data-doc-search-results-label={labels.search_results}
+    data-doc-search-loading-label={labels.search_loading}
     aria-label={label}>
     <label for={`${id}-query`}>{label}</label>
     <input id={`${id}-query`} data-doc-search-input role="combobox" aria-controls={`${id}-results`} aria-expanded="true" placeholder={`${label}…`} />
     {#each facets as facet (facet.name)}
-      <label>{facet.name}<select data-doc-search-filter={facet.name}><option value="">All</option>{#each facet.values as value (value)}<option {value}>{value}</option>{/each}</select></label>
+      <label>{labels[`filter_${facet.name}`] ?? facet.name}<select data-doc-search-filter={facet.name}><option value="">{labels.filter_all ?? "All"}</option>{#each facet.values as value (value)}<option {value}>{value}</option>{/each}</select></label>
     {/each}
     <p role="status" aria-live="polite" data-doc-search-status></p>
     <ul id={`${id}-results`} role="listbox" data-doc-search-results></ul>
-    <button type="button" class="pa-button" data-doc-search-close>Close</button>
+    <button type="button" class="pa-button" data-doc-search-close>{labels.close ?? "Close"}</button>
   </svelte:element>
 </div>
 <style>

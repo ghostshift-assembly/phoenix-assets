@@ -33,10 +33,11 @@ belong to their host or dedicated contract/provider owners.
 
 DocShell completion is coordinated with the upstream `doc_shell` package.
 The [renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
-records the remaining selectors, customization, page metadata, publication-pair
-adoption, portable-artifact rendering and qualification work. Its linked
-upstream checklist owns shared contracts and validation. These planned features
-are not supplied by the current package merely because a baseline CI run passes.
+records presentation controls, page metadata, publication-pair adoption,
+portable-artifact rendering and qualification work. Inert settings now drive
+locale/release links, brand/footer data, shell/search labels and SEO metadata.
+Its linked upstream checklist owns the shared contracts and validation; fresh
+package/browser qualification and the other tracked additions remain open.
 
 ## What it provides
 

@@ -18,9 +18,108 @@ defmodule PhoenixAssets.DocShellTest do
   }
 
   alias Phoenix.HTML
-  alias PhoenixAssets.DocShell.{ApiReference, Assets, Ast, Components, Pagefind, StaticRenderer}
+
+  alias PhoenixAssets.DocShell.{
+    ApiReference,
+    Assets,
+    Ast,
+    Components,
+    Pagefind,
+    Settings,
+    StaticRenderer
+  }
 
   import Phoenix.LiveViewTest, only: [render_component: 2]
+
+  test "settings remain optional on older producers and reject malformed values before rendering" do
+    assert Settings.get(%{}) == %{}
+    assert Settings.label(%{}, "search", "Search") == "Search"
+
+    assert_raise ArgumentError, ~r/DocShell settings admission failed/, fn ->
+      Settings.get(%{presentation: %{"unknown" => true}})
+    end
+
+    settings = %{"brand" => %{"logo" => %{"asset" => "logo.svg"}}}
+
+    assert Settings.logo_url(settings, %{assets: %{"logo.svg" => "/assets/logo.svg"}}) ==
+             "/assets/logo.svg"
+
+    assert Settings.logo_url(settings, %{assets: %{"logo.svg" => "https://example.test/logo.svg"}}) ==
+             "https://example.test/logo.svg"
+
+    assert Settings.logo_url(settings, %{}) == nil
+
+    for url <- [
+          "javascript:alert(1)",
+          "data:image/svg+xml,bad",
+          "//other.invalid/logo.svg",
+          "/a\\b",
+          "http://["
+        ] do
+      assert Settings.logo_url(settings, %{assets: %{"logo.svg" => url}}) == nil
+    end
+  end
+
+  test "current producer settings reach static pages, not-found output and document metadata" do
+    settings = %{
+      "brand" => %{"label" => "Example brand", "href" => "/docs/guide/"},
+      "labels" => %{
+        "search" => "Sök dokumentation",
+        "theme_dark" => "Mörkt",
+        "language" => "Språk",
+        "not_found" => "Sidan saknas"
+      },
+      "locales" => [
+        %{"id" => "sv", "label" => "Svenska", "href" => "/docs/guide/", "current" => true}
+      ],
+      "releases" => [
+        %{"id" => "v1", "label" => "Version 1", "href" => "https://example.test/v1/"}
+      ],
+      "footer" => %{
+        "text" => "Example footer",
+        "links" => [%{"label" => "Support", "href" => "https://example.test/support"}]
+      },
+      "metadata" => %{
+        "description" => "Site description",
+        "image" => "https://example.test/social.png",
+        "robots" => ["noindex", "nofollow"]
+      }
+    }
+
+    if Code.ensure_loaded?(DocShell.Presentation.Settings) do
+      site = Map.put(site_fixture(), :presentation, settings)
+      destination = temporary_path("settings")
+      on_exit(fn -> File.rm_rf(destination) end)
+
+      assert {:ok, _} =
+               StaticExporter.export(
+                 site: site,
+                 renderer: StaticRenderer,
+                 destination: destination
+               )
+
+      html = destination |> Path.join("docs/guide/index.html") |> File.read!()
+      assert html =~ "Example brand"
+      assert html =~ "Sök dokumentation"
+      assert html =~ "Mörkt"
+      assert html =~ ~s(aria-label="Språk")
+      assert html =~ ~s(hreflang="sv")
+      assert html =~ ~s(aria-current="true")
+      assert html =~ "Example footer"
+      assert html =~ ~s(<footer)
+      assert html =~ ~s(name="description" content="A renderer conformance fixture.")
+      assert html =~ ~s(property="og:image" content="https://example.test/social.png")
+      assert html =~ ~s(name="robots" content="noindex, nofollow")
+      missing = destination |> Path.join("404.html") |> File.read!()
+      assert missing =~ "Sidan saknas"
+      assert missing =~ "Example footer"
+      assert missing =~ ~s(name="description" content="Site description")
+    else
+      assert_raise ArgumentError, ~r/doc_shell_settings_unavailable/, fn ->
+        Settings.get(%{presentation: settings})
+      end
+    end
+  end
 
   test "Mermaid code fences and step titles preserve their reader semantics" do
     html =

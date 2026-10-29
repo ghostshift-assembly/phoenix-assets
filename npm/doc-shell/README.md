@@ -28,11 +28,35 @@ the optional HEEx/static integration in `phoenix_assets`; see
 for that integration's dependencies and conformance scope.
 
 The [coordinated tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
-records remaining selector/customization, page metadata, publication-pair and
-portable-artifact work. These planned options are not current component props.
+records implemented settings and remaining page, publication-pair, artifact
+and qualification work.
 Shared contracts land in DocShell first; this package owns rendering and visual
 preview. Hosts supply brand content, labels and routes, and retain authorization
 and product state. Native readers and producer algorithms are separate owners.
+
+`SiteShell` consumes the optional upstream `site.presentation` object through
+`admitPresentation`. It renders brand/footer data and locale/release destinations
+as ordinary links, and supplies title, description, canonical, Open Graph and
+robots metadata. Hosts may replace the brand/footer with Svelte `brand` and
+`footer` snippets (each receives the site). `assetUrls` maps logical brand-logo
+asset names to URLs supplied by the host. These are checkout additions awaiting
+release; the matching DocShell settings API is also awaiting release.
+
+The HEEx/static renderer reads the same data from `context.presentation` and
+retains its local brand/footer slots. Nonempty settings require a DocShell
+version containing `DocShell.Presentation.Settings`; older producers retain
+empty/default rendering and refuse unsupported new settings.
+
+Host-authored `labels` override `search`, `skip`, `browse`, `close_navigation`,
+`documentation`, `navigation`, `language`, `release`, `reader_preferences`,
+`theme_system`, `theme_light`, `theme_dark`, `theme_contrast`, `breadcrumbs`,
+`continue_reading`, `on_this_page`, `provenance`, `updated`, `view_source`,
+`edit_page`, `footer`, `not_found`, `not_found_description`, and `home`.
+Search additionally recognizes `close`, `filter_all`, `filter_<facet>`,
+`search_loading`, `search_error`, `search_empty`, `search_result`, and
+`search_results`; result templates replace `{count}` with the observed count.
+Missing labels preserve defaults. Code/diagram/request enhancement messages
+retain their existing labels pending the remaining control-label work.
 
 The package contains no app aliases. `DocShell` accepts a `DocShellTheme` through
 its `theme` prop; both shells use the `--doc-*` CSS custom properties. Search

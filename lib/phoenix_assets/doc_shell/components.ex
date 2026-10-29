@@ -13,7 +13,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @search_browser_contract_keys ~w(schema_version algorithm path indexes filters version)
 
     alias DocShell.Presentation.Renderer
-    alias PhoenixAssets.DocShell.{Assets, Ast, StaticRenderer}
+    alias PhoenixAssets.DocShell.{Assets, Ast, Settings, StaticRenderer}
 
     attr(:page, :any, required: true)
     attr(:context, :any, required: true)
@@ -39,6 +39,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       assigns =
         assigns
         |> assign_new(:nonce, fn -> nil end)
+        |> assign(:settings, Settings.get(assigns.context))
         |> assign(:content, Ast.render(assigns.page.content))
         |> assign(:direction, direction(assigns.page.locale))
         |> assign(:enhancement_assets, Map.get(assigns.context, :assets, %{}))
@@ -60,7 +61,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         dir={@direction}
       >
         <script type="importmap" nonce={@nonce}><%= Phoenix.HTML.raw(@import_map) %></script>
-        <a class="doc-skip-link" href="#doc-main">Skip to documentation</a>
+        <a class="doc-skip-link" href="#doc-main">{Settings.label(@settings, "skip", "Skip to documentation")}</a>
         <.header context={@context}>
           <:brand :for={brand <- @brand}>{render_slot(brand)}</:brand>
         </.header>
@@ -70,15 +71,15 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           data-doc-nav-toggle
           aria-controls="doc-navigation"
           aria-expanded="false"
-        >Browse documentation</button>
+        >{Settings.label(@settings, "browse", "Browse documentation")}</button>
         <div class="doc-layout">
-          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label="Documentation navigation">
-            <button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button>
-            <.navigation items={@context.navigation} current_route={@page.route} />
+          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+            <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
+            <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} />
           </dialog>
           <main id="doc-main" tabindex="-1" data-pagefind-body>
             <.announcement :if={@page.banner} banner={@page.banner} />
-            <.breadcrumbs items={@page.breadcrumbs} />
+            <.breadcrumbs items={@page.breadcrumbs} settings={@settings} />
             <header class="doc-page-header">
               <p>{@page.collection_id} · {@page.package_version}</p>
               <h1>{@page.title}</h1>
@@ -89,11 +90,11 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
               </div>
             </header>
             <article>{@content}</article>
-            <.reading_flow previous={@page.previous} next={@page.next} />
-            <.provenance page={@page} />
-            <div :if={@footer != []} class="doc-host-footer">{render_slot(@footer)}</div>
+            <.reading_flow previous={@page.previous} next={@page.next} settings={@settings} />
+            <.provenance page={@page} settings={@settings} />
+            <.site_footer settings={@settings}><:content :if={@footer != []}>{render_slot(@footer)}</:content></.site_footer>
           </main>
-          <.table_of_contents headings={@page.headings} />
+          <.table_of_contents headings={@page.headings} settings={@settings} />
         </div>
       </div>
       """
@@ -105,33 +106,75 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @doc "Renders site identity, search, and reader theme controls."
     @spec header(map()) :: Phoenix.LiveView.Rendered.t()
     def header(assigns) do
-      assigns = assign(assigns, :home_path, home_path(assigns.context))
+      settings = Settings.get(assigns.context)
+
+      assigns =
+        assigns
+        |> assign(:home_path, home_path(assigns.context))
+        |> assign(:settings, settings)
+        |> assign(:logo_url, Settings.logo_url(settings, assigns.context))
 
       ~H"""
       <header class="doc-site-header" data-pagefind-ignore>
         <div class="doc-brand">
-          <a :if={@brand == []} href={@home_path}>{@context.site_title}</a>
+          <a :if={@brand == []} href={get_in(@settings, ["brand", "href"]) || @home_path}><img :if={@logo_url} src={@logo_url} alt={get_in(@settings, ["brand", "logo", "alt"])} />{get_in(@settings, ["brand", "label"]) || @context.site_title}</a>
           {render_slot(@brand)}
         </div>
-        <.search search={@context.search} label={search_label(Map.get(@context, :locale))} />
-        <div class="doc-theme-controls" aria-label="Reader theme">
-          <button type="button" class="pa-button" data-doc-theme-value="system">System</button>
-          <button type="button" class="pa-button" data-doc-theme-value="light">Light</button>
-          <button type="button" class="pa-button" data-doc-theme-value="dark">Dark</button>
-          <button type="button" class="pa-button" data-doc-theme-value="contrast">High contrast</button>
+        <.search search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
+        <.destinations choices={Map.get(@settings, "locales", [])} label={Settings.label(@settings, "language", "Language")} locale? />
+        <.destinations choices={Map.get(@settings, "releases", [])} label={Settings.label(@settings, "release", "Version")} />
+        <div class="doc-theme-controls" aria-label={Settings.label(@settings, "reader_preferences", "Reader preferences")}>
+          <button type="button" class="pa-button" data-doc-theme-value="system">{Settings.label(@settings, "theme_system", "System")}</button>
+          <button type="button" class="pa-button" data-doc-theme-value="light">{Settings.label(@settings, "theme_light", "Light")}</button>
+          <button type="button" class="pa-button" data-doc-theme-value="dark">{Settings.label(@settings, "theme_dark", "Dark")}</button>
+          <button type="button" class="pa-button" data-doc-theme-value="contrast">{Settings.label(@settings, "theme_contrast", "High contrast")}</button>
         </div>
       </header>
+      """
+    end
+
+    attr(:choices, :list, required: true)
+    attr(:label, :string, required: true)
+    attr(:locale?, :boolean, default: false)
+
+    @doc "Renders exact host-supplied locale or release destinations as ordinary links."
+    @spec destinations(map()) :: Phoenix.LiveView.Rendered.t()
+    def destinations(assigns) do
+      ~H"""
+      <nav :if={@choices != []} class="doc-site-selector" aria-label={@label}><ul><li :for={choice <- @choices}><a href={choice["href"]} aria-current={choice["current"] && "true"} hreflang={@locale? && choice["id"]}>{choice["label"]}</a></li></ul></nav>
+      """
+    end
+
+    attr(:settings, :map, required: true)
+    slot(:content)
+
+    @doc "Renders inert footer data or a host's local footer slot."
+    @spec site_footer(map()) :: Phoenix.LiveView.Rendered.t()
+    def site_footer(assigns) do
+      ~H"""
+      <footer :if={@content != [] || @settings["footer"]} class="doc-host-footer" aria-label={Settings.label(@settings, "footer", "Site footer")}>
+        <%= if @content != [] do %>
+          {render_slot(@content)}
+        <% else %>
+          <p :if={get_in(@settings, ["footer", "text"])}>{get_in(@settings, ["footer", "text"])}</p>
+          <a :for={link <- get_in(@settings, ["footer", "links"]) || []} href={link["href"]}>{link["label"]}</a>
+        <% end %>
+      </footer>
       """
     end
 
     attr(:items, :list, required: true)
     attr(:current_route, :string, required: true)
 
+    attr(:settings, :map, default: %{})
+
     @doc "Renders hierarchical documentation navigation."
     @spec navigation(map()) :: Phoenix.LiveView.Rendered.t()
     def navigation(assigns) do
+      assigns = assign_new(assigns, :settings, fn -> %{} end)
+
       ~H"""
-      <nav aria-label="Documentation"><ul><.navigation_item :for={item <- @items} item={item} current_route={@current_route} /></ul></nav>
+      <nav aria-label={Settings.label(@settings, "documentation", "Documentation")}><ul><.navigation_item :for={item <- @items} item={item} current_route={@current_route} /></ul></nav>
       """
     end
 
@@ -160,6 +203,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     attr(:trigger, :boolean, default: true)
     attr(:filter_values, :map, default: %{})
     attr(:label, :string, default: "Search documentation")
+    attr(:labels, :map, default: %{})
     slot(:header)
     slot(:controls)
 
@@ -197,10 +241,16 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       ~H"""
       <div class="doc-search" data-pagefind-ignore>
         <button :if={@trigger} type="button" class="pa-button" data-doc-search-open aria-haspopup={@presentation == :dialog && "dialog"}>{@label}</button>
-        <section :if={@presentation == :inline} class="doc-search-inline" data-doc-search-dialog data-doc-search-presentation="inline" data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label={@label}><.search_content {assigns} /></section>
-        <dialog :if={@presentation == :dialog} class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract} aria-label={@label}><.search_content {assigns} /></dialog>
+        <section :if={@presentation == :inline} class="doc-search-inline" data-doc-search-dialog data-doc-search-presentation="inline" data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract}
+        data-doc-search-error-label={@labels["search_error"]} data-doc-search-empty-label={@labels["search_empty"]}
+        data-doc-search-result-label={@labels["search_result"]} data-doc-search-results-label={@labels["search_results"]}
+        data-doc-search-loading-label={@labels["search_loading"]} aria-label={@label}><.search_content {assigns} /></section>
+        <dialog :if={@presentation == :dialog} class="doc-search-dialog" data-doc-search-dialog data-doc-search-records={@encoded_records} data-doc-search-contract={@encoded_contract}
+        data-doc-search-error-label={@labels["search_error"]} data-doc-search-empty-label={@labels["search_empty"]}
+        data-doc-search-result-label={@labels["search_result"]} data-doc-search-results-label={@labels["search_results"]}
+        data-doc-search-loading-label={@labels["search_loading"]} aria-label={@label}><.search_content {assigns} /></dialog>
         <noscript>
-          <details><summary>Browse the page index</summary><ul><li :for={record <- @records}><a href={record.route}>{record.title}</a></li></ul></details>
+          <details><summary>{@labels["browse_index"] || "Browse the page index"}</summary><ul><li :for={record <- @records}><a href={record.route}>{record.title}</a></li></ul></details>
         </noscript>
       </div>
       """
@@ -208,16 +258,16 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     defp search_content(assigns) do
       ~H"""
-          <header :if={@header == []}><h2>{@label}</h2><button type="button" class="pa-button" data-doc-search-close>Close</button></header>
+          <header :if={@header == []}><h2>{@label}</h2><button type="button" class="pa-button" data-doc-search-close>{@labels["close"] || "Close"}</button></header>
           {render_slot(@header)}
           <label for="doc-search-query">{@label}</label>
           <input id="doc-search-query" class="pa-field" type="search" role="combobox" autocomplete="off" aria-controls="doc-search-results" aria-expanded="true" data-doc-search-input />
           {render_slot(@controls)}
-          <details class="doc-search-filters"><summary>Filters</summary><div aria-label="Search filters">
+          <details class="doc-search-filters"><summary>{@labels["filters"] || "Filters"}</summary><div aria-label={@labels["search_filters"] || "Search filters"}>
             <label :for={{name, values} <- @filters}>
-              {filter_label(name)}
+              {@labels["filter_" <> name] || filter_label(name)}
               <select class="pa-select" data-doc-search-filter={name}>
-                <option value="">All</option><option :for={value <- values} value={value}>{value}</option>
+                <option value="">{@labels["filter_all"] || "All"}</option><option :for={value <- values} value={value}>{value}</option>
               </select>
             </label>
           </div></details>
@@ -228,45 +278,61 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     attr(:items, :list, required: true)
 
+    attr(:settings, :map, default: %{})
+
     @doc "Renders the page breadcrumb trail."
     @spec breadcrumbs(map()) :: Phoenix.LiveView.Rendered.t()
     def breadcrumbs(assigns) do
+      assigns = assign_new(assigns, :settings, fn -> %{} end)
+
       ~H"""
-      <nav aria-label="Breadcrumbs"><ol class="doc-breadcrumbs"><li :for={item <- @items}><a href={item.path}>{item.title}</a></li></ol></nav>
+      <nav aria-label={Settings.label(@settings, "breadcrumbs", "Breadcrumbs")}><ol class="doc-breadcrumbs"><li :for={item <- @items}><a href={item.path}>{item.title}</a></li></ol></nav>
       """
     end
 
     attr(:headings, :list, required: true)
 
+    attr(:settings, :map, default: %{})
+
     @doc "Renders the projected heading tree without recalculating identifiers."
     @spec table_of_contents(map()) :: Phoenix.LiveView.Rendered.t()
     def table_of_contents(assigns) do
+      assigns = assign_new(assigns, :settings, fn -> %{} end)
+
       ~H"""
-      <aside class="doc-toc"><details open><summary>On this page</summary><nav aria-label="On this page"><ol><li :for={heading <- @headings} data-level={heading.level}><a href={"##{heading.id}"}>{heading.title}</a></li></ol></nav></details></aside>
+      <aside class="doc-toc"><details open><summary>{Settings.label(@settings, "on_this_page", "On this page")}</summary><nav aria-label={Settings.label(@settings, "on_this_page", "On this page")}><ol><li :for={heading <- @headings} data-level={heading.level}><a href={"##{heading.id}"}>{heading.title}</a></li></ol></nav></details></aside>
       """
     end
 
     attr(:previous, :any, default: nil)
     attr(:next, :any, default: nil)
 
+    attr(:settings, :map, default: %{})
+
     @doc "Renders previous and next reading links."
     @spec reading_flow(map()) :: Phoenix.LiveView.Rendered.t()
     def reading_flow(assigns) do
+      assigns = assign_new(assigns, :settings, fn -> %{} end)
+
       ~H"""
-      <nav :if={@previous || @next} aria-label="Continue reading" class="doc-reading-flow"><a :if={@previous} rel="prev" href={@previous.path}>← {@previous.title}</a><a :if={@next} rel="next" href={@next.path}>{@next.title} →</a></nav>
+      <nav :if={@previous || @next} aria-label={Settings.label(@settings, "continue_reading", "Continue reading")} class="doc-reading-flow"><a :if={@previous} rel="prev" href={@previous.path}>← {@previous.title}</a><a :if={@next} rel="next" href={@next.path}>{@next.title} →</a></nav>
       """
     end
 
     attr(:page, :any, required: true)
 
+    attr(:settings, :map, default: %{})
+
     @doc "Renders last-updated, source, and edit provenance."
     @spec provenance(map()) :: Phoenix.LiveView.Rendered.t()
     def provenance(assigns) do
+      assigns = assign_new(assigns, :settings, fn -> %{} end)
+
       ~H"""
-      <div class="doc-provenance" role="contentinfo" aria-label="Page provenance">
-        <span :if={@page.last_modified}>Updated {@page.last_modified}</span>
-        <a :if={@page.source_url} href={@page.source_url}>View source</a>
-        <a :if={@page.edit_url} href={@page.edit_url}>Edit this page</a>
+      <div class="doc-provenance" role="contentinfo" aria-label={Settings.label(@settings, "provenance", "Page provenance")}>
+        <span :if={@page.last_modified}>{Settings.label(@settings, "updated", "Updated")} {@page.last_modified}</span>
+        <a :if={@page.source_url} href={@page.source_url}>{Settings.label(@settings, "view_source", "View source")}</a>
+        <a :if={@page.edit_url} href={@page.edit_url}>{Settings.label(@settings, "edit_page", "Edit this page")}</a>
       </div>
       """
     end
@@ -316,6 +382,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         assigns.context ||
           %{
             site_title: assigns.site.title,
+            presentation: Map.get(assigns.site, :presentation, %{}),
+            locale: assigns.site.default_locale,
             navigation: assigns.site.navigation,
             search: %{
               "contract" => Map.get(assigns.site.metadata, "search_contract", %{}),
@@ -324,22 +392,26 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           }
 
       assigns =
-        assigns |> assign(:home_path, site_home_path(assigns.site)) |> assign(:context, context)
+        assigns
+        |> assign(:home_path, site_home_path(assigns.site))
+        |> assign(:context, context)
+        |> assign(:settings, Settings.get(context))
 
       ~H"""
       <div class="doc-shell pa-doc-shell" data-pa-doc-shell>
-        <a class="doc-skip-link" href="#doc-main">Skip to documentation</a>
+        <a class="doc-skip-link" href="#doc-main">{Settings.label(@settings, "skip", "Skip to documentation")}</a>
         <.header context={@context} />
-        <button type="button" class="pa-button doc-mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">Browse documentation</button>
+        <button type="button" class="pa-button doc-mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{Settings.label(@settings, "browse", "Browse documentation")}</button>
         <div class="doc-layout">
-          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label="Documentation navigation">
-            <button type="button" class="pa-button" data-doc-nav-close hidden>Close navigation</button>
-            <.navigation items={@site.navigation} current_route="" />
+          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+            <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
+            <.navigation items={@site.navigation} current_route="" settings={@settings} />
           </dialog>
           <main id="doc-main" tabindex="-1">
-            <h1>Page not found</h1>
-            <p>The requested documentation page is not part of this site generation.</p>
-            <a href={@home_path}>Documentation home</a>
+            <h1>{Settings.label(@settings, "not_found", "Page not found")}</h1>
+            <p>{Settings.label(@settings, "not_found_description", "The requested documentation page is not part of this site generation.")}</p>
+            <a href={@home_path}>{Settings.label(@settings, "home", "Documentation home")}</a>
+            <.site_footer settings={@settings} />
           </main>
         </div>
       </div>

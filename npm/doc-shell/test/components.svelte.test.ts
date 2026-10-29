@@ -1,4 +1,4 @@
-import { flushSync, mount, tick, unmount } from "svelte"
+import { createRawSnippet, flushSync, mount, tick, unmount } from "svelte"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import ApiReference from "../src/api-reference.svelte"
 import DocShell from "../src/doc-shell.svelte"
@@ -167,6 +167,139 @@ describe("rendered heading targets", () => {
 })
 
 describe("SiteShell browser controller ownership", () => {
+  it("renders host settings as ordinary links, translated controls and a semantic footer", () => {
+    const element = target()
+    const customized: DocShellSite = {
+      ...site,
+      presentation: {
+        brand: {
+          label: "Example brand",
+          href: "/brand/",
+          logo: { asset: "logo.svg", alt: "Example logo" },
+        },
+        labels: {
+          search: "Sök dokumentation",
+          theme_dark: "Mörkt",
+          language: "Språk",
+          release: "Utgåva",
+        },
+        locales: [{ id: "sv", label: "Svenska", href: "/sv/", current: true }],
+        releases: [{ id: "v2", label: "Version 2", href: "/v2/" }],
+        footer: { text: "Example footer", links: [{ label: "Support", href: "/support/" }] },
+      },
+    }
+    mounted.push(
+      mount(SiteShell, {
+        target: element,
+        props: {
+          site: customized,
+          pageId: "anchors:guide",
+          assetUrls: { "logo.svg": "/local-logo.svg" },
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("a.brand")?.getAttribute("href")).toBe("/brand/")
+    expect(element.querySelector("a.brand img")?.getAttribute("alt")).toBe("Example logo")
+    expect(element.querySelector('nav[aria-label="Språk"] a')?.getAttribute("href")).toBe("/sv/")
+    expect(element.querySelector('nav[aria-label="Språk"] a')?.getAttribute("aria-current")).toBe(
+      "true",
+    )
+    expect(element.querySelector('nav[aria-label="Utgåva"] a')?.getAttribute("href")).toBe("/v2/")
+    expect(element.querySelector("[data-doc-search-open]")?.textContent).toBe("Sök dokumentation")
+    expect(element.querySelector('[data-doc-theme-value="dark"]')?.textContent).toBe("Mörkt")
+    expect(element.querySelector("footer")?.textContent).toContain("Example footer")
+    expect(element.querySelector("footer a")?.getAttribute("href")).toBe("/support/")
+  })
+
+  it("keeps settings in the not-found shell", () => {
+    const element = target()
+    mounted.push(
+      mount(SiteShell, {
+        target: element,
+        props: {
+          site: {
+            ...site,
+            presentation: {
+              labels: { not_found: "Sidan saknas", home: "Dokumentation" },
+              footer: { text: "Footer" },
+            },
+          },
+          pageId: "missing",
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("main h1")?.textContent).toBe("Sidan saknas")
+    expect(element.querySelector("main a")?.textContent).toBe("Dokumentation")
+    expect(element.querySelector("footer")?.textContent).toBe("Footer")
+  })
+
+  it("allows local brand and footer snippets to replace the inert defaults", () => {
+    const element = target()
+    const brand = createRawSnippet<[DocShellSite]>(() => ({
+      render: () => "<strong data-host-brand>Host brand</strong>",
+    }))
+    const footer = createRawSnippet<[DocShellSite]>(() => ({
+      render: () => "<span data-host-footer>Host footer</span>",
+    }))
+    mounted.push(
+      mount(SiteShell, {
+        target: element,
+        props: {
+          site: {
+            ...site,
+            presentation: {
+              brand: { label: "Default brand", href: "/" },
+              footer: { text: "Default footer" },
+            },
+          },
+          pageId: "anchors:guide",
+          brand,
+          footer,
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("[data-host-brand]")?.textContent).toBe("Host brand")
+    expect(element.querySelector("footer [data-host-footer]")?.textContent).toBe("Host footer")
+    expect(element.textContent).not.toContain("Default brand")
+    expect(element.textContent).not.toContain("Default footer")
+  })
+
+  it("emits escaped page and site SEO metadata", () => {
+    const element = target()
+    mounted.push(
+      mount(SiteShell, {
+        target: element,
+        props: {
+          site: {
+            ...site,
+            presentation: {
+              metadata: {
+                description: 'Example <description> "quoted"',
+                image: "/social.png",
+                robots: ["noindex", "nofollow"],
+              },
+            },
+          },
+          pageId: "missing",
+        },
+      }),
+    )
+    flushSync()
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe(
+      'Example <description> "quoted"',
+    )
+    expect(document.head.querySelector('meta[property="og:image"]')?.getAttribute("content")).toBe(
+      "/social.png",
+    )
+    expect(document.head.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe(
+      "noindex, nofollow",
+    )
+    expect(document.head.querySelector("description")).toBeNull()
+  })
+
   it.each(["ar-SA", "FA-ir", "he-IL", "ur-PK"])("preserves RTL direction for %s", (locale) => {
     const element = target()
     const page = site.pages["anchors:guide"]
@@ -241,9 +374,12 @@ function result(id: string): SearchEntry {
   return { id, title: id, path: `/docs/${id}/`, content: id, audience: null, locale: null }
 }
 
-function openSearch(search: (query: string) => SearchEntry[] | Promise<SearchEntry[]>) {
+function openSearch(
+  search: (query: string) => SearchEntry[] | Promise<SearchEntry[]>,
+  labels: Record<string, string> = {},
+) {
   const element = target()
-  const component = mount(Search, { target: element, props: { entries: [], search } })
+  const component = mount(Search, { target: element, props: { entries: [], search, labels } })
   mounted.push(component)
   flushSync()
   element.querySelector<HTMLButtonElement>("button")?.click()
@@ -267,6 +403,45 @@ async function settle(): Promise<void> {
 }
 
 describe("custom search lifecycle", () => {
+  it("uses translated loading, failure and result status templates", async () => {
+    const pending = deferred<SearchEntry[]>()
+    const { element, query } = openSearch(
+      (value) =>
+        value === "pending"
+          ? pending.promise
+          : value === "empty"
+            ? []
+            : value === "one"
+              ? [result("one")]
+              : [result("one"), result("two")],
+      {
+        search_loading: "Söker",
+        search_error: "Försök igen",
+        search_empty: "Inga resultat",
+        search_result: "{count} träff",
+        search_results: "{count} träffar",
+        close: "Stäng",
+      },
+    )
+    const status = () => element.querySelector("[data-doc-search-status]")?.textContent
+    query("pending")
+    await settle()
+    expect(status()).toBe("Söker")
+    pending.reject(new Error("offline"))
+    await settle()
+    expect(status()).toBe("Försök igen")
+    query("empty")
+    await settle()
+    expect(status()).toBe("Inga resultat")
+    query("one")
+    await settle()
+    expect(status()).toBe("1 träff")
+    query("two")
+    await settle()
+    expect(status()).toBe("2 träffar")
+    expect(element.querySelector("[data-doc-search-close]")?.textContent).toBe("Stäng")
+  })
+
   it("keeps newer results when an older query resolves later", async () => {
     const old = deferred<SearchEntry[]>()
     const current = deferred<SearchEntry[]>()

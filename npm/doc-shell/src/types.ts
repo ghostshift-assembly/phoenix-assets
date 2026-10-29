@@ -205,4 +205,23 @@ export interface DocShellSite {
   search: SiteSearchEntry[]
   redirects: Record<string, string>
   metadata: Record<string, unknown>
+  presentation?: PresentationSettings
+}
+
+/** Inert host data owned by DocShell.Presentation.Settings upstream. */
+export interface PresentationSettings {
+  brand?: { label: string; href: string; logo?: { asset: string; alt: string } }
+  footer?: { text?: string; links?: Array<{ label: string; href: string }> }
+  labels?: Record<string, string>
+  locales?: PresentationDestination[]
+  releases?: PresentationDestination[]
+  metadata?: { description?: string; image?: string; robots?: string[] }
+  robots?: { allow?: string[]; disallow?: string[] }
+}
+
+export interface PresentationDestination {
+  id: string
+  label: string
+  href: string
+  current?: boolean
 }
