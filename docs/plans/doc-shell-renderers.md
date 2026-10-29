@@ -10,21 +10,25 @@ qualification are recorded separately.
 | PHA-P01 | source implemented; qualification below | DSH-P03/P06 | Import the upstream conformance corpus and add a renderer capability manifest | PHA-V01/V03; schema and fixture drift fail CI |
 | PHA-P02 | source implemented; qualification below | PHA-P01 | Split URL, search, theme, navigation, copy, tabs and enhancement lifecycle into `@phoenix-assets/doc-shell/browser` | PHA-V02; Svelte renderer remains green |
 | PHA-P03 | source implemented; qualification below | PHA-P01/P02 | Add optional DocShell dependency and `PhoenixAssets.DocShell.Ast` | PHA-V01/V07/V08; no-optional compile remains green |
-| PHA-P04 | source implemented; expanded qualification pending | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
+| PHA-P04 | implemented; local archive/browser evidence below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
 | PHA-P05 | source implemented; qualification below | PHA-P03/P04 | Add directive, code, Mermaid fallback and browser enhancement components | PHA-V03/V05–V08 |
 | PHA-P06 | source implemented; qualification below | PHA-P03–P05 | Add OpenAPI reference and disabled-by-default request panel | PHA-V03/V07/V08 |
 | PHA-P07 | source implemented; qualification below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
-| PHA-P09 | selectors implemented; broader accessibility evidence pending | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
-| PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
-| PHA-P11 | source implemented; expanded target/archive qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
-| PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
-| PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
-| PHA-P14 | receipt views and diagnostics implemented; expanded qualification pending | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
-| PHA-P15 | baseline and passive artifact reader evidence; broader target evidence pending | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
-| PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
+| PHA-P09 | automated archive/browser evidence recorded; human/device checks unverified | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
+| PHA-P10 | local archive qualification recorded below | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
+| PHA-P11 | implemented; local archive/browser evidence below | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
+| PHA-P12 | implemented; local archive/browser evidence below | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
+| PHA-P13 | implemented; source and package admission evidence below | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
+| PHA-P14 | synthetic-profile archive readers qualified; external producer/native checks unverified | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
+| PHA-P15 | automated browser/print/offline evidence recorded; human/native checks unverified | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
+| PHA-P16 | local coordinated archives qualified; external targets and new remote CI unverified | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
 
 ## Coordinated completion
+
+The status table is current. Dated records below describe each earlier cut;
+where they say work was pending, the final coordinated archive record states
+the subsequent result without changing the historical observation.
 
 The [shared completion checklist](https://github.com/futhr/doc_shell/blob/main/docs/plans/documentation-sites.md#coordinated-completion)
 records the twelve-step dependency order across both repositories. DSH-P10 and
@@ -501,3 +505,68 @@ metadata, passive 404 and the existing artifact/preview tasks. Eighteen changed
 images were inspected; eight byte-identical HEEx preview images retain their
 previous image review. This remains checkout evidence until repeated against
 the coordinated archive cohort.
+
+
+## Coordinated archive qualification — 2026-10-29
+
+The local cohort pairs Phoenix Assets
+`2e9a9e086e433807b62a7a6d84b3fd08a65ff547` with DocShell
+`b9987b9a0ed0ca1a4a3c43bf30200cf9b13c0acb`. These are unpublished archives;
+no remote refs or repository visibility were changed. The retained directory is
+`phoenix-assets/dist/release/coordinated-2e9a9e0` in the two-repository workspace.
+
+| Evidence | Executed result |
+| --- | --- |
+| Phoenix Assets full gate, Elixir 1.20.4/OTP 29.0.4 | All 25 required checks; 505 backend checks, 87.5% coverage; 556 frontend tests, both coverage floors; 17 release-script tests |
+| DocShell full gate, same runtime | 439 checks (16 doctests, 35 properties, 388 tests), 95.6% coverage; strict compiler/lint/docs/audits/Dialyzer and no-optional compilation |
+| Elixir 1.20.4/OTP 28.5.0.7 | Both warnings-as-errors compiles and backend suites pass; DocShell no-optional compile also passes |
+| Independent archived baseline renderers | 166 browser cases; Svelte, static HEEx and hosted LiveView observations pass upstream surface/conformance comparison; JSON/Pagefind, keyboard/focus, no-JavaScript, themes, RTL, reflow and offline cases |
+| Fresh extracted Hex pair and separately installed npm renderer | 152 settings/artifact/preview browser cases; exact receipt/media/fallback/anchor parity, passive controls/404, actual locale links, SEO, HTTP/file/root/subpath, print and reflow |
+| Screenshot review | All 132 baseline and 26 expanded screenshots reviewed; changed images inspected, unchanged images matched by SHA-256 to explicitly reviewed images; component CSS is included |
+| Hosted pair package checks | Extracted HEEx and installed Svelte SSR each render the matching fixture and refuse 21 missing/mismatched/stale cases; checks use the packaged upstream fixture |
+| Producer consumers | Nine fresh core/Plug/Ash combinations pass across locked, unlocked and minimum dependencies; AshOaskit 0.4.5 remains the released adapter baseline |
+| Notebooks and benchmarks | Five checkout notebooks, 64 executable cells; full non-CI benchmark suite and all six refreshed reports; ExDoc warnings-as-errors |
+
+The reviewed baseline receipt is
+`qualification-74449d8e5f00499641cf605d68dd0c11d368fa51195af78e3b2d8bfb587d2088.json`.
+Its SHA-256 is
+`74449d8e5f00499641cf605d68dd0c11d368fa51195af78e3b2d8bfb587d2088`.
+The separate joined proof is
+`doc-shell-cohort/coordinated-proof-fd0932bcc11013e195e40c61e715b6e27a9ba5482042f1d322e3665716933f31.json`,
+SHA-256 `fd0932bcc11013e195e40c61e715b6e27a9ba5482042f1d322e3665716933f31`.
+It binds the archive/source identities, expanded reader output/screenshots,
+paired Hex/npm consumer locks and retained gate/consumer/notebook/benchmark logs.
+The hosted-pair checks were executed subsequently against the same extracted
+packages; their scripts/logs are retained with the final documentation cohort.
+
+The nine producer smoke consumers delete their temporary locks; their retained
+logs prove execution, not retention of all nine resolved lockfiles. The separate
+paired Hex/npm consumer locks are retained. Some optional upstream dependency
+warnings were printed; successful consumers do not establish warning-free
+upstream dependencies. Notebook checkout execution does not prove fresh Livebook
+installation of unreleased APIs. Benchmark allocations are not peak RSS or
+performance guarantees. Earlier failed or narrower cohorts retain their original
+scope and are superseded only where the current evidence names the same task.
+
+This closes the recorded local automated archive/browser work for the synthetic
+profiles. It does not close actual external producer semantics/geometry and
+comparison images, a named native application's reading/paint/lifecycle behavior,
+or human assistive-task/device observations. The repository boundary review found
+no consumer-specific runtime feature to relocate in the reviewed paths. Hosts and
+producers retain those implementations and authorization/product policy.
+
+New local commits have no GitHub Actions result until the maintainer pushes them.
+The last observed successful remote runs remain
+[Phoenix Assets 40860204683](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/40860204683)
+and [DocShell 40842385182](https://github.com/futhr/doc_shell/actions/runs/40842385182)
+at their earlier source revisions. Phoenix Assets' three Codecov uploads returned
+`Repository not found` despite the green job; repository activation/app access/
+credential configuration remains unverified. No full specification-completion or
+publication claim is made while the required external evidence is absent.
+
+The final documentation commit changes tracked inputs. A subsequent archive run
+must have its own source-bound receipt; the immutable results above continue to
+refer to their exact named cuts. `dist/release/coordinated-final/qualification.json`
+and `doc-shell-cohort/coordinated-proof.json` in that directory are the local
+lookup paths for a subsequent final cut, if present and verified. They are ignored
+release artifacts rather than published or Git-tracked evidence.

@@ -39,8 +39,10 @@ locale/release links, brand/footer data, shell/search and nested control labels,
 and SEO metadata. Passive artifact documents and diagnostic previews consume
 verified receipts, original SVG/PNG bytes and complete fallback content; the
 native path requires the current upstream receipt API.
-The linked upstream checklist owns the shared contracts and validation; fresh
-package/browser qualification and the other tracked additions remain open.
+The linked upstream checklist owns shared contracts and validation. Fresh local
+archives pass the automated renderer/browser qualification recorded there.
+External producer, native-application and human assistive-task evidence remains
+unverified; these local changes are not yet published.
 
 ## What it provides
 

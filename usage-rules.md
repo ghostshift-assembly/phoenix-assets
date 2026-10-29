@@ -244,8 +244,9 @@ renderers consume validated navigation, hero/banner and SEO data. Artifact
 components consume producer-admitted receipts and verified original passive
 SVG/PNG bytes, retain complete fallback and expose a read-only diagnostic preview.
 The native artifact path requires the current upstream receipt API and refuses
-when it is unavailable. Fresh coordinated package/browser qualification remains
-open in the tracker. Keep host routing, authorization, product task state,
+when it is unavailable. The tracker records fresh local archive/browser results
+and the outstanding external producer, native-application and human checks.
+Keep host routing, authorization, product task state,
 native readers and producer algorithms at their owners when filling a gap.
 
 ## Linting and formatting in host applications

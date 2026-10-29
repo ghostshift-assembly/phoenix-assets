@@ -1,12 +1,14 @@
 # PHA.01: DocShell renderers for Svelte and LiveView
 
 Specification version: 0.3.2. Contract: accepted. Implementation status:
-implemented for the fixed conformance cohort, with the source gaps listed below;
-release qualification is artifact-specific.
+source implemented, including presentation settings, hosted pairs and passive
+artifacts. Local archive/browser qualification is recorded for the named cohort;
+external producer, native-application and human evidence remains unverified.
 The [renderer completion tracker](../plans/doc-shell-renderers.md#coordinated-completion)
 and its linked upstream checklist assign the remaining work in dependency order.
 New shared presentation, publication-pair and artifact contracts land in
-DocShell before their renderer implementation; planned rows are not current APIs.
+DocShell before their renderer implementation. The tracker distinguishes current
+checkout APIs, unpublished archives and remaining external obligations.
 
 ## Purpose
 
@@ -58,7 +60,9 @@ presentation/OpenAPI contracts. HEEx invokes upstream `HostedPair.validate/3`
 before calling either renderer and refuses when the installed producer lacks it.
 The shared fixture is copied byte-for-byte from `doc_shell@72b46cd` and pinned by
 SHA-256. Tests cover matching output and refusal before DOM/component output.
-These source checks await fresh package/browser qualification.
+Source regressions cover matching pairs and refusal. Fresh package evidence is
+recorded separately from host source authentication and disclosure policy in
+the renderer tracker.
 
 ## Package boundary
 
@@ -382,21 +386,24 @@ labels and SEO metadata. Svelte exposes local `brand` and `footer` snippets and
 an `assetUrls` map; HEEx retains local slots. Static export obtains settings
 through renderer context. Nonempty HEEx settings require the upstream validator;
 older DocShell releases keep their default rendering. Targeted candidate tests
-exercise these additions, while package/browser qualification remains pending.
+exercise these additions; the tracker also records fresh archive/browser
+observations for the named producer/renderer cohort.
 Nested code/diagram, tabs, directive and API/request controls now inherit host
 labels. Standalone Svelte AST/API/hosted/legacy shells accept a `labels` map;
 HEEx `Ast.render/2` accepts that map and API components accept `settings`.
 Browser copy/enhancement/request statuses read the nearest inert label scope.
 The [package documentation](../../npm/doc-shell/README.md) lists control keys.
 Source wording remains unchanged. Unit/component tests cover inheritance,
-escaping, catalogue isolation and status changes; expanded target qualification
-remains open under PHA-P15/P16.
+escaping, catalogue isolation and status changes. Automated archive/browser
+qualification is recorded under PHA-P15/P16; human and native-application
+observations remain unverified.
 PHA-P12 now consumes validated hero/banner content, splash presentation,
 reserved per-page SEO and badge/collapse metadata. Static local image bytes use
 the existing asset handoff; absent hero images retain alt text. Projected sites
 opt into navigation metadata, while legacy sidebars leave it opaque by default.
 Locale markers match the active locale when that ID is among the supplied
-choices, without deriving destinations. Expanded target qualification remains open.
+choices, without deriving destinations. The expanded archive reader lane checks
+these values, actual locale destinations and passive 404 behavior.
 
 Browser qualification tests a 400%-zoom-equivalent viewport rather than changing
 browser zoom itself. It checks selected text contrast and keyboard behavior;
@@ -443,5 +450,7 @@ artifact fallback never starts highlighting, diagram or tab enhancement.
 The exact chart/drawing corpus is copied from DocShell `20e9425`, SHA-256
 `2d812d1849126f20d6aaea583037e94c11e9c83d1f4a011410b01ac104c05e37`.
 Source tests cover receipt/byte refusal, both profiles, fallback/anchor parity,
-preview modes and native passive shells. Expanded targets, producer comparison
-images and fresh archive qualification retain their own open tracker status.
+preview modes and HEEx passive shells. The tracker records the fresh paired
+archive run, including 152 reader cases and 26 reviewed screenshots. Actual
+producer comparison images, native applications and human assistive tasks
+retain their own unverified status.
