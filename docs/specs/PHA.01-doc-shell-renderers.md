@@ -372,8 +372,13 @@ an `assetUrls` map; HEEx retains local slots. Static export obtains settings
 through renderer context. Nonempty HEEx settings require the upstream validator;
 older DocShell releases keep their default rendering. Targeted candidate tests
 exercise these additions, while package/browser qualification remains pending.
-Code/diagram/request enhancement labels and the remaining page presentation
-features stay tracked under PHA-P11/P12.
+Code/diagram/request enhancement labels remain tracked under PHA-P11.
+PHA-P12 now consumes validated hero/banner content, splash presentation,
+reserved per-page SEO and badge/collapse metadata. Static local image bytes use
+the existing asset handoff; absent hero images retain alt text. Projected sites
+opt into navigation metadata, while legacy sidebars leave it opaque by default.
+Locale markers match the active locale when that ID is among the supplied
+choices, without deriving destinations. Expanded target qualification remains open.
 
 Browser qualification tests a 400%-zoom-equivalent viewport rather than changing
 browser zoom itself. It checks selected text contrast and keyboard behavior;

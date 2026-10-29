@@ -418,3 +418,26 @@
 :where(.doc-shell) .doc-api-schema dd {
   margin-inline-start: clamp(0.5rem, 2vw, 1rem);
 }
+
+:where(.doc-shell) .doc-hero {
+  margin-block: 2rem;
+}
+:where(.doc-shell) .doc-hero img {
+  max-width: 100%;
+  max-height: 28rem;
+  object-fit: contain;
+}
+:where(.doc-shell) .doc-hero ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
+}
+:where(.doc-shell) [data-doc-template="splash"] .doc-page-header,
+:where(.doc-shell) [data-doc-template="splash"] .doc-hero {
+  text-align: center;
+}
+:where(.doc-shell) [data-doc-template="splash"] .doc-hero ul {
+  justify-content: center;
+}

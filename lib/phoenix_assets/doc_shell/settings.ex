@@ -10,9 +10,65 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) do
     """
 
     @upstream DocShell.Presentation.Settings
+    @decorations DocShell.Presentation.PageDecorations
 
     unless Code.ensure_loaded?(@upstream) do
       @compile {:no_warn_undefined, [{DocShell.Presentation.Settings, :validate, 1}]}
+    end
+
+    unless Code.ensure_loaded?(@decorations) do
+      @compile {:no_warn_undefined, [{DocShell.Presentation.PageDecorations, :validate, 2}]}
+    end
+
+    @doc "Validates structured page decorations, retaining the legacy label-only banner path."
+    @spec admit_page(map()) :: :ok
+    def admit_page(page) do
+      validator = @decorations
+
+      if Code.ensure_loaded?(validator) do
+        admit_decoration(validator.validate(:banner, Map.get(page, :banner)))
+        admit_decoration(validator.validate(:hero, Map.get(page, :hero)))
+      else
+        legacy_decorations(page)
+      end
+
+      :ok
+    end
+
+    @doc "Resolves validated page SEO overrides, page description and site defaults in that order."
+    @spec page_metadata(map() | nil, map()) :: map()
+    def page_metadata(page, settings) do
+      local = if page, do: Map.get(page.metadata, "seo", %{}), else: %{}
+
+      _ =
+        if page && Map.has_key?(page.metadata, "seo"),
+          do: get(%{presentation: %{"metadata" => local}})
+
+      description =
+        local["description"] || (page && page.description) ||
+          get_in(settings, ["metadata", "description"])
+
+      Map.merge(Map.get(settings, "metadata", %{}), local) |> Map.put("description", description)
+    end
+
+    defp admit_decoration({:ok, _}), do: :ok
+
+    defp admit_decoration(error),
+      do: raise(ArgumentError, "DocShell page decoration admission failed: #{inspect(error)}")
+
+    defp legacy_decorations(page) do
+      banner = Map.get(page, :banner)
+
+      legacy_banner? =
+        is_nil(banner) or
+          (is_map(banner) and Map.keys(banner) == ["label"] and is_binary(banner["label"]))
+
+      unless is_nil(Map.get(page, :hero)) and legacy_banner?,
+        do:
+          raise(
+            ArgumentError,
+            "DocShell page decoration API unavailable in the installed producer"
+          )
     end
 
     @doc "Returns validated context settings or raises before rendering invalid data."

@@ -9,6 +9,7 @@ interface Props {
   navigate?: (path: string) => void
   nested?: boolean
   label?: string
+  presentationMetadata?: boolean
 }
 const {
   items,
@@ -16,10 +17,11 @@ const {
   navigate,
   nested = false,
   label = "Documentation",
+  presentationMetadata = false,
 }: Props = $props()
 const currentBranch = (item: NavigationItem): boolean =>
-  item.path === currentPath || (item.children?.some(currentBranch) ?? false)
+  (item.path !== "" && item.path === currentPath) || (item.children?.some(currentBranch) ?? false)
 </script>
-{#snippet branches()}<ul>{#each items as item (item.id)}{const link = $derived(safeLinkTarget(item.path))}<li>{#if item.path === ""}<details open={currentBranch(item)}><summary>{item.title}</summary><RecursiveSidebar items={item.children ?? []} {currentPath} {navigate} nested /></details>{:else}{#if link}<a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined} aria-current={item.path === currentPath ? "page" : undefined} onclick={(event) => { if (navigate && link.navigable) { event.preventDefault(); navigate(item.path) } }}>{item.title}</a>{:else}<span data-unsafe-link>{item.title}</span>{/if}{#if item.children?.length}<RecursiveSidebar items={item.children} {currentPath} {navigate} nested />{/if}{/if}</li>{/each}</ul>{/snippet}
+{#snippet branches()}<ul>{#each items as item (item.id)}{const link = $derived(safeLinkTarget(item.path))}<li>{#if item.path === ""}<details open={currentBranch(item) || (presentationMetadata && item.meta?.collapsed === false)}><summary>{item.title}{#if presentationMetadata && typeof item.meta?.badge === "string"}<span class="pa-status"> {item.meta.badge}</span>{/if}</summary><RecursiveSidebar items={item.children ?? []} {currentPath} {navigate} {presentationMetadata} nested /></details>{:else}{#if link}<a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined} aria-current={item.path === currentPath ? "page" : undefined} onclick={(event) => { if (navigate && link.navigable) { event.preventDefault(); navigate(item.path) } }}>{item.title}{#if presentationMetadata && typeof item.meta?.badge === "string"}<span class="pa-status"> {item.meta.badge}</span>{/if}</a>{:else}<span data-unsafe-link>{item.title}</span>{/if}{#if item.children?.length}<RecursiveSidebar items={item.children} {currentPath} {navigate} {presentationMetadata} nested />{/if}{/if}</li>{/each}</ul>{/snippet}
 {#if nested}{@render branches()}{:else}<nav aria-label={label}>{@render branches()}</nav>{/if}
 <style>ul { list-style: none; margin: 0; padding: 0; } li :global(ul) { padding-inline-start: .75rem; } a { display: block; padding: .35rem .5rem; border-radius: var(--doc-radius); color: inherit; text-decoration: none; } a:hover, a[aria-current="page"] { background: var(--doc-surface); color: var(--doc-accent); }</style>

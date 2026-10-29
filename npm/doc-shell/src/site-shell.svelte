@@ -5,10 +5,15 @@ import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import type { PagefindContract } from "./browser/search.js"
 import { searchLabel } from "./browser/search.js"
+import {
+  admitNavigationPresentation,
+  admitPagePresentation,
+  pageMetadata,
+} from "./page-presentation.js"
 import { admitPresentation, presentationLabel } from "./presentation.js"
 import Search from "./search.svelte"
 import Sidebar from "./sidebar.svelte"
-import type { DocShellSite } from "./types.js"
+import type { DocShellSite, PresentationDestination } from "./types.js"
 import { safeLinkTarget } from "./url.js"
 
 let {
@@ -28,18 +33,32 @@ let {
   footer?: Snippet<[DocShellSite]>
   assetUrls?: Record<string, string>
 } = $props()
-const settings = $derived(admitPresentation(site.presentation))
-const label = (key: string, fallback: string) => presentationLabel(settings, key, fallback)
-const brandLogo = $derived.by(() => {
-  const target = safeLinkTarget(assetUrls[settings.brand?.logo?.asset ?? ""])
-  return target?.href.startsWith("mailto:") ? undefined : target?.href
+const settings = $derived.by(() => {
+  admitNavigationPresentation(site.navigation)
+  return admitPresentation(site.presentation)
 })
+const label = (key: string, fallback: string) => presentationLabel(settings, key, fallback)
+const assetUrl = (name: string | undefined) => {
+  const target = safeLinkTarget(assetUrls[name ?? ""])
+  return target?.href.startsWith("mailto:") ? undefined : target?.href
+}
+const brandLogo = $derived(assetUrl(settings.brand?.logo?.asset))
 const page = $derived.by(() => {
   const current = site.pages[pageId]
-  if (current) admitPage(current)
+  if (current) {
+    admitPage(current)
+    admitPagePresentation(current)
+  }
   return current
 })
-const description = $derived(page?.description ?? settings.metadata?.description)
+const localeCurrent = (choice: PresentationDestination) => {
+  const locale = page?.locale ?? site.default_locale
+  return settings.locales?.some((entry) => entry.id === locale)
+    ? choice.id === locale
+    : choice.current
+}
+const metadata = $derived(pageMetadata(page, settings))
+const description = $derived(metadata.description)
 const homePath = $derived(
   site.routes[site.base_path] ? site.base_path : (Object.keys(site.routes).sort()[0] ?? "/"),
 )
@@ -60,8 +79,8 @@ $effect(() => {
   <meta property="og:site_name" content={site.title} />
   <meta property="og:locale" content={page?.locale ?? site.default_locale} />
   {#if page?.canonical_url}<link rel="canonical" href={page.canonical_url} /><meta property="og:url" content={page.canonical_url} />{/if}
-  {#if settings.metadata?.image}<meta property="og:image" content={settings.metadata.image} />{/if}
-  {#if settings.metadata?.robots?.length}<meta name="robots" content={settings.metadata.robots.join(", ")} />{/if}
+  {#if metadata.image}<meta property="og:image" content={metadata.image} />{/if}
+  {#if metadata.robots?.length}<meta name="robots" content={metadata.robots.join(", ")} />{/if}
 </svelte:head>
 {#key Boolean(page)}
 <div
@@ -80,7 +99,7 @@ $effect(() => {
     {#if brand}{@render brand(site)}{:else}<a href={settings.brand?.href ?? homePath} class="brand">{#if brandLogo && settings.brand?.logo}<img src={brandLogo} alt={settings.brand.logo.alt} />{/if}{settings.brand?.label ?? site.title}</a>{/if}
     <Search entries={site.search} {navigate} contract={searchContract} label={label("search", searchLabel(page?.locale ?? site.default_locale))} labels={settings.labels} />
     {#each [["locales", "language", "Language"], ["releases", "release", "Version"]] as [key, name, fallback]}
-      {#if (key === "locales" ? settings.locales : settings.releases)?.length}<nav class="site-selector" aria-label={label(name ?? "", fallback ?? "")}><ul>{#each (key === "locales" ? settings.locales : settings.releases) ?? [] as choice (choice.id)}<li><a href={choice.href} aria-current={choice.current ? "true" : undefined} hreflang={key === "locales" ? choice.id : undefined}>{choice.label}</a></li>{/each}</ul></nav>{/if}
+      {#if (key === "locales" ? settings.locales : settings.releases)?.length}<nav class="site-selector" aria-label={label(name ?? "", fallback ?? "")}><ul>{#each (key === "locales" ? settings.locales : settings.releases) ?? [] as choice (choice.id)}<li><a href={choice.href} aria-current={(key === "locales" ? localeCurrent(choice) : choice.current) ? "true" : undefined} hreflang={key === "locales" ? choice.id : undefined}>{choice.label}</a></li>{/each}</ul></nav>{/if}
     {/each}
     <div class="header-actions" aria-label={label("reader_preferences", "Reader preferences")}>
       {#each [["system", "System"], ["light", "Light"], ["dark", "Dark"], ["contrast", "High contrast"]] as [value, fallback]}
@@ -90,16 +109,25 @@ $effect(() => {
   </header>
   <button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{label("browse", "Browse documentation")}</button>
   <div class="site-layout">
-    <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label={label("navigation", "Documentation navigation")}><button type="button" class="pa-button" data-doc-nav-close hidden>{label("close_navigation", "Close navigation")}</button><Sidebar items={site.navigation} currentPath={page?.route ?? ""} {navigate} label={label("documentation", "Documentation")} /></dialog>
-    <main id="doc-main" tabindex="-1" data-pagefind-body>
+    <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label={label("navigation", "Documentation navigation")}><button type="button" class="pa-button" data-doc-nav-close hidden>{label("close_navigation", "Close navigation")}</button><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} {navigate} label={label("documentation", "Documentation")} /></dialog>
+    <main id="doc-main" tabindex="-1" data-pagefind-body data-doc-template={page?.template}>
       {#if page}
-        {#if page.banner}<aside class="pa-callout" role="note"><strong>{String(page.banner["label"] ?? "Notice")}</strong></aside>{/if}
+        {#if page.banner}
+          {#snippet bannerContent()}{#if page.banner?.label}<strong>{page.banner.label}</strong>{/if}{#if page.banner?.text}<p>{page.banner.text}</p>{/if}{/snippet}
+          <aside class="pa-callout doc-announcement" role="note">{#if page.banner.href}<a href={page.banner.href}>{@render bannerContent()}</a>{:else}{@render bannerContent()}{/if}</aside>
+        {/if}
         <nav aria-label={label("breadcrumbs", "Breadcrumbs")}><ol class="breadcrumbs">{#each page.breadcrumbs as item}<li><a href={item.path}>{item.title}</a></li>{/each}</ol></nav>
         <header class="page-header">
           <p>{page.collection_id} · {page.package_version}</p><h1>{page.title}</h1>
           {#if page.description}<p>{page.description}</p>{/if}
           <div class="badges">{#if page.status}<span class="pa-status">{page.status}</span>{/if}{#each page.tags as tag}<span class="pa-status">{tag}</span>{/each}</div>
         </header>
+        {#if page.hero}<section class="doc-hero">
+          {#if page.hero.tagline}<p class="doc-hero-tagline">{page.hero.tagline}</p>{/if}
+          <h2>{page.hero.title}</h2>{#if page.hero.description}<p>{page.hero.description}</p>{/if}
+          {#if page.hero.image}{#if assetUrl(page.hero.image.asset)}<img src={assetUrl(page.hero.image.asset)} alt={page.hero.image.alt} />{:else}<span data-doc-media-unavailable>{page.hero.image.alt}</span>{/if}{/if}
+          {#if page.hero.actions?.length}<nav aria-label={label("page_actions", "Page actions")}><ul>{#each page.hero.actions as action}<li><a class="pa-button" href={action.href}>{action.label}</a></li>{/each}</ul></nav>{/if}
+        </section>{/if}
         <article><AstRenderer nodes={page.content} legacyHeadingIds={false} /></article>
         {#if page.previous || page.next}<nav aria-label={label("continue_reading", "Continue reading")} class="reading-flow">
           {#if page.previous}<a rel="prev" href={page.previous.path}>← {page.previous.title}</a>{/if}
@@ -134,6 +162,11 @@ $effect(() => {
   .site-layout { display: grid; grid-template-columns: minmax(13rem, 18rem) minmax(0, 46rem) minmax(10rem, 14rem); justify-content: center; gap: clamp(1rem, 4vw, 3rem); padding: 1.25rem; }
   .sidebar, .toc { position: sticky; inset-block-start: 5.25rem; align-self: start; max-height: calc(100vh - 6rem); overflow: auto; }
   main { min-width: 0; }
+  .doc-hero { margin-block: 2rem; }
+  .doc-hero img { max-width: 100%; max-height: 28rem; object-fit: contain; }
+  .doc-hero ul { display: flex; flex-wrap: wrap; gap: .75rem; list-style: none; padding: 0; }
+  [data-doc-template="splash"] .page-header, [data-doc-template="splash"] .doc-hero { text-align: center; }
+  [data-doc-template="splash"] .doc-hero ul { justify-content: center; }
   .page-header { margin-block-end: 2rem; }
   .page-header h1 { font-size: clamp(2rem, 6vw, 3.5rem); line-height: 1.08; }
   article { overflow-wrap: anywhere; }

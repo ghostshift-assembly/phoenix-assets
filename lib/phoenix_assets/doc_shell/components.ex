@@ -24,6 +24,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @doc "Renders one complete documentation shell and page."
     @spec page(map()) :: Phoenix.LiveView.Rendered.t()
     def page(assigns) do
+      :ok = Settings.admit_page(assigns.page)
+
       case Renderer.admit(
              assigns.page,
              StaticRenderer.capabilities(),
@@ -75,9 +77,9 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         <div class="doc-layout">
           <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
-            <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} />
+            <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} presentation_metadata? />
           </dialog>
-          <main id="doc-main" tabindex="-1" data-pagefind-body>
+          <main id="doc-main" tabindex="-1" data-pagefind-body data-doc-template={@page.template}>
             <.announcement :if={@page.banner} banner={@page.banner} />
             <.breadcrumbs items={@page.breadcrumbs} settings={@settings} />
             <header class="doc-page-header">
@@ -89,6 +91,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
                 <span :for={tag <- @page.tags} class="pa-status">{tag}</span>
               </div>
             </header>
+            <.hero :if={@page.hero} hero={@page.hero} context={@context} settings={@settings} />
             <article>{@content}</article>
             <.reading_flow previous={@page.previous} next={@page.next} settings={@settings} />
             <.provenance page={@page} settings={@settings} />
@@ -121,7 +124,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           {render_slot(@brand)}
         </div>
         <.search search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
-        <.destinations choices={Map.get(@settings, "locales", [])} label={Settings.label(@settings, "language", "Language")} locale? />
+        <.destinations choices={Map.get(@settings, "locales", [])} label={Settings.label(@settings, "language", "Language")} locale? current_id={Map.get(@context, :locale)} />
         <.destinations choices={Map.get(@settings, "releases", [])} label={Settings.label(@settings, "release", "Version")} />
         <div class="doc-theme-controls" aria-label={Settings.label(@settings, "reader_preferences", "Reader preferences")}>
           <button type="button" class="pa-button" data-doc-theme-value="system">{Settings.label(@settings, "theme_system", "System")}</button>
@@ -136,12 +139,20 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     attr(:choices, :list, required: true)
     attr(:label, :string, required: true)
     attr(:locale?, :boolean, default: false)
+    attr(:current_id, :string, default: nil)
 
     @doc "Renders exact host-supplied locale or release destinations as ordinary links."
     @spec destinations(map()) :: Phoenix.LiveView.Rendered.t()
     def destinations(assigns) do
+      assigns =
+        assign(
+          assigns,
+          :use_current_id?,
+          Enum.any?(assigns.choices, &(&1["id"] == assigns.current_id))
+        )
+
       ~H"""
-      <nav :if={@choices != []} class="doc-site-selector" aria-label={@label}><ul><li :for={choice <- @choices}><a href={choice["href"]} aria-current={choice["current"] && "true"} hreflang={@locale? && choice["id"]}>{choice["label"]}</a></li></ul></nav>
+      <nav :if={@choices != []} class="doc-site-selector" aria-label={@label}><ul><li :for={choice <- @choices}><a href={choice["href"]} aria-current={(if @use_current_id?, do: choice["id"] == @current_id, else: choice["current"]) && "true"} hreflang={@locale? && choice["id"]}>{choice["label"]}</a></li></ul></nav>
       """
     end
 
@@ -168,32 +179,52 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     attr(:settings, :map, default: %{})
 
+    attr(:presentation_metadata?, :boolean, default: false)
+
     @doc "Renders hierarchical documentation navigation."
     @spec navigation(map()) :: Phoenix.LiveView.Rendered.t()
     def navigation(assigns) do
-      assigns = assign_new(assigns, :settings, fn -> %{} end)
+      assigns =
+        assigns
+        |> assign_new(:settings, fn -> %{} end)
+        |> assign_new(:presentation_metadata?, fn -> false end)
 
       ~H"""
-      <nav aria-label={Settings.label(@settings, "documentation", "Documentation")}><ul><.navigation_item :for={item <- @items} item={item} current_route={@current_route} /></ul></nav>
+      <nav aria-label={Settings.label(@settings, "documentation", "Documentation")}><ul><.navigation_item :for={item <- @items} item={item} current_route={@current_route} presentation_metadata?={@presentation_metadata?} /></ul></nav>
       """
     end
 
     attr(:item, :any, required: true)
     attr(:current_route, :string, required: true)
 
+    attr(:presentation_metadata?, :boolean, default: false)
+
     @doc "Renders one recursive navigation branch and its current-page state."
     @spec navigation_item(map()) :: Phoenix.LiveView.Rendered.t()
     def navigation_item(assigns) do
-      assigns = assign(assigns, :current?, current_branch?(assigns.item, assigns.current_route))
+      assigns = assign_new(assigns, :presentation_metadata?, fn -> false end)
+      meta = Map.get(assigns.item, :meta, %{})
+      badge = if assigns.presentation_metadata? and is_binary(meta["badge"]), do: meta["badge"]
+
+      open? =
+        current_branch?(assigns.item, assigns.current_route) or
+          (assigns.presentation_metadata? and meta["collapsed"] == false)
+
+      assigns =
+        assigns
+        |> assign(:badge, badge)
+        |> assign(:current?, open?)
+        |> assign(:link, Ast.link_target(assigns.item.path))
 
       ~H"""
       <li>
-        <a :if={@item.path != ""} href={@item.path} aria-current={@item.path == @current_route && "page"}>{@item.title}</a>
+        <a :if={@item.path != "" && @link != :error} href={elem(@link, 1)} target={elem(@link, 2) && "_blank"} rel={elem(@link, 2) && "noopener noreferrer"} aria-current={@item.path == @current_route && "page"}>{@item.title}<span :if={@badge} class="pa-status"> {@badge}</span></a>
+        <span :if={@item.path != "" && @link == :error} data-unsafe-link>{@item.title}<span :if={@badge} class="pa-status"> {@badge}</span></span>
         <details :if={@item.path == ""} class="doc-navigation-group" open={@current?}>
-          <summary>{@item.title}</summary>
-          <ul><.navigation_item :for={child <- @item.children} item={child} current_route={@current_route} /></ul>
+          <summary>{@item.title}<span :if={@badge} class="pa-status"> {@badge}</span></summary>
+          <ul><.navigation_item :for={child <- @item.children} item={child} current_route={@current_route} presentation_metadata?={@presentation_metadata?} /></ul>
         </details>
-        <ul :if={@item.path != "" and @item.children != []}><.navigation_item :for={child <- @item.children} item={child} current_route={@current_route} /></ul>
+        <ul :if={@item.path != "" and @item.children != []}><.navigation_item :for={child <- @item.children} item={child} current_route={@current_route} presentation_metadata?={@presentation_metadata?} /></ul>
       </li>
       """
     end
@@ -342,11 +373,36 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @doc "Renders an announcement with a visible textual label."
     @spec announcement(map()) :: Phoenix.LiveView.Rendered.t()
     def announcement(assigns) do
-      label = Map.get(assigns.banner, "label") || Map.get(assigns.banner, :label) || "Notice"
-      assigns = assign(assigns, :label, label)
+      :ok = Settings.admit_page(%{banner: assigns.banner})
 
       ~H"""
-      <aside class="pa-callout" role="note"><strong>{@label}</strong></aside>
+      <aside class="pa-callout doc-announcement" role="note">
+        <a :if={@banner["href"]} href={@banner["href"]}><strong :if={@banner["label"]}>{@banner["label"]}</strong><p :if={@banner["text"]}>{@banner["text"]}</p></a>
+        <div :if={!@banner["href"]}><strong :if={@banner["label"]}>{@banner["label"]}</strong><p :if={@banner["text"]}>{@banner["text"]}</p></div>
+      </aside>
+      """
+    end
+
+    attr(:hero, :map, required: true)
+    attr(:context, :any, required: true)
+    attr(:settings, :map, default: %{})
+
+    @doc "Renders validated hero text, local image and ordinary action links."
+    @spec hero(map()) :: Phoenix.LiveView.Rendered.t()
+    def hero(assigns) do
+      :ok = Settings.admit_page(%{hero: assigns.hero})
+      image = Map.get(assigns.hero, "image")
+      image_settings = if image, do: %{"brand" => %{"logo" => image}}, else: %{}
+      assigns = assign(assigns, :image_url, Settings.logo_url(image_settings, assigns.context))
+
+      ~H"""
+      <section class="doc-hero">
+        <p :if={@hero["tagline"]} class="doc-hero-tagline">{@hero["tagline"]}</p>
+        <h2>{@hero["title"]}</h2><p :if={@hero["description"]}>{@hero["description"]}</p>
+        <img :if={@image_url} src={@image_url} alt={get_in(@hero, ["image", "alt"])} />
+        <span :if={@hero["image"] && !@image_url} data-doc-media-unavailable>{get_in(@hero, ["image", "alt"])}</span>
+        <nav :if={Map.get(@hero, "actions", []) != []} aria-label={Settings.label(@settings, "page_actions", "Page actions")}><ul><li :for={action <- Map.get(@hero, "actions", [])}><a class="pa-button" href={action["href"]}>{action["label"]}</a></li></ul></nav>
+      </section>
       """
     end
 
@@ -405,7 +461,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         <div class="doc-layout">
           <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
-            <.navigation items={@site.navigation} current_route="" settings={@settings} />
+            <.navigation items={@site.navigation} current_route="" settings={@settings} presentation_metadata? />
           </dialog>
           <main id="doc-main" tabindex="-1">
             <h1>{Settings.label(@settings, "not_found", "Page not found")}</h1>
@@ -425,7 +481,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     defp direction(_), do: "ltr"
 
     defp current_branch?(item, route) do
-      item.path == route or Enum.any?(item.children, &current_branch?(&1, route))
+      (item.path != "" and item.path == route) or
+        Enum.any?(item.children, &current_branch?(&1, route))
     end
 
     defp search_filters(records, explicit) do

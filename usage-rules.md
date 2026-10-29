@@ -332,3 +332,12 @@ compares bindings and basic wire fields, while HEEx delegates to upstream
 `HostedPair.validate/3`. Missing or mismatched publication fields refuse before
 rendering. Older DocShell producers lack this new API and must not be presented
 as supporting it. Source authentication and authorization stay in the host.
+
+Projected DocShell sites consume the upstream hero/banner and page SEO shapes.
+Provide local image bytes through static `asset_options: [assets: [...]]` or a
+Svelte `assetUrls` map. The exporter checks paths, digests, links and publication;
+renderers preserve image alt text when an image cannot be resolved. Badge and
+collapse metadata apply to projected site navigation; legacy graph sidebars keep
+metadata opaque unless explicitly enabled. Current locale markers match a known
+page/context locale; host-provided destinations remain exact. New nonempty page
+decorations and reserved SEO require the matching upstream validator for HEEx.

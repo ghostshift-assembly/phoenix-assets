@@ -10,7 +10,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
 
     @behaviour DocShell.Presentation.Renderer
 
-    alias DocShell.Presentation.{Page, Renderer, Site}
+    alias DocShell.Presentation.{Asset, Page, Renderer, Site}
     alias DocShell.Presentation.Renderer.{Capabilities, Capability, Context}
     alias Phoenix.HTML
     alias PhoenixAssets.DocShell.{Assets, Components, Settings}
@@ -27,8 +27,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
             __changed__: nil
           })
 
-        {:ok,
-         document(page.title, page.locale, page.canonical_url, context, body, page.description)}
+        {:ok, document(page.title, page.locale, page.canonical_url, context, body, page)}
       end
     end
 
@@ -41,12 +40,26 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
 
     @impl true
     def assets(%Site{}, options) when is_list(options) do
-      if Keyword.keyword?(options) and options == [] do
-        with :ok <- Assets.validate(), do: {:ok, Assets.all()}
+      if Keyword.keyword?(options) and Keyword.keys(options) -- [:assets] == [] and
+           valid_extra_assets?(Keyword.get(options, :assets, [])) do
+        with :ok <- Assets.validate(),
+             do: {:ok, Assets.all() ++ Keyword.get(options, :assets, [])}
       else
         {:error, {:invalid_doc_shell_asset_options, options}}
       end
     end
+
+    defp valid_extra_assets?(assets) when is_list(assets) do
+      Enum.all?(assets, fn
+        %Asset{path: path, media_type: media, bytes: bytes} ->
+          is_binary(path) and is_binary(media) and is_binary(bytes)
+
+        _ ->
+          false
+      end)
+    end
+
+    defp valid_extra_assets?(_), do: false
 
     @impl true
     def capabilities do
@@ -70,7 +83,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
       }
     end
 
-    defp document(title, locale, canonical_url, context, body, description) do
+    defp document(title, locale, canonical_url, context, body, page) do
       direction =
         if Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, locale), do: "rtl", else: "ltr"
 
@@ -78,8 +91,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
       browser = Map.fetch!(context.assets, "doc-shell-browser.js")
       canonical = canonical_url || canonical(context.canonical_origin, context.current_route)
       settings = Settings.get(context)
-      metadata = Map.get(settings, "metadata", %{})
-      description = description || metadata["description"]
+      metadata = Settings.page_metadata(page, settings)
+      description = metadata["description"]
 
       [
         "<!doctype html><html lang=\"",
@@ -121,6 +134,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
     defp robots([]), do: nil
     defp robots(tokens), do: Enum.join(tokens, ", ")
     defp meta(_, _, nil), do: []
+    defp meta(_, _, ""), do: []
 
     defp meta(attribute, name, value),
       do: ["<meta ", attribute, "=\"", name, "\" content=\"", escape_attribute(value), "\">"]

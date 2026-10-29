@@ -228,6 +228,92 @@ describe("rendered heading targets", () => {
 })
 
 describe("SiteShell browser controller ownership", () => {
+  it("renders splash hero, full banner, navigation metadata and page SEO without requiring controls", () => {
+    const element = target()
+    const page = site.pages["anchors:guide"]
+    if (!page) throw new Error("guide fixture missing")
+    const decorated: DocShellSite = {
+      ...site,
+      presentation: { metadata: { description: "Site default", robots: ["index"] } },
+      navigation: [
+        {
+          id: "section",
+          title: "Guides",
+          path: "",
+          meta: { collapsed: false, badge: "Preview" },
+          children: [{ id: page.id, title: "Guide", path: page.route, meta: { badge: "New" } }],
+        },
+      ],
+      pages: {
+        ...site.pages,
+        [page.id]: {
+          ...page,
+          template: "splash",
+          banner: { label: "Preview", text: "Read the stable release", href: "/stable/" },
+          hero: {
+            title: "Start here",
+            tagline: "Portable documentation",
+            description: "Choose a guide",
+            actions: [{ label: "Read guide", href: "/guide/" }],
+            image: { asset: "hero.svg", alt: "Documentation overview" },
+          },
+          metadata: { seo: { description: "Page SEO", robots: ["noindex"] } },
+        },
+      },
+    }
+    mounted.push(
+      mount(SiteShell, {
+        target: element,
+        props: { site: decorated, pageId: page.id, assetUrls: { "hero.svg": "/local-hero.svg" } },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("main")?.getAttribute("data-doc-template")).toBe("splash")
+    expect(element.querySelector(".doc-hero h2")?.textContent).toBe("Start here")
+    expect(element.querySelector(".doc-hero img")?.getAttribute("alt")).toBe(
+      "Documentation overview",
+    )
+    expect(element.querySelector(".doc-hero a")?.getAttribute("href")).toBe("/guide/")
+    expect(element.querySelector(".doc-announcement a")?.textContent).toContain(
+      "Read the stable release",
+    )
+    expect(element.querySelector(".doc-announcement a")?.getAttribute("href")).toBe("/stable/")
+    expect(element.querySelector(".sidebar details")?.hasAttribute("open")).toBe(true)
+    expect(element.querySelector(".sidebar summary .pa-status")?.textContent?.trim()).toBe(
+      "Preview",
+    )
+    expect(element.querySelector(".sidebar a .pa-status")?.textContent?.trim()).toBe("New")
+    expect(document.head.querySelector('meta[name="description"]')?.getAttribute("content")).toBe(
+      "Page SEO",
+    )
+    expect(document.head.querySelector('meta[name="robots"]')?.getAttribute("content")).toBe(
+      "noindex",
+    )
+  })
+
+  it("leaves legacy sidebar metadata opaque unless the site profile enables it", () => {
+    const element = target()
+    mounted.push(
+      mount(Sidebar, {
+        target: element,
+        props: {
+          items: [
+            {
+              id: "group",
+              title: "Group",
+              path: "",
+              meta: { collapsed: false, badge: "Opaque" },
+              children: [],
+            },
+          ],
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("details")?.hasAttribute("open")).toBe(false)
+    expect(element.textContent).not.toContain("Opaque")
+  })
+
   it("renders host settings as ordinary links, translated controls and a semantic footer", () => {
     const element = target()
     const customized: DocShellSite = {
@@ -294,6 +380,27 @@ describe("SiteShell browser controller ownership", () => {
     expect(element.querySelector("main h1")?.textContent).toBe("Sidan saknas")
     expect(element.querySelector("main a")?.textContent).toBe("Dokumentation")
     expect(element.querySelector("footer")?.textContent).toBe("Footer")
+  })
+
+  it("marks the page's locale when it is among the host's exact destinations", () => {
+    const element = target()
+    const page = site.pages["anchors:guide"]
+    if (!page) throw new Error("guide fixture missing")
+    const localized: DocShellSite = {
+      ...site,
+      locales: ["en", "sv"],
+      pages: { ...site.pages, [page.id]: { ...page, locale: "sv" } },
+      presentation: {
+        locales: [
+          { id: "en", label: "English", href: "/en/", current: true },
+          { id: "sv", label: "Svenska", href: "/sv/" },
+        ],
+      },
+    }
+    mounted.push(mount(SiteShell, { target: element, props: { site: localized, pageId: page.id } }))
+    flushSync()
+    const choice = element.querySelector('nav[aria-label="Language"] [aria-current="true"]')
+    expect(choice?.getAttribute("href")).toBe("/sv/")
   })
 
   it("allows local brand and footer snippets to replace the inert defaults", () => {

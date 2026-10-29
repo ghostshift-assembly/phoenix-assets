@@ -29,6 +29,10 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     @spec render_node(DocShell.Ast.ast_node()) :: iodata()
     def render_node(node), do: render_marked(hd(mark_positions([node], [])))
 
+    @doc "Checks a dynamic link through the renderer URL policy without emitting HTML."
+    @spec link_target(term()) :: {:ok, String.t(), boolean()} | :error
+    def link_target(value), do: safe_link(value)
+
     defp render_marked(text) when is_binary(text), do: escape(text)
 
     defp render_marked(%{"tag" => tag, "attrs" => attrs, "content" => content})

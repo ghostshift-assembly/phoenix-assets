@@ -58,6 +58,22 @@ Search additionally recognizes `close`, `filter_all`, `filter_<facet>`,
 Missing labels preserve defaults. Code/diagram/request enhancement messages
 retain their existing labels pending the remaining control-label work.
 
+Projected sites also render the upstream banner/hero records and
+`metadata["seo"]` overrides. A hero preserves plain text, ordinary action links
+and logical image/alt data. `assetUrls` resolves images in Svelte; static export
+accepts `asset_options: [assets: [%DocShell.Presentation.Asset{...}]]` and delegates
+path, digest and publication checks to DocShell. Missing hero images retain their
+alt text. A splash template changes documentation presentation while retaining
+the page title and content.
+
+Navigation badges and group collapse defaults are enabled for the projected
+site profile. Legacy `Sidebar` metadata remains opaque unless its
+`presentationMetadata` prop is enabled explicitly. The current branch stays
+open, and empty group paths never count as the selected route. Locale selectors
+mark the current page/context locale when a destination ID matches; otherwise
+they retain the host's explicit current marker. Exact destinations remain host-owned.
+The `page_actions` label names hero action navigation.
+
 For embedded hosted API documentation, use `HostedReference` with
 `presentation`, `openapi`, `expected` and `currentId`. It compares the publication
 bindings before rendering either narrative or API content; it supplies no host

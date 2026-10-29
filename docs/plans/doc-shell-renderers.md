@@ -18,7 +18,7 @@ qualification are recorded separately.
 | PHA-P09 | fixed corpus implemented; selectors and broader accessibility evidence open | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
 | PHA-P11 | settings, links, seams and shell/search labels implemented; enhancement labels and qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
-| PHA-P12 | source gaps identified; implementation planned | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
+| PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
 | PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
 | PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
@@ -236,3 +236,23 @@ packaged consumers also retain older-producer behavior. The upstream fixture has
 a formatter-only exemption to retain exact bytes, alongside the published v2
 fixture; JSON parsing and the checksum assertion remain required. Fresh archive
 and browser qualification remain open.
+
+### Projected page presentation evidence
+
+Both renderers now consume the upstream hero/banner and reserved SEO fields.
+Projected sites enable badge/collapse metadata; legacy graph sidebars keep it
+opaque. Locale current markers follow a matching page/context locale without
+inventing destinations. Static renderer asset options accept explicit local
+Asset values through the existing exporter, including hashed image bytes and
+rollback when an unsafe asset path is supplied. Missing hero images keep alt text.
+
+Targeted tests cover splash content, full banner links, hero text/actions/images,
+SEO precedence, native selector links, collapse/current behavior, legacy opacity,
+malformed records and local asset integrity. HEEx navigation now uses the same
+URL policy as AST links; its regression fails against the previous component,
+which emitted an executable href. Generic navigation also avoids treating an
+empty group path as the current route. The full current-runtime gate passes: 431 backend checks (18 doctests,
+413 tests), 91.0% line coverage and 412 frontend tests (179 DocShell tests).
+The candidate path passes 21 targeted HEEx checks. The full gate also passes
+compiler, Dialyzer, exports, audits, packaged older-producer consumers and HTTP-only
+isolation. Fresh expanded browser and coordinated archive qualification remain open.

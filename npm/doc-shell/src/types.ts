@@ -199,9 +199,22 @@ export interface SitePage {
   metadata: Record<string, unknown>
   "navigation?": boolean
   "search?": boolean
-  banner?: Record<string, unknown> | null
-  hero?: Record<string, unknown> | null
+  banner?: PageBanner | null
+  hero?: PageHero | null
   requirements: CapabilityRequirement[]
+}
+
+export interface PageBanner {
+  label?: string
+  text?: string
+  href?: string
+}
+export interface PageHero {
+  title: string
+  tagline?: string
+  description?: string
+  actions?: Array<{ label: string; href: string }>
+  image?: { asset: string; alt: string }
 }
 
 export interface DocShellSite {

@@ -31,6 +31,140 @@ defmodule PhoenixAssets.DocShellTest do
 
   import Phoenix.LiveViewTest, only: [render_component: 2]
 
+  test "navigation uses the closed URL policy and leaves legacy presentation metadata opaque" do
+    for path <- [
+          "javascript:alert(1)",
+          "java%73cript:alert(1)",
+          "data:text/html,bad",
+          "//other.invalid"
+        ] do
+      item = %NavigationItem{id: "unsafe", title: "Visible fallback", path: path}
+      html = render_component(&Components.navigation/1, items: [item], current_route: "")
+      assert html =~ "data-unsafe-link"
+      assert html =~ "Visible fallback"
+      refute html =~ "href="
+    end
+
+    group = %NavigationItem{
+      id: "group",
+      title: "Group",
+      path: "",
+      meta: %{"collapsed" => false, "badge" => "Preview"},
+      children: [
+        %NavigationItem{id: "leaf", title: "Leaf", path: "/guide/", meta: %{"badge" => "New"}}
+      ]
+    }
+
+    legacy = render_component(&Components.navigation/1, items: [group], current_route: "")
+    refute legacy =~ "Preview"
+    refute legacy =~ ~s(class="doc-navigation-group" open)
+
+    projected =
+      render_component(&Components.navigation/1,
+        items: [group],
+        current_route: "",
+        presentation_metadata?: true
+      )
+
+    assert projected =~ "Preview"
+    assert projected =~ "New"
+    assert projected =~ ~s(class="doc-navigation-group" open)
+
+    choices = [
+      %{"id" => "en", "label" => "English", "href" => "/en/", "current" => true},
+      %{"id" => "sv", "label" => "Svenska", "href" => "/sv/"}
+    ]
+
+    html =
+      render_component(&Components.destinations/1,
+        choices: choices,
+        label: "Language",
+        current_id: "sv",
+        locale?: true
+      )
+
+    assert html =~ ~s(href="/sv/" aria-current="true")
+    refute html =~ ~s(href="/en/" aria-current="true")
+  end
+
+  test "complete page decorations and supplied local assets reach static output with page SEO precedence" do
+    site = site_fixture()
+    page = site.pages["guide"]
+
+    hero = %{
+      "title" => "Start here",
+      "tagline" => "Documentation",
+      "description" => "Choose a guide",
+      "actions" => [%{"label" => "Read guide", "href" => page.route}],
+      "image" => %{"asset" => "hero.svg", "alt" => "Documentation overview"}
+    }
+
+    if Code.ensure_loaded?(DocShell.Presentation.PageDecorations) do
+      page = %{
+        page
+        | template: :splash,
+          hero: hero,
+          banner: %{"label" => "Preview", "text" => "Read this release", "href" => page.route},
+          metadata: %{"seo" => %{"description" => "Page SEO", "robots" => ["noindex"]}}
+      }
+
+      site =
+        Map.put(%{site | pages: %{page.id => page}}, :presentation, %{
+          "metadata" => %{"description" => "Site default", "robots" => ["index"]}
+        })
+
+      bytes =
+        ~s(<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"><title>Overview</title></svg>)
+
+      asset = %DocShell.Presentation.Asset{
+        path: "hero.svg",
+        media_type: "image/svg+xml",
+        bytes: bytes
+      }
+
+      destination = temporary_path("page-decorations")
+      on_exit(fn -> File.rm_rf(destination) end)
+
+      assert {:ok, _} =
+               StaticExporter.export(
+                 site: site,
+                 renderer: StaticRenderer,
+                 destination: destination,
+                 asset_options: [assets: [asset]]
+               )
+
+      html = destination |> Path.join("docs/guide/index.html") |> File.read!()
+      assert html =~ ~s(data-doc-template="splash")
+      assert html =~ "Start here"
+      assert html =~ "Read this release"
+      assert html =~ "Read guide"
+      assert html =~ ~s(alt="Documentation overview")
+      assert html =~ ~s(name="description" content="Page SEO")
+      assert html =~ ~s(name="robots" content="noindex")
+      [_, image] = Regex.run(~r/<img[^>]+src="([^"]+)"/, html)
+      assert File.read!(Path.join(destination, String.trim_leading(image, "/"))) == bytes
+
+      assert {:error, _} =
+               StaticExporter.export(
+                 site: site,
+                 renderer: StaticRenderer,
+                 destination: destination,
+                 asset_options: [assets: [%{asset | path: "../unsafe.svg"}]]
+               )
+
+      assert File.read!(Path.join(destination, "docs/guide/index.html")) == html
+    else
+      assert_raise ArgumentError, ~r/decoration API unavailable/, fn ->
+        Settings.admit_page(%{hero: hero})
+      end
+    end
+
+    for options <- [[unknown: true], [assets: :invalid], [assets: [:invalid]]] do
+      assert {:error, {:invalid_doc_shell_asset_options, ^options}} =
+               StaticRenderer.assets(site, options)
+    end
+  end
+
   test "hosted API pair admission happens before rendering narrative or operations" do
     fixture =
       Path.expand("../../npm/doc-shell/test/fixtures/hosted-pair-v1.json", __DIR__)

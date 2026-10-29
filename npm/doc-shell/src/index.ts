@@ -18,6 +18,11 @@ export { default as LocaleSwitcher } from "./locale-switcher.svelte"
 export { default as MermaidDiagram } from "./mermaid-diagram.svelte"
 export * from "./openapi.js"
 export { default as OperationCard } from "./operation-card.svelte"
+export {
+  admitNavigationPresentation,
+  admitPagePresentation,
+  pageMetadata,
+} from "./page-presentation.js"
 export { admitPresentation, presentationLabel } from "./presentation.js"
 export { default as SchemaTable } from "./schema-table.svelte"
 export { default as Search } from "./search.svelte"
