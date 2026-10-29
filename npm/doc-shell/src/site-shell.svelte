@@ -1,4 +1,5 @@
 <script lang="ts">
+import { admitPage } from "./admission.js"
 import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import type { PagefindContract } from "./browser/search.js"
@@ -18,7 +19,11 @@ let {
   navigate?: (path: string) => void
   searchContract?: PagefindContract
 } = $props()
-const page = $derived(site.pages[pageId])
+const page = $derived.by(() => {
+  const current = site.pages[pageId]
+  if (current) admitPage(current)
+  return current
+})
 const homePath = $derived(
   site.routes[site.base_path] ? site.base_path : (Object.keys(site.routes).sort()[0] ?? "/"),
 )
@@ -72,11 +77,11 @@ $effect(() => {
           {#if page.previous}<a rel="prev" href={page.previous.path}>← {page.previous.title}</a>{/if}
           {#if page.next}<a rel="next" href={page.next.path}>{page.next.title} →</a>{/if}
         </nav>{/if}
-        <footer class="provenance" role="contentinfo" aria-label="Page provenance">
+        <div class="provenance" role="contentinfo" aria-label="Page provenance">
           {#if page.last_modified}<span>Updated {page.last_modified}</span>{/if}
           {#if page.source_url}<a href={page.source_url}>View source</a>{/if}
           {#if page.edit_url}<a href={page.edit_url}>Edit this page</a>{/if}
-        </footer>
+        </div>
       </main>
       <aside class="toc">
         <details open><summary>On this page</summary><nav aria-label="On this page"><ol>{#each page.headings as heading}<li data-level={heading.level}><a href={`#${heading.id}`}>{heading.title}</a></li>{/each}</ol></nav></details>

@@ -26,7 +26,7 @@ matches the supplied records with the built-in deterministic matcher. The
 exported `Search` component accepts a replacement `search` callback. Navigation
 uses the host's `navigate` callback when supplied.
 
-The recursive AST renderer handles all fourteen directives plus Shiki and
+The recursive AST renderer handles content directives plus Shiki and
 Mermaid code fences. `ApiReference` renders tag-grouped OpenAPI operations,
 recursive schemas and examples. Every operation has an ordinary link and stays
 readable without JavaScript. The complete document JSON retains unknown fields.
@@ -50,7 +50,7 @@ emits both themes as `--shiki-light` / `--shiki-dark` custom properties, so the
 page's `color-scheme` picks a side and a dark host needs no extra class.
 
 
-The next coordinated release requires Svelte `^5.57.2`. Upgrade the host's Svelte
+The 2.x package requires Svelte `^5.57.2`. Upgrade the host's Svelte
 compiler and runtime together before installing its exact candidate archive.
 The browser subpath remains independent of Svelte. HEEx static output ships local
 optional highlighting and Mermaid chunks, loaded by the enhancement controls;
@@ -61,3 +61,15 @@ Try-it requests require confirmation, refuse redirects, keep tokens in component
 memory, abort when their operation or component retires, and display at most
 65,536 response bytes. A lost mutation response remains an unknown outcome and
 is never retried automatically.
+
+`SiteShell` and the HEEx page component enforce the page's capability requirements
+before rendering. Unknown essential features fail. Unsupported optional features
+require the producer's matching fallback digest. `admitPage(page)` exposes the
+same Svelte preflight for callers. Its fallback verifier handles bounded canonical
+JSON with strings, booleans, nulls and safe integers; metadata requiring another
+numeric encoding must be normalized upstream. It refuses a digest it cannot
+reproduce rather than dropping required content.
+
+The Pagefind adapter builds separate locale indexes. Search loads them only when
+a query needs them, preserves section routes and applies the same seven facets as
+the JSON adapter. The search component also accepts a host-supplied `label`.

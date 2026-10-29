@@ -12,7 +12,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     @search_browser_contract_keys ~w(schema_version algorithm path indexes filters version)
 
-    alias PhoenixAssets.DocShell.{Assets, Ast}
+    alias DocShell.Presentation.Renderer
+    alias PhoenixAssets.DocShell.{Assets, Ast, StaticRenderer}
 
     attr(:page, :any, required: true)
     attr(:context, :any, required: true)
@@ -23,6 +24,18 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @doc "Renders one complete documentation shell and page."
     @spec page(map()) :: Phoenix.LiveView.Rendered.t()
     def page(assigns) do
+      case Renderer.admit(
+             assigns.page,
+             StaticRenderer.capabilities(),
+             :hosted
+           ) do
+        :ok ->
+          :ok
+
+        {:error, reason} ->
+          raise ArgumentError, "DocShell page admission failed: #{inspect(reason)}"
+      end
+
       assigns =
         assigns
         |> assign_new(:nonce, fn -> nil end)
@@ -250,11 +263,11 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @spec provenance(map()) :: Phoenix.LiveView.Rendered.t()
     def provenance(assigns) do
       ~H"""
-      <footer class="doc-provenance" role="contentinfo" aria-label="Page provenance">
+      <div class="doc-provenance" role="contentinfo" aria-label="Page provenance">
         <span :if={@page.last_modified}>Updated {@page.last_modified}</span>
         <a :if={@page.source_url} href={@page.source_url}>View source</a>
         <a :if={@page.edit_url} href={@page.edit_url}>Edit this page</a>
-      </footer>
+      </div>
       """
     end
 

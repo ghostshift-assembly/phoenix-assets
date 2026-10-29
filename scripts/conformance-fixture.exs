@@ -23,3 +23,8 @@ File.write!(
 
 {:ok, corpus} = DocShell.Presentation.Conformance.fixture()
 File.write!(Path.join(destination, "corpus.json"), Jason.encode!(corpus))
+
+File.write!(
+  Path.join(destination, "admission-cases.json"),
+  Jason.encode!(PhoenixAssets.DocShellConformanceFixture.admission_cases())
+)

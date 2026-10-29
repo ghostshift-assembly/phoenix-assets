@@ -55,6 +55,28 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
   const site = JSON.parse(readFileSync(join(output, "browser-conformance/site.json"), "utf8"))
   const corpus = JSON.parse(readFileSync(join(output, "browser-conformance/corpus.json"), "utf8"))
   const cases = []
+  const admissions = JSON.parse(
+    readFileSync(join(output, "browser-conformance/admission-cases.json"), "utf8"),
+  )
+  const admissionPage = await browser.newPage()
+  try {
+    await admissionPage.goto(`${origin}/svelte/?corpus=renderer%3Ahome`)
+    await admissionPage.waitForFunction(() => typeof window.admitDocPage === "function")
+    for (const fixture of admissions) {
+      const accepted = await admissionPage.evaluate((page) => {
+        try {
+          window.admitDocPage(page)
+          return true
+        } catch {
+          return false
+        }
+      }, fixture.page)
+      assert.equal(accepted, fixture.accept, fixture.name)
+      cases.push(`extracted DocShell admission: ${fixture.name}`)
+    }
+  } finally {
+    await admissionPage.close()
+  }
   const surfaces = {}
   const offline = await browser.newContext({ javaScriptEnabled: false })
   try {

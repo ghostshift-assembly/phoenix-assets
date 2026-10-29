@@ -1,0 +1,1526 @@
+[
+  {
+    "name": "projected-fallbacks",
+    "accept": true,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["fallback"],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "doc-shell/html/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:f0cee2790f4db44605b2a42a97502157ce0de16124947065603b592061cc466e",
+          "feature_id": "doc-shell/island/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:b1124420662c8ae786d5829b01045349cbdc46f6bd65b1c9a0ede2212c75bc02",
+          "feature_id": "doc-shell/mermaid/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:5a1a91a1047e3088a1473b23729fbc56d0727142a632cb86da959b4d4eed946c",
+          "feature_id": "doc-shell/request-execution/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:ae2489afd8587f2a486cc6379017446acbef1b5b4a0fbcb57b085882bd333824",
+          "feature_id": "doc-shell/tabs/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "unknown-essential",
+    "accept": false,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["connected"],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "example/feature/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "unknown-optional-with-proof",
+    "accept": true,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["connected"],
+          "essential?": false,
+          "fallback_digest": "sha256:08101f46880bc735382ebc551be34e306ea6b7d0e401e83ff1d5ac1b927b84e0",
+          "feature_id": "example/feature/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "missing-fallback-proof",
+    "accept": false,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["connected"],
+          "essential?": false,
+          "fallback_digest": null,
+          "feature_id": "example/feature/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "stale-fallback-proof",
+    "accept": false,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        },
+        {
+          "attrs": {},
+          "content": ["Changed content"],
+          "meta": {},
+          "tag": "p"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["fallback"],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "doc-shell/html/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:f0cee2790f4db44605b2a42a97502157ce0de16124947065603b592061cc466e",
+          "feature_id": "doc-shell/island/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:b1124420662c8ae786d5829b01045349cbdc46f6bd65b1c9a0ede2212c75bc02",
+          "feature_id": "doc-shell/mermaid/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:5a1a91a1047e3088a1473b23729fbc56d0727142a632cb86da959b4d4eed946c",
+          "feature_id": "doc-shell/request-execution/v1"
+        },
+        {
+          "acceptable_states": ["fallback", "enhanced"],
+          "essential?": false,
+          "fallback_digest": "sha256:ae2489afd8587f2a486cc6379017446acbef1b5b4a0fbcb57b085882bd333824",
+          "feature_id": "doc-shell/tabs/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "unsupported-connected-state",
+    "accept": false,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": ["connected"],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "doc-shell/html/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  },
+  {
+    "name": "invalid-requirement-states",
+    "accept": false,
+    "page": {
+      "audience": null,
+      "banner": {
+        "label": "Conformance release"
+      },
+      "breadcrumbs": [
+        {
+          "path": null,
+          "title": "Reading"
+        },
+        {
+          "path": "/conformance/guide/",
+          "title": "Directive guide"
+        }
+      ],
+      "canonical_url": null,
+      "collection_id": "renderer",
+      "content": [
+        {
+          "attrs": {
+            "id": "content-directives"
+          },
+          "content": ["Content directives"],
+          "meta": {},
+          "tag": "h2"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Interactive example unavailable; read this fallback."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {
+            "count": 42,
+            "empty": null,
+            "enabled": true,
+            "quoted": " \"<>&",
+            "": "bmp",
+            "𐀀": "astral"
+          },
+          "tag": "island"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {},
+              "content": ["Request execution is unavailable in this example."],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "request-execution"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible callout content."],
+          "meta": {},
+          "tag": "callout"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card content."],
+          "meta": {},
+          "tag": "card"
+        },
+        {
+          "attrs": {
+            "href": "/conformance/module/",
+            "title": "Module reference"
+          },
+          "content": ["Follow an ordinary link."],
+          "meta": {},
+          "tag": "link-card"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible card-grid content."],
+          "meta": {},
+          "tag": "card-grid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible badge content."],
+          "meta": {},
+          "tag": "badge"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible file-tree content."],
+          "meta": {},
+          "tag": "file-tree"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "Install"
+              },
+              "content": ["Install dependencies."],
+              "meta": {},
+              "tag": "step"
+            }
+          ],
+          "meta": {},
+          "tag": "steps"
+        },
+        {
+          "attrs": {},
+          "content": [
+            {
+              "attrs": {
+                "title": "First"
+              },
+              "content": ["First panel content"],
+              "meta": {},
+              "tag": "p"
+            },
+            {
+              "attrs": {
+                "title": "Second"
+              },
+              "content": ["Second panel content"],
+              "meta": {},
+              "tag": "p"
+            }
+          ],
+          "meta": {},
+          "tag": "tabs"
+        },
+        {
+          "attrs": {},
+          "content": ["flowchart LR; A[Read]-->B[Understand]"],
+          "meta": {},
+          "tag": "mermaid"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-operation content."],
+          "meta": {},
+          "tag": "openapi-operation"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible openapi-schema content."],
+          "meta": {},
+          "tag": "openapi-schema"
+        },
+        {
+          "attrs": {},
+          "content": ["Visible unknown content."],
+          "meta": {},
+          "tag": "unknown"
+        }
+      ],
+      "content_digest": "sha256:65b42a0d456f08c74793bdbd3963343953a4702029c54b3749bae8d6b88a9e4c",
+      "description": null,
+      "document_id": "guide",
+      "edit_url": "https://source.example.test/renderer/edit/revision/guide.md",
+      "headings": [
+        {
+          "id": "content-directives",
+          "level": 2,
+          "title": "Content directives"
+        }
+      ],
+      "hero": null,
+      "id": "renderer:guide",
+      "kind": "guide",
+      "last_modified": "2026-10-29",
+      "locale": "en",
+      "metadata": {},
+      "navigation?": true,
+      "next": {
+        "path": "/conformance/module/",
+        "title": "Example.Module"
+      },
+      "package_version": "1.0.0",
+      "previous": {
+        "path": "/conformance/",
+        "title": "Documentation home"
+      },
+      "requirements": [
+        {
+          "acceptable_states": [],
+          "essential?": true,
+          "fallback_digest": null,
+          "feature_id": "example/feature/v1"
+        }
+      ],
+      "route": "/conformance/guide/",
+      "search?": true,
+      "source_path": "guide.md",
+      "source_revision": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "source_url": "https://source.example.test/renderer",
+      "status": "stable",
+      "tags": ["renderer"],
+      "template": "document",
+      "title": "Directive guide"
+    }
+  }
+]

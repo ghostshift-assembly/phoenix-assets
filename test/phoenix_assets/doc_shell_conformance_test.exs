@@ -7,6 +7,18 @@ defmodule PhoenixAssets.DocShellConformanceTest do
   alias PhoenixAssets.DocShell.{Ast, Components, StaticRenderer}
   alias PhoenixAssets.DocShellConformanceFixture
 
+  test "retained capability cases agree with the actual upstream admission implementation" do
+    path = Path.expand("../../npm/doc-shell/test/fixtures/capability-cases.json", __DIR__)
+    expected = DocShellConformanceFixture.admission_cases() |> Jason.encode!() |> Jason.decode!()
+    assert Jason.decode!(File.read!(path)) == expected
+
+    for %{accept: false, page: page} <- DocShellConformanceFixture.admission_cases() do
+      assert_raise ArgumentError, ~r/DocShell page admission failed/, fn ->
+        Components.page(%{page: page})
+      end
+    end
+  end
+
   test "every projected conformance page shares its HEEx body and source digests with static output" do
     site = DocShellConformanceFixture.site!()
     assert map_size(site.pages) == 5

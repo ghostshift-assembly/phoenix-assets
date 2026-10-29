@@ -1,3 +1,4 @@
+export { admitPage } from "./admission.js"
 export { default as ApiReference } from "./api-reference.svelte"
 export * from "./ast.js"
 export { default as AstRenderer } from "./ast-renderer.svelte"

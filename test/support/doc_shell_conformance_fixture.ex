@@ -2,7 +2,11 @@ defmodule PhoenixAssets.DocShellConformanceFixture do
   @moduledoc false
 
   alias DocShell.Generate.Collection
+  alias DocShell.Json.Canonical
   alias DocShell.Presentation.{Conformance, SiteProjector}
+  alias DocShell.Presentation.Renderer
+  alias DocShell.Presentation.Renderer.CapabilityRequirement
+  alias PhoenixAssets.DocShell.StaticRenderer
 
   defmodule Source do
     @moduledoc false
@@ -113,7 +117,22 @@ defmodule PhoenixAssets.DocShellConformanceFixture do
   end
 
   defp directives(names) do
-    [node("h2", ["Content directives"])] ++
+    [
+      node("h2", ["Content directives"]),
+      Map.put(
+        node("island", [node("p", ["Interactive example unavailable; read this fallback."])]),
+        "meta",
+        %{
+          "\uE000" => "bmp",
+          "𐀀" => "astral",
+          "quoted" => "\u2028\"<>&",
+          "count" => 42,
+          "enabled" => true,
+          "empty" => nil
+        }
+      ),
+      node("request-execution", [node("p", ["Request execution is unavailable in this example."])])
+    ] ++
       Enum.map(names, fn
         "mermaid" ->
           node("mermaid", ["flowchart LR; A[Read]-->B[Understand]"])
@@ -136,6 +155,49 @@ defmodule PhoenixAssets.DocShellConformanceFixture do
         name ->
           node(name, ["Visible #{name} content."])
       end)
+  end
+
+  def admission_cases do
+    page = site!().pages["renderer:guide"]
+
+    essential = %CapabilityRequirement{
+      feature_id: "example/feature/v1",
+      acceptable_states: [:connected],
+      essential?: true
+    }
+
+    optional = %{essential | essential?: false, fallback_digest: nil}
+
+    {:ok, digest} =
+      Canonical.digest(%{
+        "feature" => optional.feature_id,
+        "content" => page.content
+      })
+
+    accepted = %{optional | fallback_digest: digest}
+
+    variants = [
+      {"projected-fallbacks", page},
+      {"unknown-essential", %{page | requirements: [essential]}},
+      {"unknown-optional-with-proof", %{page | requirements: [accepted]}},
+      {"missing-fallback-proof", %{page | requirements: [optional]}},
+      {"stale-fallback-proof",
+       %{page | content: page.content ++ [node("p", ["Changed content"])]}},
+      {"unsupported-connected-state",
+       %{page | requirements: [%{essential | feature_id: "doc-shell/html/v1"}]}},
+      {"invalid-requirement-states",
+       %{page | requirements: [%{essential | acceptable_states: []}]}}
+    ]
+
+    Enum.map(variants, fn {name, value} ->
+      %{
+        name: name,
+        accept:
+          Renderer.admit(value, StaticRenderer.capabilities(), :static) ==
+            :ok,
+        page: value
+      }
+    end)
   end
 
   defp document(id, title, content),

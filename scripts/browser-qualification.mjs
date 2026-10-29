@@ -25,6 +25,7 @@ export async function qualifyBrowser(sourceRoot, root, output, hostedConsumer) {
   assert.ok(existsSync(join(fixture, "site.json")), "extracted Hex renderer fixture is missing")
   copyFileSync(join(fixture, "site.json"), join(root, "site.json"))
   copyFileSync(join(conformanceFixture, "site.json"), join(root, "corpus-site.json"))
+  copyFileSync(join(conformanceFixture, "admission-cases.json"), join(root, "admission-cases.json"))
   writeFileSync(
     join(root, "search-fixtures.json"),
     JSON.stringify(
@@ -52,7 +53,7 @@ export async function qualifyBrowser(sourceRoot, root, output, hostedConsumer) {
   writeFileSync(
     join(root, "fixture.svelte"),
     `<script>
-import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"
+import { SiteShell, ApiReference, admitPage } from "@phoenix-assets/doc-shell"
 import { PortableReport, decodeReportEnvelope, safeDecodeReportEnvelope } from "@phoenix-assets/svelte/reporting"
 import "@phoenix-assets/doc-shell/theme.css"
 import site from "./site.json"
@@ -62,6 +63,7 @@ import api from "./api.json"
 import envelope from "./envelope.json"
 import samples from "./qualified-envelopes.json"
 window.decodeProducerCase = safeDecodeReportEnvelope
+window.admitDocPage = admitPage
 const pageId = new URLSearchParams(window.location.search).get("page") ?? "anchors:guide"
 const apiPage = new URLSearchParams(window.location.search).has("api")
 const searchFixture = searchFixtures[new URLSearchParams(window.location.search).get("search")]
@@ -96,7 +98,7 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
   const application = join(root, "browser-dist")
   writeFileSync(
     join(root, "ssrfixture.svelte"),
-    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import corpusSite from "./corpus-site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false, corpus = false } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell site={corpus ? corpusSite : site} {pageId} />{/if}',
+    '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import corpusSite from "./corpus-site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false, corpus = false, siteOverride = null } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell site={siteOverride ?? (corpus ? corpusSite : site)} {pageId} />{/if}',
   )
   writeFileSync(
     join(root, "ssr.config.mjs"),
@@ -117,6 +119,11 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
     `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import { mkdirSync, writeFileSync } from "node:fs"; mkdirSync("browser-dist/conformance-ssr", { recursive: true }); for (const pageId of Object.keys(site.pages)) { const result = render(Fixture, { props: { pageId, corpus: true } }); writeFileSync("browser-dist/conformance-ssr/" + pageId + ".html", '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + '</head><body style="margin:0">' + result.body + '</body></html>'); }`,
   )
   execFileSync("node", ["render-corpus.mjs"], { cwd: root, stdio: "inherit" })
+  writeFileSync(
+    join(root, "check-admission.mjs"),
+    `import assert from "node:assert/strict"; import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import cases from "./admission-cases.json" with { type: "json" }; import { writeFileSync } from "node:fs"; const results = cases.map((fixture) => { let accepted = true; try { render(Fixture, { props: { pageId: "candidate", siteOverride: { ...site, pages: { candidate: fixture.page } } } }); } catch { accepted = false; } assert.equal(accepted, fixture.accept, fixture.name); return { name: fixture.name, accepted }; }); writeFileSync("browser-dist/ssr-admission-results.json", JSON.stringify(results));`,
+  )
+  execFileSync("node", ["check-admission.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")
   mkdirSync(screenshots, { recursive: true })
   const server = createServer((request, response) => {
