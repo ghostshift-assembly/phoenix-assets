@@ -435,3 +435,15 @@ Both Elixir 1.20.4 lanes pass: OTP 28.5.0.7 compiles with warnings as errors and
 passes 505 backend checks; OTP 29.0.4 passes the full gate, both coverage floors
 and all 25 required checks. Workflow YAML parses and the matrix contains only
 Elixir 1.20. Historical earlier-Elixir results were preserved as observations.
+
+
+### Extracted SSR runtime regression
+
+The first fresh `c50c500` archive consumer failed at Svelte's
+`lifecycle_outside_component` while rendering SiteShell. Its SSR qualification
+bundle had included a second Svelte context runtime while the caller used the
+installed server renderer. The qualification config now keeps the Svelte peer
+and its subpaths external. Rebuilding the same extracted npm consumer and
+running its real `render-ssr.mjs` succeeds for document, missing-page and API
+output. No library context checks were bypassed. The full local gate also passes;
+the failed archive cohort remains distinct from the subsequent qualified cut.

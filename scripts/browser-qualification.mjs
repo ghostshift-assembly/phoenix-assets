@@ -100,9 +100,10 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
     join(root, "ssrfixture.svelte"),
     '<script>import { SiteShell, ApiReference } from "@phoenix-assets/doc-shell"; import site from "./site.json"; import corpusSite from "./corpus-site.json"; import spec from "./api.json"; let { pageId = "anchors:guide", api = false, corpus = false, siteOverride = null } = $props();</script>{#if api}<div class="doc-shell" data-pa-doc-shell style="min-height:100dvh;padding:1rem"><main style="max-width:70rem;margin:auto"><h1>API reference</h1><ApiReference {spec} /></main></div>{:else}<SiteShell site={siteOverride ?? (corpus ? corpusSite : site)} {pageId} />{/if}',
   )
+  // Context helpers and the server renderer must share the installed Svelte peer.
   writeFileSync(
     join(root, "ssr.config.mjs"),
-    'import { svelte } from "@sveltejs/vite-plugin-svelte"; export default { plugins: [svelte()], ssr: { noExternal: ["@phoenix-assets/doc-shell"] }, build: { ssr: "ssrfixture.svelte", outDir: "ssr-dist" } };',
+    'import { svelte } from "@sveltejs/vite-plugin-svelte"; export default { plugins: [svelte()], ssr: { noExternal: ["@phoenix-assets/doc-shell"] }, build: { ssr: "ssrfixture.svelte", outDir: "ssr-dist", rollupOptions: { external: (id) => id === "svelte" || id.startsWith("svelte/") } } };',
   )
   execFileSync(join(root, "node_modules/.bin/vite"), ["build", "--config", "ssr.config.mjs"], {
     cwd: root,
