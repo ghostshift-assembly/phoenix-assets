@@ -237,11 +237,24 @@
   :where(.doc-shell) .doc-toc {
     position: static;
     grid-column: 2;
+    grid-row: 1;
+  }
+  :where(.doc-shell) .doc-layout > main {
+    grid-column: 2;
+    grid-row: 2;
+  }
+  :where(.doc-shell) .doc-sidebar {
+    grid-column: 1;
+    grid-row: 1 / span 2;
   }
 }
 @media (max-width: 48rem) {
   :where(.doc-shell) .doc-layout {
-    grid-template-columns: minmax(0, 1fr);
+    display: flex;
+    flex-direction: column;
+  }
+  :where(.doc-shell) .doc-layout > main {
+    order: 2;
   }
   :where(.doc-shell) .doc-mobile-nav {
     display: block;
@@ -255,7 +268,7 @@
     display: none;
   }
   :where(.doc-shell) .doc-toc {
-    grid-column: auto;
+    order: 1;
   }
 }
 @media (prefers-reduced-motion: reduce) {

@@ -89,6 +89,23 @@ export async function qualifySearch(browser, origin, fixture, hostedOrigin) {
           }
           cases.push(`liveview/${adapter}: three DOM replacements refresh search and restore focus`)
         }
+        await page.locator("[data-doc-search-open]").click()
+        const finalInput = page.locator("[data-doc-search-input]")
+        await finalInput.fill("introduction")
+        await page.waitForFunction(
+          () =>
+            document
+              .querySelector("[data-doc-search-results]")
+              ?.getAttribute("data-doc-search-state") === "ready",
+        )
+        await page.locator("[data-doc-search-results] a").first().waitFor()
+        await page.keyboard.press("ArrowDown")
+        const destination = await page
+          .locator('[data-doc-search-results] [aria-selected="true"] a')
+          .getAttribute("href")
+        await page.keyboard.press("Enter")
+        await page.waitForURL(new URL(destination, page.url()).href)
+        cases.push(`${renderer}/${adapter}: Enter follows the selected admitted route`)
         assert.deepEqual(errors, [], `${renderer}/${adapter}: browser errors`)
       } finally {
         await context.close()

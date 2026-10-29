@@ -132,6 +132,6 @@ $effect(() => {
   .toc li[data-level="3"] { margin-inline-start: .75rem; }
   .mobile-nav { display: none; margin: 1rem; }
   @media (max-width: 70rem) { .site-layout { grid-template-columns: minmax(12rem, 17rem) minmax(0, 46rem); } .toc { position: static; grid-column: 2; grid-row: 1; max-height: none; } main { grid-column: 2; } }
-  @media (max-width: 48rem) { .site-header { flex-wrap: wrap; position: static; } .header-actions { width: 100%; } .mobile-nav { display: inline-flex; } .site-layout { display: block; padding: 1rem; } .sidebar { position: static; max-height: none; margin-block-end: 1rem; } :global([data-doc-nav][data-doc-nav-state="closed"]) { display: none; } .toc { margin-block-end: 1.5rem; } }
+  @media (max-width: 48rem) { .site-header { flex-wrap: wrap; position: static; } .header-actions { width: 100%; } .mobile-nav { display: inline-flex; } .site-layout { display: flex; flex-direction: column; padding: 1rem; } main { order: 2; } .sidebar { position: static; max-height: none; margin-block-end: 1rem; } :global([data-doc-nav][data-doc-nav-state="closed"]) { display: none; } .toc { order: 1; margin-block-end: 1.5rem; } }
   @media (max-width: 20rem) { .site-header, .site-layout { padding-inline: .5rem; } .header-actions > * { flex: 1; } }
 </style>

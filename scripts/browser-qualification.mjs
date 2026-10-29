@@ -121,7 +121,7 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
   execFileSync("node", ["render-corpus.mjs"], { cwd: root, stdio: "inherit" })
   writeFileSync(
     join(root, "check-admission.mjs"),
-    `import assert from "node:assert/strict"; import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import cases from "./admission-cases.json" with { type: "json" }; import { writeFileSync } from "node:fs"; const results = cases.map((fixture) => { let accepted = true; try { render(Fixture, { props: { pageId: "candidate", siteOverride: { ...site, pages: { candidate: fixture.page } } } }); } catch { accepted = false; } assert.equal(accepted, fixture.accept, fixture.name); return { name: fixture.name, accepted }; }); writeFileSync("browser-dist/ssr-admission-results.json", JSON.stringify(results));`,
+    `import assert from "node:assert/strict"; import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import cases from "./admission-cases.json" with { type: "json" }; import { writeFileSync } from "node:fs"; const results = cases.map((fixture) => { let accepted = true; try { render(Fixture, { props: { pageId: "candidate", siteOverride: { ...site, pages: { candidate: fixture.page } } } }).body; } catch { accepted = false; } assert.equal(accepted, fixture.accept, fixture.name); return { name: fixture.name, accepted }; }); writeFileSync("browser-dist/ssr-admission-results.json", JSON.stringify(results));`,
   )
   execFileSync("node", ["check-admission.mjs"], { cwd: root, stdio: "inherit" })
   const screenshots = join(output, "browser-screenshots")

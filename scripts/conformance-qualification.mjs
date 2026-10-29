@@ -117,7 +117,10 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
   }
   const screenshots = join(output, "browser-screenshots")
   for (const renderer of ["heex", "svelte", ...(hostedOrigin ? ["liveview"] : [])]) {
-    const context = await browser.newContext({ reducedMotion: "reduce" })
+    const context = await browser.newContext({
+      reducedMotion: "reduce",
+      permissions: ["clipboard-read", "clipboard-write"],
+    })
     const page = await context.newPage()
     page.setDefaultTimeout(15_000)
     const errors = []
@@ -135,6 +138,14 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
         if (renderer === "liveview") await page.locator(".phx-connected").waitFor()
         for (const width of [320, 768, 1280]) {
           await page.setViewportSize({ width, height: 900 })
+          if (width <= 768 && source.headings.length) {
+            const contents = await page.locator(".toc, .doc-toc").boundingBox()
+            const article = await page.locator("[data-content-digest] main").boundingBox()
+            assert.ok(
+              contents && article && contents.y < article.y,
+              `${renderer}/${id}/${width}: contents must precede the article`,
+            )
+          }
           for (const theme of ["light", "dark"]) {
             await page
               .getByRole("button", { name: theme === "light" ? "Light" : "Dark", exact: true })
@@ -171,6 +182,26 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
           )
           await page.keyboard.press("End")
           assert.ok(await page.getByRole("tabpanel", { name: "Second", exact: true }).isVisible())
+          await page.keyboard.press("ArrowLeft")
+          assert.equal(
+            await page
+              .getByRole("tab", { name: "First", exact: true })
+              .getAttribute("aria-selected"),
+            "true",
+          )
+        }
+        if (id === "renderer:module") {
+          const copy = page.getByRole("button", { name: "Copy code", exact: true })
+          await copy.focus()
+          await page.keyboard.press("Enter")
+          const copied = page.getByRole("button", { name: "Copied", exact: true })
+          await copied.waitFor()
+          assert.equal(
+            await page.evaluate(() => navigator.clipboard.readText()),
+            "@spec run(map()) :: :ok\ndef run(input), do: :ok",
+          )
+          assert.ok(await copied.evaluate((element) => element === document.activeElement))
+          cases.push(`${renderer}/${id}: keyboard copy preserves source and focus`)
         }
         cases.push(
           `${renderer}/${id}: 320/768/1280 light/dark, reduced motion, keyboard tabs and reflow`,
