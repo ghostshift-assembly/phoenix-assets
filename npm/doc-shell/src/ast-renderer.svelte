@@ -43,7 +43,7 @@ const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
     {#if info?.language === "mermaid"}<MermaidDiagram code={info.code} />{:else if info}<CodeBlock code={info.code} language={info.language} />{:else}<pre><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></pre>{/if}
   {:else if /^h[1-6]$/.test(node.tag)}
     <svelte:element this={node.tag as "h1"} id={projectedHeadingId(node) ?? (legacyHeadingIds ? headingId(node.content) : undefined)}><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></svelte:element>
-  {:else if ["p", "ul", "ol", "li", "blockquote", "strong", "em", "table", "thead", "tbody", "tr", "th", "td", "code", "b", "i", "tfoot", "figure", "figcaption", "details", "summary", "dl", "dt", "dd", "kbd", "mark", "sub", "sup", "del", "s"].includes(node.tag)}
+  {:else if ["p", "span", "ul", "ol", "li", "blockquote", "strong", "em", "table", "thead", "tbody", "tr", "th", "td", "code", "b", "i", "tfoot", "figure", "figcaption", "details", "summary", "dl", "dt", "dd", "kbd", "mark", "sub", "sup", "del", "s"].includes(node.tag)}
     <svelte:element this={node.tag as "p"} {...admittedAttributes(node)}><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></svelte:element>
   {:else if node.tag === "a"}
     {const link = $derived(safeLinkTarget(node.attrs?.href))}

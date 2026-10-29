@@ -52,11 +52,9 @@ export const safeMediaTarget = (value: unknown): string | undefined => {
 export const preCodeInfo = (
   node: DocAstElement,
 ): { code: string; language: string } | undefined => {
-  if (!Array.isArray(node.content)) return undefined
-  const code = node.content.find(
-    (child): child is DocAstElement => typeof child !== "string" && child.tag === "code",
-  )
-  if (!code) return undefined
+  if (!Array.isArray(node.content) || node.content.length !== 1) return undefined
+  const code = node.content[0]
+  if (!code || typeof code !== "object" || code.tag !== "code") return undefined
   return {
     code: typeof code.content === "string" ? code.content : extractText(code.content),
     language:

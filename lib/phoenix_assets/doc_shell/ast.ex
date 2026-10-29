@@ -9,7 +9,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     recalculated by the renderer.
     """
 
-    @elements ~w(p ul ol li blockquote strong em b i table thead tbody tfoot tr th td code
+    @elements ~w(p span ul ol li blockquote strong em b i table thead tbody tfoot tr th td code
                  figure figcaption details summary dl dt dd kbd mark sub sup del s)
     @void_elements ~w(br hr)
     @directives ~w(accordion badge callout card card-grid code-group frame response-fields

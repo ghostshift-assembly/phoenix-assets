@@ -290,6 +290,11 @@ with keyboard and pointer input and reports success without moving focus.
 Unsupported languages stay plain text. Mermaid source remains visible in a
 fallback block when parsing or browser execution fails.
 
+Inline spans retain safe textual anchor IDs in both renderers. A pre element
+with mixed children stays plain and preserves every child; the single-code-child
+enhancement path cannot discard a sibling warning. The artifact fallback owner
+upstream rejects child content under the void `br` element.
+
 Tabs use tablist/tab/tabpanel semantics, arrow-key navigation, Home/End, and a
 readable stacked fallback without JavaScript. Steps retain ordered-list
 semantics. Callout kind is expressed in its text label and not only color.

@@ -10,12 +10,12 @@ qualification are recorded separately.
 | PHA-P01 | source implemented; qualification below | DSH-P03/P06 | Import the upstream conformance corpus and add a renderer capability manifest | PHA-V01/V03; schema and fixture drift fail CI |
 | PHA-P02 | source implemented; qualification below | PHA-P01 | Split URL, search, theme, navigation, copy, tabs and enhancement lifecycle into `@phoenix-assets/doc-shell/browser` | PHA-V02; Svelte renderer remains green |
 | PHA-P03 | source implemented; qualification below | PHA-P01/P02 | Add optional DocShell dependency and `PhoenixAssets.DocShell.Ast` | PHA-V01/V07/V08; no-optional compile remains green |
-| PHA-P04 | fixed corpus implemented; customization gaps below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
+| PHA-P04 | source implemented; expanded qualification pending | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
 | PHA-P05 | source implemented; qualification below | PHA-P03/P04 | Add directive, code, Mermaid fallback and browser enhancement components | PHA-V03/V05–V08 |
 | PHA-P06 | source implemented; qualification below | PHA-P03–P05 | Add OpenAPI reference and disabled-by-default request panel | PHA-V03/V07/V08 |
 | PHA-P07 | source implemented; qualification below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
-| PHA-P09 | fixed corpus implemented; selectors and broader accessibility evidence open | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
+| PHA-P09 | selectors implemented; broader accessibility evidence pending | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
 | PHA-P11 | source implemented; expanded target/archive qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
@@ -84,8 +84,8 @@ this pass's comment/doc edits show no executable changes; dependency manifests
 and locks are unchanged.
 
 This pass did not rerun application suites, notebooks, browsers, benchmarks or
-archive/native/human qualification. The earlier Vite fixes and their tests
-remain in the worktree; their recorded results below retain their prior scope.
+archive/native/human qualification. The earlier Vite fixes and tests were
+subsequently committed; their recorded results below retain their prior scope.
 
 ## Qualification scope
 
@@ -327,3 +327,19 @@ exports, optional-free/older-producer/HTTP-only consumers and release checks pas
 DocShell source also passes its full gate with the expanded canonical corpus:
 437 checks and 95.5% coverage. Receipt views/preview and expanded target/archive
 qualification remain open; the exact byte binding is not source authentication.
+
+### Complete inline anchors and mixed code content
+
+Both renderers now preserve admitted inline `span` IDs. Svelte enhances only
+an exact single-code-child pre block; mixed pre content keeps all siblings.
+The old renderer omitted span IDs, and the old Svelte helper rendered `source`
+where the regression expects `sourceRequired warning`. The corrected source
+passes DOM assertions and native HTML checks while continuing to ignore inert
+non-text IDs. Upstream `a055500` separately refuses ghost array-valued anchors
+and child content under a void `br`; its full gate passes 439 checks at 95.6%.
+
+The downstream full current-runtime gate passes 499 backend checks (18 doctests,
+481 tests), 91.4% coverage, 513 frontend tests (280 DocShell), all package/export/
+audit checks and 17 release-script tests. Targeted DOM checks also pass after
+reordering the regression to assert the missing warning in rendered HTML.
+Artifact receipt views and fresh browser/archive qualification remain open.

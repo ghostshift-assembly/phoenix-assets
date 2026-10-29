@@ -418,6 +418,19 @@ defmodule PhoenixAssets.DocShellTest do
     assert html =~ "Source summary"
   end
 
+  test "inline anchors and mixed pre content retain every semantic child" do
+    nodes = [
+      node("span", ["Subject"], %{"id" => "subject"}),
+      node("span", ["Inert"], %{"id" => ["ghost"]}),
+      node("pre", [node("code", ["source"]), node("strong", ["Required warning"])])
+    ]
+
+    html = nodes |> Ast.render() |> HTML.safe_to_string()
+    assert html =~ ~s(<span id="subject">Subject</span>)
+    refute html =~ ~s(id="ghost")
+    assert html =~ "<pre><code>source</code><strong>Required warning</strong></pre>"
+  end
+
   test "upstream-valid JSON attribute values cannot crash code fences or become HTML attributes" do
     for value <- [1, false, nil, ["text"], %{"nested" => "value"}] do
       nodes = [
