@@ -10,7 +10,7 @@ export function resolveOptions(
   return {
     mode,
     root: config.root,
-    generatedDir: opts.generatedDir ?? "src/generated",
+    generatedDir: opts.generatedDir ?? "src/lib/generated",
     gettextDir: opts.gettextDir ?? "../priv/gettext",
     graphOut: opts.graphOut ?? "../priv/phoenix_assets/graph.json",
     emitGraph: opts.emitGraph ?? false,

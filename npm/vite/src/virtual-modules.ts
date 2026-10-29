@@ -1,6 +1,6 @@
 import fs from "node:fs"
 import path from "node:path"
-import type { Plugin } from "vite"
+import { type Plugin, transformWithOxc } from "vite"
 import { GENERATED, RESOLVED_PREFIX } from "./generated"
 import { resolveOptions } from "./options"
 import type { PhoenixAssetsOptions, ResolvedOptions } from "./types"
@@ -25,7 +25,7 @@ export function virtualModulesPlugin(opts: PhoenixAssetsOptions): Plugin {
       const name = id.slice(prefix.length)
       return Object.hasOwn(GENERATED, name) ? RESOLVED_PREFIX + name : null
     },
-    load(id) {
+    async load(id) {
       if (!id.startsWith(RESOLVED_PREFIX)) return null
       const name = id.slice(RESOLVED_PREFIX.length)
       if (!Object.hasOwn(GENERATED, name)) return null
@@ -39,7 +39,7 @@ export function virtualModulesPlugin(opts: PhoenixAssetsOptions): Plugin {
         this.warn(
           `${options.virtualPrefix}/${name} has not been generated yet — run \`mix phoenix_assets.gen\``,
         )
-        return entry.stub
+        return transformWithOxc(entry.stub, file)
       }
 
       return `export * from ${JSON.stringify(file)}\n`

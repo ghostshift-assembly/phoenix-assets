@@ -3,7 +3,7 @@ export interface PhoenixAssetsOptions {
    *  bridge and the build-time graph emitter; other modes keep just the virtual
    *  modules and PO loader active. */
   mode?: "app" | "storybook" | "test"
-  /** Directory (relative to the Vite root) where Elixir writes generated TS contracts. */
+  /** Directory relative to the Vite root (default "src/lib/generated"); match Elixir's generated_dir. */
   generatedDir?: string
   /** Gettext directory whose .po files the PO loader transforms. */
   gettextDir?: string

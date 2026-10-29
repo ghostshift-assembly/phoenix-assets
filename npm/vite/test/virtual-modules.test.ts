@@ -25,32 +25,38 @@ describe("virtual modules", () => {
     expect(resolveId.call({}, "react")).toBeNull()
   })
 
-  it("returns a typed stub and warns when the generated file is missing", () => {
+  it("transpiles the typed stub and warns when the generated file is missing", async () => {
     const load = hook(setup().load)
     const warnings: string[] = []
     const ctx = { addWatchFile: () => undefined, warn: (message: string) => warnings.push(message) }
 
-    const output = load.call(ctx, "\0phoenix-assets:routes") as string
+    const output = (await load.call(ctx, "\0phoenix-assets:routes")) as { code: string }
 
-    expect(output).toContain("export const routes")
+    expect(output.code).toContain("export const routes")
+    expect(output.code).not.toContain("export type")
     expect(warnings).toHaveLength(1)
   })
 
-  it("ignores ids outside the resolved namespace", () => {
-    expect(hook(setup().load).call({}, "some-other-module")).toBeNull()
+  it("ignores ids outside the resolved namespace", async () => {
+    expect(await hook(setup().load).call({}, "some-other-module")).toBeNull()
   })
 })
 
-it.each(["commands", "session"])("resolves and supplies a first-boot stub for %s", (name) => {
+it.each(["commands", "session"])("resolves and supplies a first-boot stub for %s", async (name) => {
   const plugin = setup()
   const resolved = hook(plugin.resolveId).call({}, `$phoenix/${name}`)
   expect(resolved).toBe(`\0phoenix-assets:${name}`)
-  const output = hook(plugin.load).call({ addWatchFile: () => {}, warn: () => {} }, resolved)
-  expect(output).toContain(
-    name === "session" ? "export interface Session" : "export const commands",
+  const output = (await hook(plugin.load).call(
+    { addWatchFile: () => {}, warn: () => {} },
+    resolved,
+  )) as {
+    code: string
+  }
+  expect(output.code).toContain(
+    name === "session" ? "export const sessionFields" : "export const commands",
   )
 })
 
-it("does not load inherited registry entries", () => {
-  expect(hook(setup().load).call({}, "\0phoenix-assets:constructor")).toBeNull()
+it("does not load inherited registry entries", async () => {
+  expect(await hook(setup().load).call({}, "\0phoenix-assets:constructor")).toBeNull()
 })

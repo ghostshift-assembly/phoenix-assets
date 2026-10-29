@@ -53,8 +53,11 @@ module without restarting the development server.
 Options use the same default paths as the Elixir package. Two options commonly
 need attention:
 
-- `generatedDir` must agree with `config :phoenix_assets, generated_dir:`. Move
-  one without the other and the virtual modules resolve to nothing.
+- `generatedDir` defaults to `src/lib/generated`, matching Elixir's
+  `generated_dir`. Change both options together. Hosts retaining the older
+  `src/generated` location must set it explicitly in both configurations.
+  A missing generated file produces a warning and an empty first-boot stub;
+  generating it invalidates that stub and reloads the contract.
 - `mode` defaults to `"app"`, the only mode with the dev HMR bridge and
   the build-time graph emitter. Storybook gets `"storybook"` (via
   `createPhoenixViteConfig`) and test runners `"test"`; both keep the virtual
