@@ -27,6 +27,6 @@ const admitted = $derived(
 provideArtifacts(() => admitted)
 </script>
 
-<div class="doc-artifact-document" data-artifact-page-digest={admitted.receipt?.page_digest} data-artifact-constraints-digest={admitted.receipt?.constraints_digest}>
+<div class="doc-shell doc-artifact-document" data-artifact-page-digest={admitted.receipt?.page_digest} data-artifact-constraints-digest={admitted.receipt?.constraints_digest}>
   <AstRenderer {nodes} legacyHeadingIds={false} />
 </div>

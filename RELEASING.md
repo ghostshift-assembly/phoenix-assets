@@ -189,3 +189,21 @@ required; GitHub's paid private-repository attestation feature is not.
 
 The manual Recover Hex workflow can resume an artifact from a prior hosted
 release run. Local releases recover directly from their retained directory.
+
+
+The passive artifact reader lane requires a producer exporting
+`ArtifactBlock.verify_receipt/2`. Run `scripts/artifact-fixture.exs` with `mix run
+--no-start` inside the selected Hex consumer, passing a disposable output path.
+It compares the installed producer's packaged synthetic corpus with the frozen
+renderer input and writes exact receipts/canonical witnesses. Then run:
+
+```sh
+mise exec -- pnpm qualify:artifacts /absolute/path/to/output /absolute/path/to/installed/doc-shell/dist /absolute/path/to/npm-consumer
+```
+
+The last argument supplies the selected Vite/Svelte compiler peers. The runner
+uses the specified renderer package, creates a disposable SSR workspace, observes
+Svelte and HEEx without JavaScript, and retains its report and screenshots in the
+output directory. Inspect the images separately. Bind this scoped evidence to
+its actual Hex/npm archives, locks and runtimes; a checkout invocation is not
+an extracted-consumer or external producer/native/human qualification.

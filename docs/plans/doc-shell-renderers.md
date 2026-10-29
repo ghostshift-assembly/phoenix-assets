@@ -21,7 +21,7 @@ qualification are recorded separately.
 | PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
 | PHA-P14 | receipt views and diagnostics implemented; expanded qualification pending | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
-| PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
+| PHA-P15 | baseline and passive artifact reader evidence; broader target evidence pending | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
 | PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
 
 ## Coordinated completion
@@ -387,3 +387,36 @@ verify the current repository's Codecov access/credential configuration; see
 [Codecov connection guidance](https://docs.codecov.com/v4.6/docs/video-guide-connecting-codecov-to-github).
 No repository visibility or remote refs were changed. New local commits still
 need the maintainer's push before remote CI can verify them.
+
+
+### Static export and passive reader observations
+
+The actual native exporter now passes both frozen profiles across `/` and
+`/review/` in web/file modes. Selected image bytes resolve from their emitted
+URLs. Changed bytes and an unexpected JavaScript asset refuse while preserving
+the prior manifest and HTML. The fixture adapters accept only the complete frozen
+synthetic producer input; they do not implement external producer semantics.
+
+`scripts/artifact-fixture.exs` checks its corpus against the selected producer's
+packaged contract and writes native documents, previews and canonical witnesses.
+`scripts/artifact-qualification.mjs` renders the same receipts through Svelte SSR
+and observes both independent readers in Chromium. The checkout run passes 120
+cases on Chromium 156.0.8078.4: JavaScript disabled, actual SVG paint, exact
+caption/description/locale/selection/fallback/anchor parity, HTTP and offline
+file loading, root/subpath output, 360/1280-pixel reflow and print visibility.
+
+Twenty screenshots were inspected. The four preview modes retain the media,
+complete fallback and readable diagnostic data; enlarged mode scales text and
+images. Native/Svelte preview screenshot pairs have identical bytes in this
+fixture. The standalone Svelte document now also carries the scoped shell class.
+The retained checkout run is `/tmp/phoenix-artifact-browser-source`; these
+observations await a fresh archive-bound run and do not close native applications,
+human assistive tasks, producer comparison images or the broader site matrix.
+
+
+The subsequent full gate passes all 25 required checks, 505 backend checks at
+87.5% coverage and 555 frontend tests. The published-producer lane passes six
+artifact/compatibility tests; the candidate lane passes twelve artifact tests,
+including the complete static export matrix. The browser runner also exercises
+native keyboard disclosure and semantic-anchor links with JavaScript disabled.
+`Canonical.encode/1` examples now explicitly unwrap its `{:ok, binary}` result.

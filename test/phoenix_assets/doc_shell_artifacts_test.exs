@@ -169,6 +169,117 @@ defmodule PhoenixAssets.DocShellArtifactsTest do
       end
     end
 
+    test "actual static exports retain selected bytes and fallback in root/subpath web/file readers" do
+      alias DocShell.Presentation.{Asset, NavigationItem, StaticExporter}
+      alias PhoenixAssets.DocShell.StaticRenderer
+
+      for input <- @cases, base <- ["/", "/review/"], reader <- ["web", "file"] do
+        {site, original, _} = site_page_context(input)
+        route = String.trim_trailing(base, "/") <> "/guide/"
+
+        page = %{
+          original
+          | route: route,
+            headings: [],
+            breadcrumbs: [],
+            previous: nil,
+            next: nil,
+            content_digest: input["receipt"]["page_digest"],
+            metadata: %{}
+        }
+
+        site = %{
+          site
+          | base_path: base,
+            pages: %{page.id => page},
+            routes: %{route => page.id},
+            navigation: [%NavigationItem{id: page.id, title: page.title, path: route}],
+            search: [],
+            redirects: %{}
+        }
+
+        binding = %{
+          "profile" => input["descriptor"]["profile"],
+          "profile_digest" => hd(input["receipt"]["blocks"])["profile_digest"],
+          "schema_digest" => input["descriptor"]["input_schema_digest"]
+        }
+
+        assert {:ok, caps} = Artifacts.capabilities([binding])
+        first = hd(input["assets"])
+
+        asset = %Asset{
+          path: first["path"],
+          media_type: first["media_type"],
+          bytes: Base.decode64!(first["base64"])
+        }
+
+        options = [
+          profiles: [PhoenixAssets.FrozenArtifactChart, PhoenixAssets.FrozenArtifactDrawing],
+          manifests: %{
+            hd(input["receipt"]["blocks"])["manifest_digest"] => input["original_manifest"]
+          },
+          projections: %{
+            hd(input["receipt"]["blocks"])["manifest_digest"] => input["checked_projection"]
+          },
+          assets: [asset],
+          capabilities: caps,
+          constraints: Map.put(input["constraints"], "reader_mode", reader)
+        ]
+
+        destination =
+          Path.join(
+            System.tmp_dir!(),
+            "phoenix-artifact-export-#{System.unique_integer([:positive])}"
+          )
+
+        on_exit(fn -> File.rm_rf!(destination) end)
+
+        args = [
+          site: site,
+          renderer: StaticRenderer,
+          destination: destination,
+          artifact_options: options
+        ]
+
+        assert {:ok, _} = StaticExporter.export(args)
+        html_path = Path.join(destination, String.trim_leading(route, "/") <> "index.html")
+        html = File.read!(html_path)
+        assert html =~ input["observations"]["caption"]
+        for text <- input["observations"]["text"], do: assert(html =~ text)
+        for anchor <- input["observations"]["anchors"], do: assert(html =~ ~s(id="#{anchor}"))
+        refute html =~ "<script"
+        refute html =~ "<button"
+        refute html =~ "<dialog"
+        [_, src] = Regex.run(~r/<img[^>]+src="([^"]+)"/, html)
+
+        image_path =
+          if reader == "file",
+            do: Path.expand(src, Path.dirname(html_path)),
+            else: Path.join(destination, String.trim_leading(src, "/"))
+
+        assert File.read!(image_path) == asset.bytes
+        before = File.read!(Path.join(destination, "site-manifest.json"))
+
+        assert {:error, _} =
+                 StaticExporter.export(
+                   Keyword.put(
+                     args,
+                     :artifact_options,
+                     Keyword.put(options, :assets, [%{asset | bytes: "changed"}])
+                   )
+                 )
+
+        assert File.read!(Path.join(destination, "site-manifest.json")) == before
+        extra = %Asset{path: "unexpected.js", media_type: "text/javascript", bytes: "export {}"}
+
+        assert {:error, _} =
+                 StaticExporter.export(Keyword.put(args, :asset_options, assets: [extra]))
+
+        assert File.read!(Path.join(destination, "site-manifest.json")) == before
+        assert File.read!(html_path) == html
+      end
+    end
+
     test "all diagnostic modes use the same verified receipt, bytes, anchors and fallback" do
       import Phoenix.LiveViewTest, only: [render_component: 2]
 

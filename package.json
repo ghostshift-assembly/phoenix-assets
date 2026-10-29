@@ -13,6 +13,7 @@
     "lint": "biome check --error-on-warnings .",
     "format": "biome check --write --unsafe .",
     "knip": "knip",
+    "qualify:artifacts": "node scripts/artifact-qualification.mjs",
     "check:boundary": "node scripts/check-boundary.mjs",
     "check:svelte-filenames": "node scripts/check-svelte-filenames.mjs",
     "check:exports": "pnpm -r build && pnpm -r run check:publish",

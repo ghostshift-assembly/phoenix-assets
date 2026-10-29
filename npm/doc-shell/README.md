@@ -165,8 +165,9 @@ require the producer's matching fallback digest. `admitPage(page, canonicalConte
 exposes the same Svelte preflight for callers. Without original bytes, it handles
 bounded canonical JSON with strings, booleans, nulls and safe integers, including
 Jason's uppercase control escapes. To retain float, negative-zero or large-integer
-spelling, supply the original `DocShell.Json.Canonical.encode(page.content)`
-string as `canonicalContent`; `SiteShell` accepts the same optional prop.
+spelling, extract `{:ok, canonical_content}` from
+`DocShell.Json.Canonical.encode(page.content)` and pass that binary as
+`canonicalContent`; `SiteShell` accepts the same optional prop.
 The bounded proof reader checks the decoded content and retains raw numeric
 subtrees for hashing. It refuses malformed, changed or unverifiable bytes;
 it does not normalize source numbers or grant source authenticity.
