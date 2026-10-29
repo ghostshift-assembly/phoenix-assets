@@ -1,6 +1,6 @@
 # Development build facts and instrumentation isolation
 
-Status: **planned; reusable-extension admission required**. Owner: the existing
+Status: **conditional; no shared extension admitted**. Owner: the existing
 Phoenix Assets build integrations. This contract covers optional compiler/build
 facts, build invalidation notifications and artifact isolation. It does not add
 an inspector application, runtime gateway, browser client or package.
@@ -135,6 +135,11 @@ versions and failures; source inspection is not an executed pass.
 | DEV-A6 | With two real consumers, prove complete generation delivery, bounded fact size/work and disposal of subscriptions. Record consumer-owned runtime/source/authority results separately; library success must not be reported as a joined inspection pass. |
 
 ## Delivery status
+
+The repository contains no DEV-A1 evidence of a missing build fact in two
+independent consumers. These rows are admission and external qualification gates,
+not an authorized backlog for a new transform. Continue using native compiler and
+Vite facilities until that evidence exists.
 
 - [x] Bound the candidate to build facts and artifact isolation.
 - [ ] Establish a reusable gap beyond native compiler/Vite facilities (DEV-A1).

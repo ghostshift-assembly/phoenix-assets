@@ -24,7 +24,7 @@ client or sync backend. Existing Electric entrypoints remain compatible.
   integrations. A non-Electric profile cannot weaken their version floors or
   replace backend qualification.
 
-The HTTP profile/import implementation is an additive unreleased source change.
+The HTTP profile/import implementation was introduced in 2.0.0.
 The source now includes scoped socket factories, host command transports, explicit
 reporting peers, producer-generated limit cases and retained qualification receipts.
 The receipt names the exact executed consumer cases; historical checks below do
@@ -90,7 +90,7 @@ for its own tests. `/core` avoids reporting imports. `/reporting` re-exports
 components: its runtime decoder import is not a chart-free entrypoint. No new
 package or decoder subpath is required.
 
-The optional-peer repair is implemented in the source manifest. Exact-artifact
+The optional-peer change is implemented in the 2.x manifest. Exact-artifact
 qualification must prove the selected installation and emitted closure; source
 configuration alone is not an installed-host or publication claim. Keep the
 existing exact 2.9.1 peer; widen only with compatibility evidence.
@@ -100,7 +100,7 @@ not resolve it through this package. Do not substitute `optionalDependencies`,
 which still attempts installation. Preserve export paths and behavior. This changes
 existing reporting consumers' installation obligations and requires a breaking
 release/migration under RELEASING, not a silent republish or an automatic host bump.
-Until that release is qualified, published cohorts retain their actual dependencies.
+Each published or installed cohort retains its actual dependency closure.
 
 A missing or incompatible selected peer must fail the consumer install/build check
 with its package and supported version requirement. Do not claim a runtime table
@@ -184,15 +184,24 @@ that support claim. A previously qualified older cohort remains distinct. Compat
 producer changes can qualify unchanged renderer bytes; a version string alone is
 insufficient. Known producer gaps remain declared gaps, not implied passes.
 
-## Planned implementation and acceptance
+## Library implementation and acceptance
 
-- [ ] GEN-1–3: correct generator/module promise wording and generic transport
-  fixtures; each host supplies its actual endpoint/declaration qualification.
-- [ ] ISO-1–3: measure, implement and qualify the optional reporting peer and
-  explicit breaking installation migration in the existing package.
-- [ ] PROF-1/PLACE-1: profile evidence and extension admission at existing owners.
-- [ ] RPT-1–2 and RELEASING REL-1–4: immutable producer-to-renderer qualification
-  and exact consumer/release evidence. Publication and operation remain separate.
+- [x] GEN-1–3 library work: declaration wording, deterministic generation and
+  generic HTTP transport fixtures. See the command runtime tests and generated
+  kitchen-sink integration. Real endpoint admission remains host-owned.
+- [x] ISO-1–3 library work: optional reporting peer, extracted HTTP/full consumers,
+  installed and emitted measurements, strict peer refusal, and a prior-cohort
+  install/restore check in `scripts/release.mjs`.
+- [x] PROF-1/PLACE-1 library work: HTTP/full preset and dev-supervision tests,
+  optional entrypoints, production isolation and the extension-admission boundary.
+  A new shared API must supply its own admission evidence.
+- [x] RPT-1–2 library work: public producer snapshots, generated boundary cases,
+  extracted decoder/component checks and content-addressed qualification receipts.
+
+The release workflow records an exact candidate's executed results. These source
+items do not certify a host's endpoint codecs, authorization, backend deployment,
+upgrade, publication or operation. Hosts retain GEN-1–3 and their selected-profile
+adoption checks. Historical results below remain tied to their original inputs.
 
 
 ## Local implementation evidence (2026-10-15)

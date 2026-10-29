@@ -22,7 +22,7 @@ PostgreSQL, Electric and Phoenix.Sync deployment separately.
 
 ### `@phoenix-assets/svelte/core`
 
-This entrypoint and optional Electric peer metadata are unreleased additions.
+This entrypoint and optional Electric peer metadata were introduced in 2.0.0.
 
 HTTP commands, their shared auth configuration, locale resolution, event
 modifiers and topic matching without Electric or TanStack imports:
@@ -97,7 +97,7 @@ neither LayerChart nor its chart dependencies. Pass the contract across the wire
 not renderer options, and supply semantic CSS tokens and domain chrome around
 the shared components.
 
-This is a breaking installation change for the next coordinated release. Before
+This is a breaking installation change from 1.x to 2.x. Before
 upgrading a reporting host, add `layerchart@2.9.1` to its dependencies and rebuild
 against the exact candidate tarball. Missing peers fail module resolution;
 incompatible peers fail a strict peer install. Restore the prior package and

@@ -1,8 +1,9 @@
 # DocShell renderer implementation plan
 
 This tracker implements
-[PHA.01](../specs/PHA.01-doc-shell-renderers.md) after the corresponding
-`doc-shell-site/v1` package is available from DocShell.
+[PHA.01](../specs/PHA.01-doc-shell-renderers.md) against DocShell's
+`doc-shell-site/v1` contract. Source implementation and exact-archive release
+qualification are recorded separately.
 
 | Package | Status | Requires | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
@@ -15,7 +16,7 @@ This tracker implements
 | PHA-P07 | source implemented; qualification below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
 | PHA-P09 | source implemented; qualification below | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
-| PHA-P10 | source implemented; qualification below | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
+| PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
 
 ## Qualification scope
 
@@ -23,15 +24,46 @@ The source includes the browser lifecycle, HEEx/static adapters, shared search,
 Pagefind adapter, native modal mobile navigation, tabs/contents disclosures,
 bounded request execution and local
 optional syntax/diagram assets. Unit tests cover the upstream corpus, unsafe
-inputs, stale DOM work, deterministic IDs and optional-dependency isolation.
-The exact-archive qualification records the executed browser cases and retained
-screenshots. PHA-P10 closes only for the exact receipt that passes the release
-process; source status alone is not release qualification. PHA-V03/V09/V10 still
-require their full conformance-page, hosted Pagefind and visual inventories for a
-claim covering all those surfaces. The current guide and 404 fixtures do not establish
-that broader claim. Standalone OpenAPI fixtures also cover server-rendered
-operation content, ordinary anchors and inert request controls without
-JavaScript; they do not establish the remaining page or hosted-search inventory.
+inputs, stale DOM work, deterministic IDs, capability admission and optional
+dependency isolation. Producer-generated capability cases include accepted
+fallback hashes, stale/missing proofs, unsupported essential features and invalid
+requirements.
+
+The browser qualification includes five projected pages: home, directive guide,
+module reference, long code/tables and Arabic content. It compares JavaScript-disabled
+text, headings, ordinary links, navigation, accessible names, landmarks and
+page/cohort digests across static HEEx, Svelte SSR and hosted LiveView. DocShell's
+public semantic-surface validator checks the observed output. The upstream
+conformance vocabulary drives the directive and locale fixtures. Standalone
+OpenAPI and 404 fixtures retain their native-link and inert-request checks.
+
+JSON and real Pagefind searches replay the producer's fixed query/filter cases
+in static HEEx, Svelte and connected LiveView. They cover section targets, all
+seven facets, English/Swedish indexes, private-content exclusion, lazy loading,
+focus restoration and three successive LiveView subtree replacements. Screenshots
+cover the page inventory, search and mobile navigation at the recorded viewports
+and themes. This describes the workflow's assertions; each candidate's receipt
+records which assertions actually passed.
+
+PHA-P10 closes only for the exact receipt that passes the release process,
+including separate review of retained screenshots. Source status alone is not
+release qualification. Host routes, branding, translation catalogues, backend
+authorization and deployment remain outside this fixture cohort.
+
+## Executed source checks (2026-10-29)
+
+`mix check --no-retry --no-parallel` passes on Elixir 1.20.4 / OTP 29.0.4,
+Node 24.21.0 and pnpm 12.15.0: 425 backend checks (18 doctests, 407 tests),
+92.1% backend line coverage, 371 frontend tests and 17 release-script tests.
+All configured required checks pass, including both Hex audits, the production
+npm audit, package exports, optional-free Hex and HTTP consumers, and the
+DocShell offline/story checks. Optional absent-package tools remain skipped.
+
+Warnings-as-errors library compilation and the same 425 backend checks also pass
+on Elixir 1.18.4 / OTP 27.3.4.15 with separate dev/test build directories.
+The clean dependency compile emits Mint's optional `CAStore.file_path/0` warning;
+this is not a warning-free claim for every dependency. Archive receipts and
+screenshot review remain separate from these source results.
 
 The optional ELK chunk emitted by Mermaid 12 measures approximately 1.47 MiB raw
 and 460 KiB gzip with the selected dependency graph. Its explicit per-file budget

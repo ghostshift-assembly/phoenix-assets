@@ -1,7 +1,8 @@
 # PHA.01: DocShell renderers for Svelte and LiveView
 
 Specification version: 0.3.2. Contract: accepted. Implementation status:
-partial.
+implemented for the fixed conformance cohort; release qualification is
+artifact-specific.
 
 ## Purpose
 
@@ -93,6 +94,12 @@ navigation, copy, tabs, highlighting and Mermaid as implemented. It never
 declares `:connected`. A host owns any connected interaction and authorization
 gate. Unknown essential feature IDs fail before HTML is emitted; optional
 features require their recorded fallback digest.
+
+Direct Svelte and HEEx page rendering also performs this admission. Svelte
+reproduces fallback hashes for bounded canonical JSON containing strings,
+booleans, nulls and safe integers. A producer numeric representation that cannot
+survive JavaScript decoding unchanged requires upstream normalization; the
+renderer refuses unverifiable fallback bytes.
 
 Phoenix Assets also provides an optional Pagefind search adapter and browser
 binding. It pins the Pagefind build package, runs it only during asset/site

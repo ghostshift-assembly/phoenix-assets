@@ -22,8 +22,13 @@ or LayerChart. The full consumer installs the explicitly selected optional peers
 checks exports and builds reporting, collection and DocShell entrypoints. Hex
 consumers compile without optional dependencies and with DocShell 0.4, 0.5 and 1.0.
 The DocShell 1.0 consumer exports a static site without starting an endpoint.
-Chromium checks both installed renderers, local optional enhancements, responsive
-themes, search focus, RTL, reduced motion and JavaScript-disabled content. The
+Chromium checks both installed renderers and a connected LiveView consumer,
+including JSON/Pagefind locale indexes and filters, repeated DOM replacements,
+local optional enhancements, responsive themes, search focus, RTL, reduced motion
+and JavaScript-disabled content. Five projected pages cover home, directives,
+module reference, long code/tables and Arabic content; standalone fixtures cover
+OpenAPI and 404 behavior. DocShell's public conformance validator compares the
+observed hosted/static semantics. The
 receipt names the exact cases; it does not establish every possible host profile.
 
 Reporting uses the retained public `refpath/refpath` producer revision recorded
@@ -38,7 +43,7 @@ record review with `review-qualification --expected-sha <receipt-sha> --reviewer
 Production publication requires reviewed evidence; a dry run may retain pending
 review. A command cannot accept a regenerated visual baseline automatically.
 
-The next coordinated release includes breaking installation changes: reporting
+Upgrades from 1.x to 2.x include breaking installation changes: reporting
 hosts must explicitly select `layerchart@2.9.1`, and Svelte consumers must select
 Svelte `^5.57.2`. Rebuild with those exact peers and retain the prior package and
 lock together for rollback. The shared lint package now uses Biome 2.6.2; migrate
@@ -88,6 +93,14 @@ Also run warnings-as-errors compilation and ExUnit on Elixir 1.18 / OTP 27,
 and the complete gate on Elixir 1.20 / OTP 29. Keep each toolchain's build and
 PLT caches separate. Run `pnpm build:doc-shell-assets` before the floor's renderer
 tests; those generated assets are absent from a clean checkout.
+Use an absolute `MIX_BUILD_ROOT` for the floor so Rebar resolves dependency
+headers correctly and dev/test retain separate compilations:
+
+```bash
+MIX_BUILD_ROOT="$PWD/_build/floor-runtime" mise exec erlang@27.3.4.15 elixir@1.18.4-otp-27 -- mix compile --warnings-as-errors
+MIX_BUILD_ROOT="$PWD/_build/floor-runtime" mise exec erlang@27.3.4.15 elixir@1.18.4-otp-27 -- mix test
+```
+
 The full gate includes both coverage floors, dependency
 audits, docs, Dialyzer, package exports and a consumer of the built Hex tarball.
 The Hex metadata must not constrain `phoenix_sync` or `electric`; each host

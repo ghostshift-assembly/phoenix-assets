@@ -186,8 +186,8 @@ consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING.
   shape clients at your app's token key. `createShapeCollection` (TanStack DB)
   lives behind the `@phoenix-assets/svelte/collection` subpath so the main
   barrel stays free of the optional `@tanstack/*` peers.
-  HTTP/Channels-only hosts can select the source-implemented, separately
-  release-qualified `PhoenixAssets.Presets.SvelteHttp` and the
+  HTTP/Channels-only hosts can select the 2.x
+  `PhoenixAssets.Presets.SvelteHttp` and the
   `/core` runtime entrypoint for commands, locales and event helpers. Electric
   is an optional peer at installation and remains required by the legacy root
   barrel and Electric entrypoints. `/socket` needs only the Phoenix peer.

@@ -81,7 +81,7 @@ runtime helpers, the documentation shell, and shared frontend lint tooling.
 | `phoenix_assets` | `lib/` | Runtime, contract generators, dev supervision, manifest, graph, doctor, and the built-in SvelteKit, Tailwind, Storybook, ElectricSQL, command, session, PubSub, localization, Ash type, and typespec integrations. |
 | `@phoenix-assets/vite` | `npm/vite/` | Vite plugin, `$phoenix/*` virtual modules, dev/HMR bridge, graph emitter. |
 | `@phoenix-assets/svelte` | `npm/svelte/` | Typed Electric / PubSub / localization helpers plus the closed portable-report decoder, accessible tables, and shared LayerChart 2 components. |
-| `@phoenix-assets/doc-shell` | `npm/doc-shell/` | Renderer-neutral Svelte documentation UI for the `doc-shell/v1` artifact contract. |
+| `@phoenix-assets/doc-shell` | `npm/doc-shell/` | Svelte documentation UI for `doc-shell/v2`, legacy `doc-shell/v1`, and `doc-shell-site/v1`. |
 | `@phoenix-assets/lint` | `npm/lint/` | Shared Biome base config, Svelte parser/policy linter, and Tailwind v4 arbitrary-value linter for host apps. |
 
 ## Requirements
@@ -103,20 +103,22 @@ The full Svelte stack is the default, so no preset module is required.
 
 ```elixir
 # mix.exs
-{:phoenix_assets, "~> 1.1.0"}
+{:phoenix_assets, "~> 2.0.1"}
 ```
 
 ```bash
-cd assets && pnpm add -D --save-exact @phoenix-assets/vite@1.1.0 @phoenix-assets/svelte@1.1.0 @phoenix-assets/lint@1.1.0
+cd assets && pnpm add -D --save-exact @phoenix-assets/vite@2.0.1 @phoenix-assets/svelte@2.0.1 @phoenix-assets/lint@2.0.1
 ```
 
 ### PostgreSQL 18 and Electric
 
-The frontend is qualified with `@electric-sql/client` 1.5.28,
-`@tanstack/electric-db-collection` 0.5.5 and `@tanstack/svelte-db` 0.5.4.
-Install the TanStack peers when using the `/collection` entry point.
+The current frontend requires `@electric-sql/client` ^1.5.27,
+`@tanstack/electric-db-collection` ^0.6.3 and `@tanstack/svelte-db` ^0.5.12.
+Install the TanStack peers when using `/collection`. Workspace tests exercise
+the locked clients with a controlled transport; hosts qualify their actual backend
+separately.
 
-Your application owns the sync backend. For the qualified PostgreSQL 18.6 /
+Your application owns the sync backend. For the previously qualified PostgreSQL 18.6 /
 Electric 1.8.1 embedded stack, declare these host dependencies:
 
 ```elixir
@@ -165,9 +167,8 @@ Sub-configs: `:dev`, `:build` (`vite_manifest`, `asset_graph`, `asset_url`,
 SvelteKit build that serves its own `index.html`. Set `:ssr` to render HTML from
 the Vite manifest through `PhoenixAssets.Components`.
 
-The HTTP profile below is an unreleased source addition; published 1.2.1 does
-not include its preset, runtime entrypoint or DocShell 0.4 compatibility.
-HTTP/Channels-only applications can select the maintained non-Electric preset:
+The HTTP profile was introduced in 2.0.0. HTTP/Channels-only applications can
+select the non-Electric preset:
 
 ```elixir
 config :phoenix_assets, preset: PhoenixAssets.Presets.SvelteHttp, serve_mode: :spa

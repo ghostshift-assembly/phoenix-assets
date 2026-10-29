@@ -10,7 +10,7 @@ mix deps.get
 pnpm install
 ```
 
-The dev toolchain is pinned in `.tool-versions` (Erlang/OTP 28, Elixir 1.19,
+The dev toolchain is pinned in `.tool-versions` (Erlang/OTP 29, Elixir 1.20,
 Node 24); you'll also need pnpm. The Elixir requirement for *consumers* is the
 `mix.exs` floor, `~> 1.18`.
 
