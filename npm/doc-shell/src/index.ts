@@ -1,5 +1,6 @@
 export { admitPage } from "./admission.js"
 export { default as ApiReference } from "./api-reference.svelte"
+export { validateArtifactMedia } from "./artifact-media.js"
 export * from "./ast.js"
 export { default as AstRenderer } from "./ast-renderer.svelte"
 export { default as AudienceSwitcher } from "./audience-switcher.svelte"

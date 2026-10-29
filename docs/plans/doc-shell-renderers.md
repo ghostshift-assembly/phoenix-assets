@@ -20,7 +20,7 @@ qualification are recorded separately.
 | PHA-P11 | source implemented; expanded target/archive qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
-| PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
+| PHA-P14 | in progress: passive media checks implemented; receipt views/preview pending | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
 | PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
 | PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
 
@@ -282,3 +282,21 @@ succeeded for `9190de09d6dfdf691d3d237e498ddf2c2ea0c7b3`; the latest
 [DocShell CI](https://github.com/futhr/doc_shell/actions/runs/40842385182) succeeded
 for `84e11cb8cce130f45e604b4439e04c09b1dd7ae6`. Neither run includes this local
 buildout. Repository policy reserves all pushes for the user; no refs were pushed.
+
+### Passive artifact media foundation
+
+The matching Elixir/TypeScript media checks admit a closed passive SVG subset
+and bounded PNG headers/chunks with CRCs. Sixty-four shared synthetic vectors
+cover drawing/chart stills, plain UTF-8 text, shapes, transforms, PNG, malformed
+XML, DTD/entities, scripts/styles/events, external references, namespace/foreign
+content, header faults, CRCs and exact/one-over dimension/depth/attribute/transform/
+chunk limits. Separate checks cover SVG bytes and element counts. The helpers
+preserve bytes and perform no I/O, geometry calculation or pixel decode.
+
+The full current-runtime gate passes: 498 backend checks (18 doctests, 480 tests),
+91.3% coverage, 482 frontend tests (249 DocShell), all required package/export/
+audit checks and 17 release-script tests. The module also loads and accepts a
+plain SVG on Elixir 1.18.4 / OTP 27.3.4.15; that is a scoped module check, not a
+new full floor qualification. A later TypeScript regression checks a PNG byte
+view at a nonzero offset and verifies that it preserves the original bytes.
+Receipt views, preview, expanded browsers and fresh archives remain pending.

@@ -392,3 +392,14 @@ browser zoom itself. It checks selected text contrast and keyboard behavior;
 it does not establish contrast for every control/state or a complete WCAG 2.2 AA
 assessment. PHA-V05/V06 and the broader customization requirements remain open
 at that scope, even when the fixed-corpus receipt passes.
+
+### Passive artifact media subset
+
+The renderer now exposes matching pure SVG/PNG media checks in Elixir and
+TypeScript. The [package documentation](../../npm/doc-shell/README.md#artifact-media-checks-in-the-current-checkout)
+fixes their supported elements, attributes and resource limits. The check retains
+original bytes, permits no retrieval or executable content, and leaves geometry,
+meaning and pixel decoding to the producer/reader. A shared synthetic corpus
+checks valid media and refusal vectors in both implementations. Receipt-backed
+views and diagnostic previews remain open under PHA-P14; these checks alone do
+not advertise artifact profile support or establish target qualification.

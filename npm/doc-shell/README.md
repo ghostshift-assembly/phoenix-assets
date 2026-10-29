@@ -166,3 +166,27 @@ reproduce rather than dropping required content.
 The Pagefind adapter builds separate locale indexes. Search loads them only when
 a query needs them, preserves section routes and applies the same seven facets as
 the JSON adapter. The search component also accepts a host-supplied `label`.
+
+### Artifact media checks in the current checkout
+
+`validateArtifactMedia(mediaType, bytes)` checks the renderer's passive media
+subset and throws on refusal. HEEx uses
+`PhoenixAssets.DocShell.ArtifactMedia.validate/2`, returning `:ok` or a tagged
+error. These helpers do not yet render an artifact or advertise profile support.
+Receipt views and the diagnostic preview remain in the renderer plan.
+
+SVG permits `svg`, `g`, `title`, `desc`, basic shape elements, `text` and `tspan`,
+with closed numeric/color/font/transform attributes. It requires a bounded
+viewport and refuses DTDs, processing instructions, foreign content, scripts,
+styles, events, entities beyond the five XML text escapes, external references
+and nested viewports. Producers can supply a PNG alternative for SVG features
+outside this subset. PNG checks its header, dimensions, chunk closure and CRCs;
+animated PNG and unsupported ancillary chunks refuse. Neither helper decodes
+pixels or validates producer geometry or semantic coverage.
+
+The fixed limits are 1 MiB SVG, 32 MiB PNG, 4096 SVG elements or PNG chunks,
+64 SVG levels, 32 attributes per element, 64 transforms per attribute, 65,536
+ASCII bytes per attribute, numeric magnitudes at most 1,000,000 and image
+dimensions at most 4096. UTF-8 text remains available in SVG text nodes.
+Both implementations consume the same synthetic media/refusal vectors; browser
+paint and native/human qualification remain separate evidence.
