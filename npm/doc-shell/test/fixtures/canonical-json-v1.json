@@ -1,0 +1,35 @@
+[
+  {
+    "value": {},
+    "canonical": "{}",
+    "digest": "sha256:44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+  },
+  {
+    "value": {
+      "a": 1
+    },
+    "canonical": "{\"a\":1}",
+    "digest": "sha256:015abd7f5cc57a2dd94b7590f04ad8084273905ee33ec5cebeae62276a97f862"
+  },
+  {
+    "value": {
+      "z": 1.0,
+      "a": [
+        true,
+        null,
+        "é"
+      ]
+    },
+    "canonical": "{\"a\":[true,null,\"é\"],\"z\":1.0}",
+    "digest": "sha256:4614eeaf0e79da768f45a37e8de07822ed49aaad3c8d033cd92a34aef7df9672"
+  },
+  {
+    "value": {
+      "literal": "\\u001b",
+      "control": "\u001b\u0000\b\t\n\f\r",
+      "unicode": "é😀  "
+    },
+    "canonical": "{\"control\":\"\\u001B\\u0000\\b\\t\\n\\f\\r\",\"literal\":\"\\\\u001b\",\"unicode\":\"é😀  \"}",
+    "digest": "sha256:17f9efd76cddffa0e25905a358c03bd621da771453e06ff34607affd786a4a4a"
+  }
+]

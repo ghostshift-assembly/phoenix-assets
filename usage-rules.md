@@ -342,3 +342,12 @@ collapse metadata apply to projected site navigation; legacy graph sidebars keep
 metadata opaque unless explicitly enabled. Current locale markers match a known
 page/context locale; host-provided destinations remain exact. New nonempty page
 decorations and reserved SEO require the matching upstream validator for HEEx.
+
+Preserve original canonical page-content bytes when a browser reader must verify
+fallbacks containing floats, negative zero or large integers. Pass the string from
+`DocShell.Json.Canonical.encode(page.content)` as Svelte `SiteShell`'s
+`canonicalContent` prop or `admitPage(page, canonicalContent)`. The bounded reader
+checks decoded content and retains original numeric spelling for the hash;
+ordinary `JSON.stringify` changes that spelling and some control escapes.
+Keep source validation and authenticity in the host; a digest comparison grants
+no access and does not replace producer admission.

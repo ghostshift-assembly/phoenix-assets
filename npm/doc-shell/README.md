@@ -157,11 +157,15 @@ is never retried automatically.
 
 `SiteShell` and the HEEx page component enforce the page's capability requirements
 before rendering. Unknown essential features fail. Unsupported optional features
-require the producer's matching fallback digest. `admitPage(page)` exposes the
-same Svelte preflight for callers. Its fallback verifier handles bounded canonical
-JSON with strings, booleans, nulls and safe integers; metadata requiring another
-numeric encoding must be normalized upstream. It refuses a digest it cannot
-reproduce rather than dropping required content.
+require the producer's matching fallback digest. `admitPage(page, canonicalContent?)`
+exposes the same Svelte preflight for callers. Without original bytes, it handles
+bounded canonical JSON with strings, booleans, nulls and safe integers, including
+Jason's uppercase control escapes. To retain float, negative-zero or large-integer
+spelling, supply the original `DocShell.Json.Canonical.encode(page.content)`
+string as `canonicalContent`; `SiteShell` accepts the same optional prop.
+The bounded proof reader checks the decoded content and retains raw numeric
+subtrees for hashing. It refuses malformed, changed or unverifiable bytes;
+it does not normalize source numbers or grant source authenticity.
 
 The Pagefind adapter builds separate locale indexes. Search loads them only when
 a query needs them, preserves section routes and applies the same seven facets as

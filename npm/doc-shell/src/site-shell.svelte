@@ -25,6 +25,7 @@ let {
   brand,
   footer,
   assetUrls = {},
+  canonicalContent,
 }: {
   site: DocShellSite
   pageId: string
@@ -33,6 +34,7 @@ let {
   brand?: Snippet<[DocShellSite]>
   footer?: Snippet<[DocShellSite]>
   assetUrls?: Record<string, string>
+  canonicalContent?: string
 } = $props()
 const settings = $derived.by(() => {
   admitNavigationPresentation(site.navigation)
@@ -48,7 +50,7 @@ const brandLogo = $derived(assetUrl(settings.brand?.logo?.asset))
 const page = $derived.by(() => {
   const current = site.pages[pageId]
   if (current) {
-    admitPage(current)
+    admitPage(current, canonicalContent)
     admitPagePresentation(current)
   }
   return current

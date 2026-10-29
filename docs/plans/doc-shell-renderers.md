@@ -300,3 +300,30 @@ plain SVG on Elixir 1.18.4 / OTP 27.3.4.15; that is a scoped module check, not a
 new full floor qualification. A later TypeScript regression checks a PNG byte
 view at a nonzero offset and verifies that it preserves the original bytes.
 Receipt views, preview, expanded browsers and fresh archives remain pending.
+
+### Canonical byte consumption
+
+Svelte fallback admission now uses a bounded original-byte proof reader. Native
+safe-integer data reproduces Jason's uppercase control escapes; optional
+`canonicalContent` preserves original float, negative-zero and large-integer
+spelling after JavaScript decoding. The reader compares decoded values, retains
+raw subtrees for hashes, checks UTF-8 key order, duplicate keys, byte/value/depth
+limits, and rejects accessors without calling them. It neither changes producer
+numbers nor authenticates a source. SiteShell accepts the same original-content
+prop as `admitPage(page, canonicalContent)`.
+
+The exact canonical corpus from DocShell `6870369` is pinned at SHA-256
+`518036dca115b22ac603b786c0d77c40a40855d474ffbaa220dc579fb7567950`.
+The formatter-only exemption preserves those bytes while tests still parse
+and hash them. Two regressions fail against the previous admission helper:
+capital-escaped control metadata and retained float bytes. The corrected helper
+passes both without changing the v1 digest definition. Tests also cover large
+integer lexemes, negative zero, UTF-8 ordering, stale/malformed proofs, duplicate
+keys, inert prototype keys, getters, sparse data and finite value/depth budgets.
+
+The full current-runtime gate passes: 498 backend checks (18 doctests, 480 tests),
+91.3% coverage and 511 frontend tests (278 DocShell). All required audits,
+exports, optional-free/older-producer/HTTP-only consumers and release checks pass.
+DocShell source also passes its full gate with the expanded canonical corpus:
+437 checks and 95.5% coverage. Receipt views/preview and expanded target/archive
+qualification remain open; the exact byte binding is not source authentication.

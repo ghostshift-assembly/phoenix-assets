@@ -126,9 +126,14 @@ features require their recorded fallback digest.
 
 Direct Svelte and HEEx page rendering also performs this admission. Svelte
 reproduces fallback hashes for bounded canonical JSON containing strings,
-booleans, nulls and safe integers. A producer numeric representation that cannot
-survive JavaScript decoding unchanged requires upstream normalization; the
-renderer refuses unverifiable fallback bytes.
+booleans, nulls and safe integers, with Jason's uppercase control escapes.
+When JavaScript decoding loses a numeric representation, callers preserve the
+original canonical content and pass `canonicalContent` to `SiteShell` or
+`admitPage(page, canonicalContent)`. The proof reader retains numeric lexemes and subtrees, checks
+decoded content equality and hashes the original spelling. Source numbers are
+not normalized. Proofs have an 8 MiB UTF-8 byte limit, 256 container levels and
+one million values, reject duplicate/unordered keys and executable accessors,
+and do not establish source authenticity. Unverifiable bytes still refuse.
 
 Phoenix Assets also provides an optional Pagefind search adapter and browser
 binding. It pins the Pagefind build package, runs it only during asset/site
