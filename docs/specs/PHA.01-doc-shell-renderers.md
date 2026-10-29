@@ -43,6 +43,23 @@ layout. Framework slots/snippets, CSS and visual previews remain renderer-owned.
 The native reader, artifact producer and host retain their implementation and
 qualification duties under the upstream checklist.
 
+## Hosted publication pair consumption
+
+Svelte `HostedReference` and HEEx `ApiReference.hosted_reference/1` consume an
+already host-admitted narrative/OpenAPI pair plus the expected publication view.
+Both bindings must match every upstream `doc-shell-publication/v1` field before
+narrative or operations render. Missing, mixed, stale and cross-surface bindings
+refuse. The components render one selected document and its API reference; host
+routing, surrounding chrome, source admission and authorization remain outside.
+
+Svelte's `admitHostedPair` checks bindings, required top-level presentation fields
+and declared OpenAPI version. Source data must already satisfy the upstream
+presentation/OpenAPI contracts. HEEx invokes upstream `HostedPair.validate/3`
+before calling either renderer and refuses when the installed producer lacks it.
+The shared fixture is copied byte-for-byte from `doc_shell@72b46cd` and pinned by
+SHA-256. Tests cover matching output and refusal before DOM/component output.
+These source checks await fresh package/browser qualification.
+
 ## Package boundary
 
 The existing npm package remains:

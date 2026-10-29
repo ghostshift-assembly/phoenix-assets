@@ -31,6 +31,64 @@ defmodule PhoenixAssets.DocShellTest do
 
   import Phoenix.LiveViewTest, only: [render_component: 2]
 
+  test "hosted API pair admission happens before rendering narrative or operations" do
+    fixture =
+      Path.expand("../../npm/doc-shell/test/fixtures/hosted-pair-v1.json", __DIR__)
+      |> File.read!()
+      |> Jason.decode!()
+
+    expected = fixture["binding"]
+
+    presentation = %{
+      schema_version: "doc-shell/v2",
+      navigation: [],
+      search: [],
+      content: fixture["presentation"]["content"],
+      publication: expected
+    }
+
+    spec = Map.put(fixture["openapi"], "x-doc-shell-publication", expected)
+    args = [presentation: presentation, spec: spec, expected: expected, current_id: "intro"]
+
+    if Code.ensure_loaded?(DocShell.Presentation.HostedPair) do
+      html = render_component(&ApiReference.hosted_reference/1, args)
+      assert html =~ "Public documentation"
+      assert html =~ "Public API"
+      assert html =~ ~s(data-doc-publication="snapshot-1")
+      refute html =~ "data-doc-api-request"
+
+      for field <- fixture["mismatch_fields"] do
+        changed = put_in(spec, ["x-doc-shell-publication", field], "other")
+
+        assert_raise ArgumentError, ~r/publication_mismatch/, fn ->
+          render_component(&ApiReference.hosted_reference/1, Keyword.put(args, :spec, changed))
+        end
+      end
+
+      stale = Map.put(expected, "publication_id", "older")
+
+      stale_args =
+        args
+        |> Keyword.put(:presentation, %{presentation | publication: stale})
+        |> Keyword.put(:spec, Map.put(spec, "x-doc-shell-publication", stale))
+
+      assert_raise ArgumentError, ~r/publication_mismatch/, fn ->
+        render_component(&ApiReference.hosted_reference/1, stale_args)
+      end
+
+      assert_raise ArgumentError, ~r/hosted pair admission failed/, fn ->
+        render_component(
+          &ApiReference.hosted_reference/1,
+          Keyword.put(args, :current_id, "missing")
+        )
+      end
+    else
+      assert_raise ArgumentError, ~r/doc_shell_hosted_pair_unavailable/, fn ->
+        render_component(&ApiReference.hosted_reference/1, args)
+      end
+    end
+  end
+
   test "settings remain optional on older producers and reject malformed values before rendering" do
     assert Settings.get(%{}) == %{}
     assert Settings.label(%{}, "search", "Search") == "Search"

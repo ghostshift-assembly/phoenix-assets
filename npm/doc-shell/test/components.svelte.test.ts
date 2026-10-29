@@ -2,17 +2,78 @@ import { createRawSnippet, flushSync, mount, tick, unmount } from "svelte"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import ApiReference from "../src/api-reference.svelte"
 import DocShell from "../src/doc-shell.svelte"
+import HostedReference from "../src/hosted-reference.svelte"
 import Search from "../src/search.svelte"
 import Sidebar from "../src/sidebar.svelte"
 import SiteShell from "../src/site-shell.svelte"
-import type { DocShellPresentation, DocShellSite, SearchEntry } from "../src/types.js"
+import type {
+  DocShellPresentation,
+  DocShellSite,
+  PublicationBinding,
+  SearchEntry,
+} from "../src/types.js"
 import presentationV2Fixture from "./fixtures/doc-shell-v2.json"
+import hostedFixture from "./fixtures/hosted-pair-v1.json"
 import apiFixture from "./fixtures/openapi.json"
 import projectedSite from "./fixtures/projected-site.json"
 
 const site = projectedSite as DocShellSite
 const mounted: Array<ReturnType<typeof mount>> = []
 const frames: number[] = []
+
+describe("hosted publication consumption", () => {
+  it("renders matching narrative and OpenAPI from the upstream fixture", () => {
+    const element = target()
+    const expected = hostedFixture.binding as PublicationBinding
+    mounted.push(
+      mount(HostedReference, {
+        target: element,
+        props: {
+          expected,
+          currentId: "intro",
+          presentation: {
+            ...hostedFixture.presentation,
+            schema_version: "doc-shell/v2",
+            publication: expected,
+          },
+          openapi: { ...hostedFixture.openapi, "x-doc-shell-publication": expected },
+        },
+      }),
+    )
+    flushSync()
+    expect(
+      element.querySelector("[data-doc-publication]")?.getAttribute("data-doc-publication"),
+    ).toBe("snapshot-1")
+    expect(element.querySelector("article")?.textContent).toBe("Public documentation")
+    expect(element.querySelector(".api-reference")?.textContent).toContain("Public API")
+  })
+
+  it("refuses a cross-surface API before either input reaches the DOM", () => {
+    const element = target()
+    const expected = hostedFixture.binding as PublicationBinding
+    expect(() =>
+      mount(HostedReference, {
+        target: element,
+        props: {
+          expected,
+          currentId: "intro",
+          presentation: {
+            ...hostedFixture.presentation,
+            schema_version: "doc-shell/v2",
+            publication: expected,
+          },
+          openapi: {
+            ...hostedFixture.openapi,
+            info: { title: "Private API" },
+            "x-doc-shell-publication": { ...expected, disclosure_surface: "internal" },
+          },
+        },
+      }),
+    ).toThrow("openapi.disclosure_surface")
+    expect(element.textContent).toBe("")
+    expect(element.querySelector("article")).toBeNull()
+  })
+})
 
 function target(): HTMLDivElement {
   const element = document.createElement("div")

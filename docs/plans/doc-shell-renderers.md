@@ -19,7 +19,7 @@ qualification are recorded separately.
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
 | PHA-P11 | settings, links, seams and shell/search labels implemented; enhancement labels and qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source gaps identified; implementation planned | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
-| PHA-P13 | planned; upstream pairing first | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
+| PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
 | PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
 | PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
 | PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
@@ -218,3 +218,21 @@ passes: 428 backend checks (18 doctests, 410 tests), 92.1% line coverage and
 395 frontend tests (including 162 DocShell tests). Exports, audits and extracted
 consumer checks passed again. This source evidence does not replace the pending
 coordinated archive/browser receipt.
+
+### Hosted pair consumption evidence
+
+Svelte and HEEx now consume the host's expected publication before rendering
+narrative/API content. Svelte's comparator is intentionally a binding/top-level
+wire check; hosts validate source contracts before handing data to the renderer.
+HEEx delegates complete pair/source checks to upstream `HostedPair.validate/3`.
+The exact shared fixture is pinned at SHA-256
+`398e2712d5d734afd69eb4d030867d272426efb2b1ee984f9daf3a13d650b066`.
+Matching, missing, stale, malformed and cross-surface cases pass in targeted tests,
+including refusal before DOM content. Candidate HEEx checks pass against upstream
+`506b839`; older producers explicitly refuse the new pair capability. The full current downstream gate passes: 429 backend checks (18 doctests,
+411 tests), 91.6% line coverage and 406 frontend tests (173 DocShell tests).
+The 19 candidate HEEx checks exercise the new upstream path; the full gate's
+packaged consumers also retain older-producer behavior. The upstream fixture has
+a formatter-only exemption to retain exact bytes, alongside the published v2
+fixture; JSON parsing and the checksum assertion remain required. Fresh archive
+and browser qualification remain open.

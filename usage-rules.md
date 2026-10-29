@@ -323,3 +323,12 @@ site or renderer context. `SiteShell` accepts local `brand`/`footer` snippets an
 translations, brand content and robots policy. Nonempty HEEx settings require
 the unreleased upstream settings validator; older supported producers keep
 empty/default behavior. New controls still need fresh browser/package qualification.
+
+For paired hosted reference content, use Svelte `HostedReference` or HEEx
+`ApiReference.hosted_reference/1` with the expected host-admitted publication.
+Svelte also exports `admitHostedPair` for custom composition. Validate graph and
+OpenAPI source contracts before passing inputs to the browser; the browser
+compares bindings and basic wire fields, while HEEx delegates to upstream
+`HostedPair.validate/3`. Missing or mismatched publication fields refuse before
+rendering. Older DocShell producers lack this new API and must not be presented
+as supporting it. Source authentication and authorization stay in the host.

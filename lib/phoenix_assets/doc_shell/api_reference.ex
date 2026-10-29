@@ -10,8 +10,59 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     use Phoenix.Component
 
+    alias PhoenixAssets.DocShell.Ast
+
     @methods ~w(get post put patch delete options head)
     @max_depth 12
+    @pair_validator DocShell.Presentation.HostedPair
+
+    unless Code.ensure_loaded?(@pair_validator) do
+      @compile {:no_warn_undefined, [{DocShell.Presentation.HostedPair, :validate, 3}]}
+    end
+
+    attr(:presentation, :map, required: true)
+    attr(:spec, :map, required: true)
+    attr(:expected, :map, required: true)
+    attr(:current_id, :string, required: true)
+    attr(:request_enabled, :boolean, default: false)
+    attr(:api_origin, :string, default: nil)
+
+    @doc "Admits a hosted narrative/API pair against the expected publication before rendering either input."
+    @spec hosted_reference(map()) :: Phoenix.LiveView.Rendered.t()
+    def hosted_reference(assigns) do
+      with {:ok, pair} <- admit_pair(assigns.presentation, assigns.spec, assigns.expected),
+           {:ok, content} <- Map.fetch(pair.presentation.content, assigns.current_id) do
+        assigns =
+          assigns
+          |> assign(:publication, pair.publication)
+          |> assign(
+            :direction,
+            if(Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, pair.publication["locale"]),
+              do: "rtl",
+              else: "ltr"
+            )
+          )
+          |> assign(:content, Ast.render(content))
+          |> assign(:spec, pair.openapi)
+
+        ~H"""
+        <section class="doc-shell" data-doc-publication={@publication["publication_id"]} lang={@publication["locale"]} dir={@direction}>
+          <article>{@content}</article>
+          <.api_reference spec={@spec} request_enabled={@request_enabled} api_origin={@api_origin} />
+        </section>
+        """
+      else
+        reason -> raise ArgumentError, "DocShell hosted pair admission failed: #{inspect(reason)}"
+      end
+    end
+
+    defp admit_pair(presentation, spec, expected) do
+      validator = @pair_validator
+
+      if Code.ensure_loaded?(validator),
+        do: validator.validate(presentation, spec, expected),
+        else: {:error, :doc_shell_hosted_pair_unavailable}
+    end
 
     attr(:spec, :map, required: true)
     attr(:request_enabled, :boolean, default: false)

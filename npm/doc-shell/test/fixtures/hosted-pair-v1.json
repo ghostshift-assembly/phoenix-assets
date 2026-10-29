@@ -1,0 +1,20 @@
+{
+  "schema_version": "doc-shell-hosted-pair-fixture/v1",
+  "binding": {
+    "schema_version": "doc-shell-publication/v1",
+    "publication_id": "snapshot-1",
+    "source_view": "view-1",
+    "graph_position": "position-1",
+    "locale": "en",
+    "release": "v1",
+    "disclosure_surface": "public"
+  },
+  "presentation": {
+    "schema_version": "doc-shell/v2",
+    "navigation": [],
+    "search": [],
+    "content": {"intro": [{"tag": "p", "attrs": {}, "content": ["Public documentation"], "meta": {}}]}
+  },
+  "openapi": {"openapi": "3.1.0", "info": {"title": "Public API", "version": "v1"}, "paths": {}},
+  "mismatch_fields": ["publication_id", "source_view", "graph_position", "locale", "release", "disclosure_surface"]
+}

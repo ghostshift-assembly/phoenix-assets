@@ -60,6 +60,18 @@ export interface DocShellPresentation {
   search: SearchEntry[]
   content: Record<string, DocAstNode[]>
   backlinks?: Record<string, Backlink[]>
+  publication?: PublicationBinding
+}
+
+/** Immutable host declaration owned by DocShell.Presentation.HostedPair. */
+export interface PublicationBinding {
+  schema_version: "doc-shell-publication/v1"
+  publication_id: string
+  source_view: string
+  graph_position: string
+  locale: string
+  release: string
+  disclosure_surface: string
 }
 
 export type PresentationSource = () => DocShellPresentation | Promise<DocShellPresentation>
@@ -108,6 +120,7 @@ export interface Operation {
 
 export interface OpenApiDocument {
   openapi?: string
+  "x-doc-shell-publication"?: PublicationBinding
   info?: { title?: string; version?: string; description?: string }
   paths?: Record<
     string,

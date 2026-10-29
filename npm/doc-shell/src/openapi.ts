@@ -2,8 +2,12 @@ import type { JsonSchema, OpenApiDocument, OperationEntry } from "./types.js"
 
 const methods = ["get", "post", "put", "patch", "delete", "options", "head"] as const
 
+const openApiVersion =
+  /^3\.[012]\.(?:0|[1-9]\d*)(?:-(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?![\s\S])/
+
+/** Standalone legacy inputs may omit a version; declared versions follow the producer's SemVer check. */
 export const supportsOpenApi = (version: string | undefined): boolean =>
-  version === undefined || /^3\.[012](?:\.|$)/.test(version)
+  version === undefined || openApiVersion.test(version)
 
 export const flattenOperations = (spec: OpenApiDocument): OperationEntry[] =>
   Object.entries(spec.paths ?? {})

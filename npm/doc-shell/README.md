@@ -58,6 +58,23 @@ Search additionally recognizes `close`, `filter_all`, `filter_<facet>`,
 Missing labels preserve defaults. Code/diagram/request enhancement messages
 retain their existing labels pending the remaining control-label work.
 
+For embedded hosted API documentation, use `HostedReference` with
+`presentation`, `openapi`, `expected` and `currentId`. It compares the publication
+bindings before rendering either narrative or API content; it supplies no host
+chrome or authorization policy. `admitHostedPair` provides that binding check for
+custom composition. Inputs must already satisfy the upstream graph/OpenAPI source
+contracts; the browser check covers bindings, required top-level presentation
+fields and the declared OpenAPI version, rather than full source/schema validation.
+
+`expected` is the host's admitted request view. Both the presentation's
+`publication` and OpenAPI's `x-doc-shell-publication` must equal it across every
+`doc-shell-publication/v1` field. Two matching but stale inputs still refuse when
+the expected view differs. The check grants no access and cannot authenticate a
+host's source declarations. HEEx exposes the corresponding
+`PhoenixAssets.DocShell.ApiReference.hosted_reference/1` component, which delegates
+to upstream `HostedPair.validate/3`; older producers refuse this new capability.
+These are checkout APIs awaiting coordinated release.
+
 The package contains no app aliases. `DocShell` accepts a `DocShellTheme` through
 its `theme` prop; both shells use the `--doc-*` CSS custom properties. Search
 matches the supplied records with the built-in deterministic matcher. The
