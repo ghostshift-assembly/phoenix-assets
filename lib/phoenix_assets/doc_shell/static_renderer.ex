@@ -13,7 +13,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
     alias DocShell.Presentation.{Asset, Page, Renderer, Site}
     alias DocShell.Presentation.Renderer.{Capabilities, Capability, Context}
     alias Phoenix.HTML
-    alias PhoenixAssets.DocShell.{Assets, Components, Settings}
+    alias PhoenixAssets.DocShell.{Artifacts, Assets, Components, Settings}
 
     @impl true
     def render_page(%Page{} = page, %Context{} = context) do
@@ -35,18 +35,27 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
     def render_not_found(%Site{} = site, %Context{} = context) do
       body = Components.not_found(%{site: site, context: context, __changed__: nil})
       title = Settings.label(Settings.get(context), "not_found", "Page not found")
-      {:ok, document(title, context.locale, nil, context, body, nil)}
+
+      {:ok,
+       document(title, context.locale, nil, context, body, nil, Artifacts.passive_site?(site))}
     end
 
     @impl true
-    def assets(%Site{}, options) when is_list(options) do
+    def assets(%Site{} = site, options) when is_list(options) do
       if Keyword.keyword?(options) and Keyword.keys(options) -- [:assets] == [] and
            valid_extra_assets?(Keyword.get(options, :assets, [])) do
-        with :ok <- Assets.validate(),
-             do: {:ok, Assets.all() ++ Keyword.get(options, :assets, [])}
+        with :ok <- Assets.validate() do
+          {:ok, own_assets(site) ++ Keyword.get(options, :assets, [])}
+        end
       else
         {:error, {:invalid_doc_shell_asset_options, options}}
       end
+    end
+
+    defp own_assets(site) do
+      if Artifacts.passive_site?(site),
+        do: Enum.filter(Assets.all(), &String.starts_with?(&1.media_type, "text/css")),
+        else: Assets.all()
     end
 
     defp valid_extra_assets?(assets) when is_list(assets) do
@@ -83,12 +92,17 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
       }
     end
 
-    defp document(title, locale, canonical_url, context, body, page) do
+    defp document(title, locale, canonical_url, context, body, page, passive? \\ false) do
       direction =
         if Regex.match?(~r/\A(?:ar|fa|he|ur)(?:[-_]|\z)/i, locale), do: "rtl", else: "ltr"
 
       css = Map.fetch!(context.assets, "doc-shell.css")
-      browser = Map.fetch!(context.assets, "doc-shell-browser.js")
+
+      browser =
+        if passive? or Artifacts.passive?(page && Map.get(page.metadata, "artifact_presentation")),
+          do: nil,
+          else: Map.get(context.assets, "doc-shell-browser.js")
+
       canonical = canonical_url || canonical(context.canonical_origin, context.current_route)
       settings = Settings.get(context)
       metadata = Settings.page_metadata(page, settings)
@@ -115,13 +129,18 @@ if Code.ensure_loaded?(DocShell.Presentation.Renderer) and Code.ensure_loaded?(P
         meta("name", "robots", robots(metadata["robots"])),
         "<link rel=\"stylesheet\" href=\"",
         escape_attribute(css),
-        "\"><script type=\"module\" src=\"",
-        escape_attribute(browser),
-        "\"></script></head><body class=\"doc-shell\" data-pa-doc-shell>",
+        "\">",
+        browser_script(browser),
+        "</head><body class=\"doc-shell\" data-pa-doc-shell>",
         HTML.Safe.to_iodata(body),
         "</body></html>"
       ]
     end
+
+    defp browser_script(nil), do: []
+
+    defp browser_script(url),
+      do: ["<script type=\"module\" src=\"", escape_attribute(url), "\"></script>"]
 
     defp canonical(nil, _), do: nil
     defp canonical(origin, route), do: String.trim_trailing(origin, "/") <> route

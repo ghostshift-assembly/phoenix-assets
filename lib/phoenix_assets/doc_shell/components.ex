@@ -13,7 +13,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     @search_browser_contract_keys ~w(schema_version algorithm path indexes filters version)
 
     alias DocShell.Presentation.Renderer
-    alias PhoenixAssets.DocShell.{Assets, Ast, Settings, StaticRenderer}
+    alias PhoenixAssets.DocShell.{Artifacts, Assets, Ast, Settings, StaticRenderer}
 
     attr(:page, :any, required: true)
     attr(:context, :any, required: true)
@@ -38,13 +38,31 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           raise ArgumentError, "DocShell page admission failed: #{inspect(reason)}"
       end
 
+      artifact_page =
+        case Artifacts.admit(
+               assigns.page.content,
+               Map.get(assigns.page.metadata, "artifact_presentation"),
+               Map.get(assigns.context, :artifact_assets, %{}),
+               Map.get(assigns.context, :assets, %{})
+             ) do
+          {:ok, page} ->
+            page
+
+          {:error, reason} ->
+            raise ArgumentError, "DocShell artifact admission failed: #{inspect(reason)}"
+        end
+
       assigns =
         assigns
+        |> assign(:passive?, artifact_page.passive?)
         |> assign_new(:nonce, fn -> nil end)
         |> assign(:settings, Settings.get(assigns.context))
         |> assign(
           :content,
-          Ast.render(assigns.page.content, Settings.get(assigns.context)["labels"] || %{})
+          Ast.render(assigns.page.content, Settings.get(assigns.context)["labels"] || %{},
+            artifact_page: artifact_page,
+            passive: artifact_page.passive?
+          )
         )
         |> assign(:direction, direction(assigns.page.locale))
         |> assign(:enhancement_assets, Map.get(assigns.context, :assets, %{}))
@@ -66,12 +84,13 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         lang={@page.locale}
         dir={@direction}
       >
-        <script type="importmap" nonce={@nonce}><%= Phoenix.HTML.raw(@import_map) %></script>
+        <script :if={!@passive?} type="importmap" nonce={@nonce}><%= Phoenix.HTML.raw(@import_map) %></script>
         <a class="doc-skip-link" href="#doc-main">{Settings.label(@settings, "skip", "Skip to documentation")}</a>
-        <.header context={@context}>
+        <.header context={@context} passive?={@passive?}>
           <:brand :for={brand <- @brand}>{render_slot(brand)}</:brand>
         </.header>
         <button
+          :if={!@passive?}
           type="button"
           class="pa-button doc-mobile-nav"
           data-doc-nav-toggle
@@ -79,7 +98,10 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           aria-expanded="false"
         >{Settings.label(@settings, "browse", "Browse documentation")}</button>
         <div class="doc-layout">
-          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+          <aside :if={@passive?} id="doc-navigation" class="doc-sidebar" aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+            <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} presentation_metadata? />
+          </aside>
+          <dialog :if={!@passive?} id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
             <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} presentation_metadata? />
           </dialog>
@@ -107,7 +129,93 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       """
     end
 
+    attr(:nodes, :list, required: true)
+    attr(:receipt, :map, default: nil)
+    attr(:assets, :map, default: %{})
+    attr(:urls, :map, default: %{})
+    attr(:labels, :map, default: %{})
+
+    @doc "Renders a receipt-verified artifact document and its complete passive fallback."
+    @spec artifact_document(map()) :: Phoenix.LiveView.Rendered.t()
+    def artifact_document(assigns) do
+      page = artifact_page!(assigns)
+
+      assigns =
+        assign(
+          assigns,
+          :content,
+          Ast.render(assigns.nodes, assigns.labels, artifact_page: page, passive: page.passive?)
+        )
+
+      ~H"""
+      <article class="doc-shell doc-artifact-document" data-artifact-page-digest={@receipt && @receipt["page_digest"]}>{@content}</article>
+      """
+    end
+
+    attr(:nodes, :list, required: true)
+    attr(:receipt, :map, required: true)
+    attr(:assets, :map, default: %{})
+    attr(:urls, :map, default: %{})
+    attr(:labels, :map, default: %{})
+    attr(:mode, :string, default: "light", values: ~w(light dark monochrome enlarged))
+
+    @doc "Shows the same verified document with read-only receipt and producer diagnostics."
+    @spec artifact_preview(map()) :: Phoenix.LiveView.Rendered.t()
+    def artifact_preview(assigns) do
+      if assigns.mode not in ~w(light dark monochrome enlarged),
+        do: raise(ArgumentError, "invalid artifact preview mode")
+
+      page = artifact_page!(assigns)
+
+      assigns =
+        assigns
+        |> assign(:views, Enum.sort_by(Map.values(page.views), & &1.selection["block_id"]))
+        |> assign(
+          :content,
+          Ast.render(assigns.nodes, assigns.labels, artifact_page: page, passive: page.passive?)
+        )
+        |> assign(:constraints_json, Jason.encode!(page.receipt["constraints"]))
+
+      ~H"""
+      <section class="doc-artifact-preview doc-shell" data-artifact-preview={@mode} data-artifact-page-digest={@receipt["page_digest"]} data-descriptor-set-digest={@receipt["descriptor_set_digest"]} data-artifact-constraints-digest={@receipt["constraints_digest"]}>
+        <header><h2>{@labels["artifact_preview"] || "Artifact preview"}</h2><p>{@labels["artifact_preview_scope"] || "Diagnostic view of the supplied document and selection. Producer meaning and target observations remain separate."}</p></header>
+        <div class="preview-document">{@content}</div>
+        <section class="preview-diagnostics" aria-label={@labels["artifact_diagnostics"] || "Artifact diagnostics"}>
+          <details :for={view <- @views} open><summary>{view.block["caption"]} · {view.selection["status"]}</summary>
+            <dl>
+              <dt>{@labels["artifact_block_id"] || "Block ID"}</dt><dd><code>{view.selection["block_id"]}</code></dd>
+              <dt>{@labels["artifact_ref"] || "Artifact reference"}</dt><dd><code>{view.block["artifact_ref"]}</code></dd>
+              <dt>{@labels["artifact_profile"] || "Profile"}</dt><dd><code>{view.block["profile"]}</code><br /><code>{view.block["profile_digest"]}</code></dd>
+              <dt>{@labels["artifact_manifest"] || "Manifest digest"}</dt><dd><code>{view.block["manifest_digest"]}</code></dd>
+              <dt>{@labels["artifact_fallback_digest"] || "Fallback digest"}</dt><dd><code>{view.block["fallback_digest"]}</code></dd>
+              <dt>{@labels["artifact_presentation"] || "Selected presentation"}</dt><dd>{view.selection["presentation_id"] || @labels["artifact_no_selection"] || "No admitted presentation"}</dd>
+              <dt>{@labels["artifact_variant"] || "Variant and state"}</dt><dd>{view.selection["variant"] && view.selection["variant"]["id"] || "—"} · {view.selection["variant"] && view.selection["variant"]["state"] || "unavailable"}</dd>
+              <dt>{@labels["artifact_runtime"] || "Selected runtime requirements"}</dt><dd>{artifact_runtime(view.selection["variant"], @labels)}</dd>
+            </dl>
+            <h3>{@labels["artifact_anchors"] || "Semantic anchors"}</h3><ul><li :for={binding <- view.block["bindings"]}><a href={"#" <> binding["anchor"]}>{binding["anchor"]}</a> · <code>{binding["subject_ref"]}</code> · {binding["subject_kind"]} · {binding["subject_id"]}</li></ul>
+            <details><summary>{@labels["artifact_constraints"] || "Presentation constraints"}</summary><pre><code>{@constraints_json}</code></pre></details>
+            <details :if={view.selection["checked_projection"]}><summary>{@labels["artifact_producer_projection"] || "Checked producer projection and supplied limitations"}</summary><pre><code>{Jason.encode!(view.selection["checked_projection"])}</code></pre></details>
+          </details>
+        </section>
+      </section>
+      """
+    end
+
+    defp artifact_page!(assigns) do
+      case Artifacts.admit(assigns.nodes, assigns.receipt, assigns.assets, assigns.urls) do
+        {:ok, page} ->
+          page
+
+        {:error, reason} ->
+          raise ArgumentError, "DocShell artifact admission failed: #{inspect(reason)}"
+      end
+    end
+
+    defp artifact_runtime(%{"runtime" => [_ | _] = runtime}, _), do: Enum.join(runtime, ", ")
+    defp artifact_runtime(_, labels), do: labels["artifact_runtime_none"] || "None"
+
     attr(:context, :any, required: true)
+    attr(:passive?, :boolean, default: false)
     slot(:brand)
 
     @doc "Renders site identity, search, and reader theme controls."
@@ -127,10 +235,11 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           <a :if={@brand == []} href={get_in(@settings, ["brand", "href"]) || @home_path}><img :if={@logo_url} src={@logo_url} alt={get_in(@settings, ["brand", "logo", "alt"])} />{get_in(@settings, ["brand", "label"]) || @context.site_title}</a>
           {render_slot(@brand)}
         </div>
-        <.search search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
+        <p :if={@passive?}>{Settings.label(@settings, "search_requires_js", "Search requires JavaScript; use navigation links.")}</p>
+        <.search :if={!@passive?} search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
         <.destinations choices={Map.get(@settings, "locales", [])} label={Settings.label(@settings, "language", "Language")} locale? current_id={Map.get(@context, :locale)} />
         <.destinations choices={Map.get(@settings, "releases", [])} label={Settings.label(@settings, "release", "Version")} />
-        <div class="doc-theme-controls" aria-label={Settings.label(@settings, "reader_preferences", "Reader preferences")}>
+        <div :if={!@passive?} class="doc-theme-controls" aria-label={Settings.label(@settings, "reader_preferences", "Reader preferences")}>
           <button type="button" class="pa-button" data-doc-theme-value="system">{Settings.label(@settings, "theme_system", "System")}</button>
           <button type="button" class="pa-button" data-doc-theme-value="light">{Settings.label(@settings, "theme_light", "Light")}</button>
           <button type="button" class="pa-button" data-doc-theme-value="dark">{Settings.label(@settings, "theme_dark", "Dark")}</button>
@@ -453,6 +562,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
       assigns =
         assigns
+        |> assign(:passive?, Artifacts.passive_site?(assigns.site))
         |> assign(:home_path, site_home_path(assigns.site))
         |> assign(:context, context)
         |> assign(:settings, Settings.get(context))
@@ -460,10 +570,13 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       ~H"""
       <div class="doc-shell pa-doc-shell" data-pa-doc-shell>
         <a class="doc-skip-link" href="#doc-main">{Settings.label(@settings, "skip", "Skip to documentation")}</a>
-        <.header context={@context} />
-        <button type="button" class="pa-button doc-mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{Settings.label(@settings, "browse", "Browse documentation")}</button>
+        <.header context={@context} passive?={@passive?} />
+        <button :if={!@passive?} type="button" class="pa-button doc-mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{Settings.label(@settings, "browse", "Browse documentation")}</button>
         <div class="doc-layout">
-          <dialog id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+          <aside :if={@passive?} id="doc-navigation" class="doc-sidebar" aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+            <.navigation items={@site.navigation} current_route="" settings={@settings} presentation_metadata? />
+          </aside>
+          <dialog :if={!@passive?} id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
             <.navigation items={@site.navigation} current_route="" settings={@settings} presentation_metadata? />
           </dialog>

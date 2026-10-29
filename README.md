@@ -36,8 +36,10 @@ The [renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blo
 records presentation controls, page metadata, publication-pair adoption,
 portable-artifact rendering and qualification work. Inert settings now drive
 locale/release links, brand/footer data, shell/search and nested control labels,
-and SEO metadata.
-Its linked upstream checklist owns the shared contracts and validation; fresh
+and SEO metadata. Passive artifact documents and diagnostic previews consume
+verified receipts, original SVG/PNG bytes and complete fallback content; the
+native path requires the current upstream receipt API.
+The linked upstream checklist owns the shared contracts and validation; fresh
 package/browser qualification and the other tracked additions remain open.
 
 ## What it provides

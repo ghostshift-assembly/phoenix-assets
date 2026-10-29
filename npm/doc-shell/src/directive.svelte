@@ -5,12 +5,13 @@ import { inheritLabels } from "./labels.js"
 import { safeLinkTarget } from "./url.js"
 
 interface Props {
+  anchorId?: string
   name: DirectiveName
   title?: string
   href?: string
   children?: Snippet
 }
-const { name, title, href, children }: Props = $props()
+const { name, title, href, children, anchorId }: Props = $props()
 const textLabel = inheritLabels()
 const label = $derived(
   title ??
@@ -22,7 +23,7 @@ const label = $derived(
 const link = $derived(name === "link-card" ? safeLinkTarget(href) : undefined)
 </script>
 
-<section class:badge={name === "badge"} class="directive directive-{name}" data-directive={name}>
+<section id={anchorId} class:badge={name === "badge"} class="directive directive-{name}" data-directive={name}>
   {#if name === "accordion"}
     <details><summary>{title ?? textLabel("details", "Details")}</summary>{#if children}<div class="directive-content">{@render children()}</div>{/if}</details>
   {:else}

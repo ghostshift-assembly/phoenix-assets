@@ -4,10 +4,12 @@ import { highlight } from "./highlighter"
 import { inheritLabels } from "./labels.js"
 
 interface Props {
+  anchorId?: string
+  sourceId?: string
   code: string
   language?: string
 }
-const { code, language = "text" }: Props = $props()
+const { code, language = "text", anchorId, sourceId }: Props = $props()
 let html = $state("")
 let copyState = $state<"copy" | "copied" | "copy_unavailable">("copy")
 $effect(() => {
@@ -29,9 +31,9 @@ $effect(() => {
 const label = inheritLabels()
 </script>
 
-<div class="code-block" data-language={language}>
+<div id={anchorId} class="code-block" data-language={language}>
   <button type="button" aria-label={label(copyState === "copy" ? "copy_code" : copyState, copyState === "copy" ? "Copy code" : copyState === "copied" ? "Copied" : "Copy unavailable; select source")} onclick={() => void copyText(code).then(() => { copyState = "copied" }, () => { copyState = "copy_unavailable" })}>{label(copyState, copyState === "copy" ? "Copy" : copyState === "copied" ? "Copied" : "Copy unavailable; select source")}</button>
-  {#if html}<div class="highlighted">{@html html}</div>{:else}<pre><code>{code}</code></pre>{/if}
+  <div id={sourceId}>{#if html}<div class="highlighted">{@html html}</div>{:else}<pre><code>{code}</code></pre>{/if}</div>
 </div>
 
 <style>

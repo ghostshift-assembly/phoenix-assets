@@ -1,6 +1,13 @@
 <script lang="ts">
 import type { Snippet } from "svelte"
 import { admitPage } from "./admission.js"
+import { provideArtifacts } from "./artifact-context.js"
+import {
+  type ArtifactAssets,
+  type ArtifactPage,
+  type ArtifactReceipt,
+  admitArtifactPage,
+} from "./artifacts.js"
 import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import type { PagefindContract } from "./browser/search.js"
@@ -26,6 +33,8 @@ let {
   footer,
   assetUrls = {},
   canonicalContent,
+  canonicalReceipt,
+  artifactAssets = {},
 }: {
   site: DocShellSite
   pageId: string
@@ -35,6 +44,8 @@ let {
   footer?: Snippet<[DocShellSite]>
   assetUrls?: Record<string, string>
   canonicalContent?: string
+  canonicalReceipt?: string
+  artifactAssets?: ArtifactAssets
 } = $props()
 const settings = $derived.by(() => {
   admitNavigationPresentation(site.navigation)
@@ -55,6 +66,17 @@ const page = $derived.by(() => {
   }
   return current
 })
+const artifactPage = $derived<ArtifactPage>(
+  page
+    ? admitArtifactPage(
+        page.content,
+        page.metadata.artifact_presentation as ArtifactReceipt | undefined,
+        artifactAssets,
+        { canonicalContent, canonicalReceipt },
+      )
+    : { blocks: new Map(), passive: false },
+)
+provideArtifacts(() => artifactPage)
 const localeCurrent = (choice: PresentationDestination) => {
   const locale = page?.locale ?? site.default_locale
   return settings.locales?.some((entry) => entry.id === locale)
@@ -70,7 +92,7 @@ let shellRoot = $state<HTMLElement>()
 
 $effect(() => {
   const root = shellRoot
-  if (!root) return
+  if (!root || artifactPage.passive) return
   const controller = mountBrowserCore(root)
   return () => controller.destroy()
 })
@@ -96,25 +118,30 @@ $effect(() => {
   data-schema-version={site.schema_version}
   data-cohort-digest={site.cohort_digest}
   data-content-digest={page?.content_digest}
+  data-artifact-page-digest={artifactPage.receipt?.page_digest}
   dir={/^(ar|fa|he|ur)(?:[-_]|$)/i.test(page?.locale ?? site.default_locale) ? "rtl" : "ltr"}
   lang={page?.locale ?? site.default_locale}
 >
   <a class="skip-link" href="#doc-main">{label("skip", "Skip to documentation")}</a>
   <header class="site-header">
     {#if brand}{@render brand(site)}{:else}<a href={settings.brand?.href ?? homePath} class="brand">{#if brandLogo && settings.brand?.logo}<img src={brandLogo} alt={settings.brand.logo.alt} />{/if}{settings.brand?.label ?? site.title}</a>{/if}
+    {#if artifactPage.passive}<p data-doc-search-disabled>{label("search_requires_js", "Search requires JavaScript; use the navigation links.")}</p>{:else}
     <Search entries={site.search} {navigate} contract={searchContract} label={label("search", searchLabel(page?.locale ?? site.default_locale))} labels={settings.labels} />
+    {/if}
     {#each [["locales", "language", "Language"], ["releases", "release", "Version"]] as [key, name, fallback]}
       {#if (key === "locales" ? settings.locales : settings.releases)?.length}<nav class="site-selector" aria-label={label(name ?? "", fallback ?? "")}><ul>{#each (key === "locales" ? settings.locales : settings.releases) ?? [] as choice (choice.id)}<li><a href={choice.href} aria-current={(key === "locales" ? localeCurrent(choice) : choice.current) ? "true" : undefined} hreflang={key === "locales" ? choice.id : undefined}>{choice.label}</a></li>{/each}</ul></nav>{/if}
     {/each}
-    <div class="header-actions" aria-label={label("reader_preferences", "Reader preferences")}>
+    {#if !artifactPage.passive}<div class="header-actions" aria-label={label("reader_preferences", "Reader preferences")}>
       {#each [["system", "System"], ["light", "Light"], ["dark", "Dark"], ["contrast", "High contrast"]] as [value, fallback]}
         <button type="button" class="pa-button" data-pa-variant="secondary" data-doc-theme-value={value}>{label(`theme_${value}`, fallback ?? "")}</button>
       {/each}
-    </div>
+    </div>{/if}
   </header>
-  <button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{label("browse", "Browse documentation")}</button>
+  {#if !artifactPage.passive}<button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{label("browse", "Browse documentation")}</button>{/if}
   <div class="site-layout">
+    {#if artifactPage.passive}<aside id="doc-navigation" class="sidebar" data-doc-passive><details open><summary>{label("navigation", "Documentation navigation")}</summary><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} label={label("documentation", "Documentation")} /></details></aside>{:else}
     <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label={label("navigation", "Documentation navigation")}><button type="button" class="pa-button" data-doc-nav-close hidden>{label("close_navigation", "Close navigation")}</button><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} {navigate} label={label("documentation", "Documentation")} /></dialog>
+    {/if}
     <main id="doc-main" tabindex="-1" data-pagefind-body data-doc-template={page?.template}>
       {#if page}
         {#if page.banner}

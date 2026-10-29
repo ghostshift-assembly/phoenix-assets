@@ -51,11 +51,12 @@ export const safeMediaTarget = (value: unknown): string | undefined => {
 
 export const preCodeInfo = (
   node: DocAstElement,
-): { code: string; language: string } | undefined => {
+): { code: string; language: string; sourceId?: string } | undefined => {
   if (!Array.isArray(node.content) || node.content.length !== 1) return undefined
   const code = node.content[0]
   if (!code || typeof code !== "object" || code.tag !== "code") return undefined
   return {
+    ...(projectedHeadingId(code) ? { sourceId: projectedHeadingId(code) } : {}),
     code: typeof code.content === "string" ? code.content : extractText(code.content),
     language:
       stringAttribute(code, "class")?.replace(/^language-/, "") ??

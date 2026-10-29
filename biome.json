@@ -59,6 +59,7 @@
         "npm/doc-shell/test/fixtures/doc-shell-v2.json",
         "npm/doc-shell/test/fixtures/hosted-pair-v1.json",
         "npm/doc-shell/test/fixtures/canonical-json-v1.json",
+        "npm/doc-shell/test/fixtures/artifact-conformance-v1.json",
         "npm/svelte/test/fixtures/upstream-reporting/**"
       ],
       "formatter": { "enabled": false }

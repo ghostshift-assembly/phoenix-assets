@@ -175,13 +175,64 @@ The Pagefind adapter builds separate locale indexes. Search loads them only when
 a query needs them, preserves section routes and applies the same seven facets as
 the JSON adapter. The search component also accepts a host-supplied `label`.
 
+### Verified artifact documents and diagnostic previews
+
+`ArtifactDocument` accepts `nodes`, an upstream producer-admitted `receipt` and
+an `assets` record keyed by logical path. Each asset contains `media_type` and
+canonical `base64` of its original bytes. `ArtifactPreview` accepts the same
+inputs plus `mode`: `light`, `dark`, `monochrome` or `enlarged`. Import the package's
+`theme.css` for the shared shell and preview styles.
+
+Both use `admitArtifactPage(nodes, receipt, assets, options?)` before rendering.
+This verifies page/constraint/fallback identity, selected variant membership,
+runtime declarations, semantic anchor membership, original asset length/digest
+and the passive SVG/PNG policy below. It renders only selected `fallback` variants
+with no runtime requirements; unsupported selected states refuse without choosing
+another presentation. Unknown optional profiles retain their complete admitted
+fallback and an unavailable status. Caption, description, locale, source anchors
+and fallback text remain visible beside the selected image. Media is inline;
+these components fetch no assets and invoke no producer callbacks.
+
+Preserve the original canonical content and receipt as `canonicalContent` and
+`canonicalReceipt` when their JSON contains numeric representations that
+JavaScript cannot reproduce. The same options belong to `admitArtifactPage`.
+Source authenticity, original producer admission and the descriptor-set binding
+remain host prerequisites. The renderer does not re-establish producer meaning.
+
+The preview adds read-only identities, selected capability/state/runtime,
+constraints, anchor links and the supplied checked producer projection, including
+its limitations. It uses the same verified document and selection in every mode;
+it neither computes comparison images nor records approval. Producer/native/human
+qualification remains separate from this diagnostic view.
+
+`artifactCapabilities(profileBindings, mode?)` describes only this passive subset
+for explicit `{profile, profile_digest, schema_digest}` records; `mode` defaults
+to `static`. It performs no profile discovery. `SiteShell` consumes receipts from
+`page.metadata.artifact_presentation` and takes the same `artifactAssets` and
+canonical proof props. When browser JavaScript is unavailable or forbidden, it
+uses native navigation, omits enhancement-only controls and explains unavailable
+search. Artifact fallback content always avoids JavaScript enhancements.
+
+HEEx offers `PhoenixAssets.DocShell.Artifacts.admit/4` and `capabilities/2`, plus
+`Components.artifact_document/1` and `artifact_preview/1` with equivalent inputs.
+Its page/static paths also consume receipt metadata and context `artifact_assets`.
+They require the upstream `ArtifactBlock.verify_receipt/2` API implemented in the
+sibling producer; older installed versions explicitly refuse portable artifacts
+while continuing to render ordinary documents. Static export passes its checked
+local URL map; standalone HEEx uses inline media by default. Custom hosts remain
+responsible for serving the checked bytes at any supplied local URLs.
+
+These source paths use the two exact synthetic producer profiles from the
+upstream conformance corpus. They await expanded browser and fresh coordinated
+archive qualification; they do not qualify an external producer or native reader.
+
 ### Artifact media checks in the current checkout
 
 `validateArtifactMedia(mediaType, bytes)` checks the renderer's passive media
 subset and throws on refusal. HEEx uses
 `PhoenixAssets.DocShell.ArtifactMedia.validate/2`, returning `:ok` or a tagged
-error. These helpers do not yet render an artifact or advertise profile support.
-Receipt views and the diagnostic preview remain in the renderer plan.
+error. Artifact views use these checks after verifying the supplied receipt and
+original selected asset bytes.
 
 SVG permits `svg`, `g`, `title`, `desc`, basic shape elements, `text` and `tspan`,
 with closed numeric/color/font/transform attributes. It requires a bounded

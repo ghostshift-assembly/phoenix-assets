@@ -82,7 +82,8 @@ presentation modules exist; accepting 0.4 does not advertise those newer APIs.
 Packaged compatibility consumers must compile with 0.4 plus LiveView and with
 the site presentation adapters on DocShell 0.5 and 1.0. The npm renderer accepts
 its v2 presentation shape while keeping member-reference metadata opaque. This
-does not add support for optional portable artifact profiles.
+does not imply portable-artifact support on older producer APIs. The passive
+artifact subset below requires the current receipt-verification contract.
 
 No host application name, route, brand, source taxonomy, or authorization rule
 may appear under `lib/phoenix_assets/doc_shell/` or `npm/doc-shell/src/`.
@@ -411,5 +412,36 @@ fixes their supported elements, attributes and resource limits. The check retain
 original bytes, permits no retrieval or executable content, and leaves geometry,
 meaning and pixel decoding to the producer/reader. A shared synthetic corpus
 checks valid media and refusal vectors in both implementations. Receipt-backed
-views and diagnostic previews remain open under PHA-P14; these checks alone do
-not advertise artifact profile support or establish target qualification.
+views and diagnostic previews use these checks after receipt verification. This
+source implementation does not establish external producer or target qualification.
+
+
+### Verified artifact rendering and previews
+
+Svelte `ArtifactDocument`/`ArtifactPreview` and HEEx
+`Components.artifact_document/1`/`artifact_preview/1` consume the exact admitted
+AST, receipt and original selected media. The existing site/static page paths
+also consume `metadata.artifact_presentation`. Receipt verification precedes
+HTML/media output. Only a selected fallback SVG/PNG with empty runtime is
+implemented; another selected state refuses rather than renegotiating.
+
+Both preserve source IDs, caption, description, locale, complete fallback and
+unavailable optional status. Preview retains selection/profile/manifest/fallback
+identities, constraints, anchor bindings and opaque checked producer diagnostics.
+Light, dark, monochrome and enlarged modes use the same receipt and bytes.
+It has no approval workflow or producer-specific geometry/semantic branch.
+
+Capabilities require explicit profile/schema digest bindings. The native path
+uses upstream `ArtifactBlock.verify_receipt/2` and refuses when it is unavailable.
+The Svelte path verifies original canonical byte witnesses where necessary;
+authenticity and initial producer admission remain caller prerequisites.
+Static export maps the verified bytes to local URLs and omits its JavaScript
+assets under passive constraints. The shells keep native navigation and complete
+text, omit JavaScript-only controls and disclose unavailable search. Passive
+artifact fallback never starts highlighting, diagram or tab enhancement.
+
+The exact chart/drawing corpus is copied from DocShell `20e9425`, SHA-256
+`2d812d1849126f20d6aaea583037e94c11e9c83d1f4a011410b01ac104c05e37`.
+Source tests cover receipt/byte refusal, both profiles, fallback/anchor parity,
+preview modes and native passive shells. Expanded targets, producer comparison
+images and fresh archive qualification retain their own open tracker status.

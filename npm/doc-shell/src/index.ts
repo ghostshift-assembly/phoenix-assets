@@ -1,6 +1,27 @@
 export { admitPage } from "./admission.js"
 export { default as ApiReference } from "./api-reference.svelte"
+export { default as ArtifactDocument } from "./artifact-document.svelte"
 export { validateArtifactMedia } from "./artifact-media.js"
+export { default as ArtifactPreview } from "./artifact-preview.svelte"
+export type {
+  ArtifactAssets,
+  ArtifactBinding,
+  ArtifactBlock,
+  ArtifactCapabilities,
+  ArtifactCheckedProjection,
+  ArtifactConstraints,
+  ArtifactFeature,
+  ArtifactPage,
+  ArtifactProfileBinding,
+  ArtifactProofOptions,
+  ArtifactReceipt,
+  ArtifactRuntime,
+  ArtifactSelection,
+  ArtifactState,
+  ArtifactVariant,
+  ArtifactView,
+} from "./artifacts.js"
+export { admitArtifactPage, artifactCapabilities } from "./artifacts.js"
 export * from "./ast.js"
 export { default as AstRenderer } from "./ast-renderer.svelte"
 export { default as AudienceSwitcher } from "./audience-switcher.svelte"

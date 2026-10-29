@@ -1,0 +1,818 @@
+{
+  "schema_version": "doc-shell-artifact-conformance/v1",
+  "provenance": {
+    "kind": "synthetic-contract-fixtures",
+    "canonical_encoder": "independent Python sorted compact JSON; integer-only vectors",
+    "qualification": "No external producer, native reader or human target result is asserted."
+  },
+  "producer_schema_keywords": [
+    "$schema",
+    "type",
+    "properties",
+    "required",
+    "additionalProperties",
+    "const",
+    "items",
+    "minItems",
+    "maxItems",
+    "minLength",
+    "pattern"
+  ],
+  "cases": [
+    {
+      "id": "chart",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "const": "example-chart/v1"
+          },
+          "measurements": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z]+$"
+                },
+                "value": {
+                  "type": "integer"
+                },
+                "unit": {
+                  "const": "kg"
+                }
+              },
+              "required": [
+                "id",
+                "value",
+                "unit"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "warning": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "schema_version",
+          "measurements",
+          "warning"
+        ],
+        "additionalProperties": false
+      },
+      "descriptor": {
+        "profile": "example/chart/v1",
+        "revision": "1",
+        "input_schema_digest": "sha256:92e301255d2c052416cbc108ca166ec4b2782eb8730411fcadf3cf1a09a9292a",
+        "subject_vocabulary": [
+          "example/measurement"
+        ],
+        "media_types": [
+          "image/svg+xml"
+        ],
+        "fallback": "complete-text",
+        "limits": {
+          "subjects": 8
+        }
+      },
+      "original_manifest": "{\"measurements\":[{\"id\":\"sample\",\"unit\":\"kg\",\"value\":12}],\"schema_version\":\"example-chart/v1\",\"warning\":\"Illustrative data; not a measured result.\"}",
+      "assets": [
+        {
+          "path": "chart.svg",
+          "media_type": "image/svg+xml",
+          "base64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQwIDEwMCI+PHRpdGxlPlNhbXBsZSBtYXNzOiAxMiBrZzwvdGl0bGU+PHJlY3QgeD0iMjAiIHk9IjIwIiB3aWR0aD0iMTIwIiBoZWlnaHQ9IjQwIiBmaWxsPSIjMjU2M2ViIi8+PHRleHQgeD0iMjAiIHk9Ijg1Ij4xMiBrZzwvdGV4dD48L3N2Zz4K"
+        }
+      ],
+      "content": [
+        {
+          "tag": "artifact",
+          "attrs": {
+            "id": "chart"
+          },
+          "content": [
+            {
+              "tag": "span",
+              "attrs": {
+                "id": "sample"
+              },
+              "content": [],
+              "meta": {}
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "content": [
+                "Sample: 12 kg."
+              ],
+              "meta": {}
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "content": [
+                "Illustrative data; not a measured result."
+              ],
+              "meta": {}
+            }
+          ],
+          "meta": {
+            "artifact": {
+              "schema_version": "doc-shell-artifact-block/v1",
+              "profile": "example/chart/v1",
+              "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+              "artifact_ref": "chart:sample",
+              "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+              "caption": "Sample mass",
+              "description": "One sample has a mass of 12 kg.",
+              "locale": "en",
+              "bindings": [
+                {
+                  "anchor": "sample",
+                  "subject_ref": "chart:sample#sample",
+                  "subject_kind": "example/measurement",
+                  "subject_id": "sample"
+                }
+              ],
+              "variants": [
+                {
+                  "id": "still",
+                  "profile": "example/chart/v1",
+                  "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+                  "state": "fallback",
+                  "media_type": "image/svg+xml",
+                  "blob_digest": "sha256:4ae0b59e5d1a3f5e64b6111f5d6709a9d179e49da4c2266db11d75be91ebcd5d",
+                  "byte_length": 219,
+                  "asset": "chart.svg",
+                  "runtime": []
+                }
+              ],
+              "acceptable_states": [
+                "fallback"
+              ],
+              "essential": true,
+              "fallback_digest": "sha256:b45215761515239c77ab80f4a43f776166c4fafd2457d1b260873952723d53bd"
+            }
+          }
+        }
+      ],
+      "canonical_content": "[{\"attrs\":{\"id\":\"chart\"},\"content\":[{\"attrs\":{\"id\":\"sample\"},\"content\":[],\"meta\":{},\"tag\":\"span\"},{\"attrs\":{},\"content\":[\"Sample: 12 kg.\"],\"meta\":{},\"tag\":\"p\"},{\"attrs\":{},\"content\":[\"Illustrative data; not a measured result.\"],\"meta\":{},\"tag\":\"p\"}],\"meta\":{\"artifact\":{\"acceptable_states\":[\"fallback\"],\"artifact_ref\":\"chart:sample\",\"bindings\":[{\"anchor\":\"sample\",\"subject_id\":\"sample\",\"subject_kind\":\"example/measurement\",\"subject_ref\":\"chart:sample#sample\"}],\"caption\":\"Sample mass\",\"description\":\"One sample has a mass of 12 kg.\",\"essential\":true,\"fallback_digest\":\"sha256:b45215761515239c77ab80f4a43f776166c4fafd2457d1b260873952723d53bd\",\"locale\":\"en\",\"manifest_digest\":\"sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298\",\"profile\":\"example/chart/v1\",\"profile_digest\":\"sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138\",\"schema_version\":\"doc-shell-artifact-block/v1\",\"variants\":[{\"asset\":\"chart.svg\",\"blob_digest\":\"sha256:4ae0b59e5d1a3f5e64b6111f5d6709a9d179e49da4c2266db11d75be91ebcd5d\",\"byte_length\":219,\"id\":\"still\",\"media_type\":\"image/svg+xml\",\"profile\":\"example/chart/v1\",\"profile_digest\":\"sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138\",\"runtime\":[],\"state\":\"fallback\"}]}},\"tag\":\"artifact\"}]",
+      "capabilities": {
+        "schema_version": "doc-shell-renderer-capabilities/v2",
+        "renderer_id": "example/portable-static",
+        "renderer_version": "1.0.0",
+        "output_modes": [
+          "static"
+        ],
+        "features": [
+          {
+            "id": "still",
+            "profile": "example/chart/v1",
+            "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+            "schema_digest": "sha256:92e301255d2c052416cbc108ca166ec4b2782eb8730411fcadf3cf1a09a9292a",
+            "output_mode": "static",
+            "state": "fallback",
+            "media_types": [
+              "image/svg+xml"
+            ],
+            "runtime": []
+          }
+        ]
+      },
+      "constraints": {
+        "output_mode": "static",
+        "reader_mode": "file",
+        "preferences": [
+          "still"
+        ],
+        "available_runtime": [],
+        "forbidden_runtime": [
+          "browser_js",
+          "live_transport",
+          "native_host"
+        ]
+      },
+      "checked_projection": {
+        "profile": "example/chart/v1",
+        "artifact_ref": "chart:sample",
+        "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+        "subjects": [
+          {
+            "anchor": "sample",
+            "subject_ref": "chart:sample#sample",
+            "subject_kind": "example/measurement",
+            "subject_id": "sample"
+          }
+        ],
+        "limitations": [
+          "Illustrative data; not a measured result."
+        ]
+      },
+      "receipt": {
+        "schema_version": "doc-shell-artifact-presentation/v1",
+        "page_digest": "sha256:e31e4775fefafdb399e255623d811c77440171f2cd63c40480e2c228e4e4ee62",
+        "descriptor_set_digest": "sha256:973e6d954c960c6b8e21bff397d0313b69f267e38f8897c51ae444e705a90d7b",
+        "constraints_digest": "sha256:74406850e8f2f40c7f5f4b3604a456b2e0b2d22ce09f4307b537635634361091",
+        "capabilities": {
+          "schema_version": "doc-shell-renderer-capabilities/v2",
+          "renderer_id": "example/portable-static",
+          "renderer_version": "1.0.0",
+          "output_modes": [
+            "static"
+          ],
+          "features": [
+            {
+              "id": "still",
+              "profile": "example/chart/v1",
+              "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+              "schema_digest": "sha256:92e301255d2c052416cbc108ca166ec4b2782eb8730411fcadf3cf1a09a9292a",
+              "output_mode": "static",
+              "state": "fallback",
+              "media_types": [
+                "image/svg+xml"
+              ],
+              "runtime": []
+            }
+          ]
+        },
+        "constraints": {
+          "output_mode": "static",
+          "reader_mode": "file",
+          "preferences": [
+            "still"
+          ],
+          "available_runtime": [],
+          "forbidden_runtime": [
+            "browser_js",
+            "live_transport",
+            "native_host"
+          ]
+        },
+        "blocks": [
+          {
+            "profile": "example/chart/v1",
+            "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+            "artifact_ref": "chart:sample",
+            "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+            "bindings": [
+              {
+                "anchor": "sample",
+                "subject_ref": "chart:sample#sample",
+                "subject_kind": "example/measurement",
+                "subject_id": "sample"
+              }
+            ],
+            "fallback_digest": "sha256:b45215761515239c77ab80f4a43f776166c4fafd2457d1b260873952723d53bd",
+            "block_id": "chart",
+            "status": "available",
+            "presentation_id": "still",
+            "variant": {
+              "id": "still",
+              "profile": "example/chart/v1",
+              "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+              "state": "fallback",
+              "media_type": "image/svg+xml",
+              "blob_digest": "sha256:4ae0b59e5d1a3f5e64b6111f5d6709a9d179e49da4c2266db11d75be91ebcd5d",
+              "byte_length": 219,
+              "asset": "chart.svg",
+              "runtime": []
+            },
+            "checked_projection": {
+              "profile": "example/chart/v1",
+              "artifact_ref": "chart:sample",
+              "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+              "subjects": [
+                {
+                  "anchor": "sample",
+                  "subject_ref": "chart:sample#sample",
+                  "subject_kind": "example/measurement",
+                  "subject_id": "sample"
+                }
+              ],
+              "limitations": [
+                "Illustrative data; not a measured result."
+              ]
+            }
+          }
+        ]
+      },
+      "manifest": {
+        "schema_version": "doc-shell-presentation-manifest/v1",
+        "pages": {
+          "chart": {
+            "schema_version": "doc-shell-artifact-presentation/v1",
+            "page_digest": "sha256:e31e4775fefafdb399e255623d811c77440171f2cd63c40480e2c228e4e4ee62",
+            "descriptor_set_digest": "sha256:973e6d954c960c6b8e21bff397d0313b69f267e38f8897c51ae444e705a90d7b",
+            "constraints_digest": "sha256:74406850e8f2f40c7f5f4b3604a456b2e0b2d22ce09f4307b537635634361091",
+            "capabilities": {
+              "schema_version": "doc-shell-renderer-capabilities/v2",
+              "renderer_id": "example/portable-static",
+              "renderer_version": "1.0.0",
+              "output_modes": [
+                "static"
+              ],
+              "features": [
+                {
+                  "id": "still",
+                  "profile": "example/chart/v1",
+                  "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+                  "schema_digest": "sha256:92e301255d2c052416cbc108ca166ec4b2782eb8730411fcadf3cf1a09a9292a",
+                  "output_mode": "static",
+                  "state": "fallback",
+                  "media_types": [
+                    "image/svg+xml"
+                  ],
+                  "runtime": []
+                }
+              ]
+            },
+            "constraints": {
+              "output_mode": "static",
+              "reader_mode": "file",
+              "preferences": [
+                "still"
+              ],
+              "available_runtime": [],
+              "forbidden_runtime": [
+                "browser_js",
+                "live_transport",
+                "native_host"
+              ]
+            },
+            "blocks": [
+              {
+                "profile": "example/chart/v1",
+                "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+                "artifact_ref": "chart:sample",
+                "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+                "bindings": [
+                  {
+                    "anchor": "sample",
+                    "subject_ref": "chart:sample#sample",
+                    "subject_kind": "example/measurement",
+                    "subject_id": "sample"
+                  }
+                ],
+                "fallback_digest": "sha256:b45215761515239c77ab80f4a43f776166c4fafd2457d1b260873952723d53bd",
+                "block_id": "chart",
+                "status": "available",
+                "presentation_id": "still",
+                "variant": {
+                  "id": "still",
+                  "profile": "example/chart/v1",
+                  "profile_digest": "sha256:ac934a469d5ed932a2c2e80a80bfa154fb408057f485270c7b34b06c62da4138",
+                  "state": "fallback",
+                  "media_type": "image/svg+xml",
+                  "blob_digest": "sha256:4ae0b59e5d1a3f5e64b6111f5d6709a9d179e49da4c2266db11d75be91ebcd5d",
+                  "byte_length": 219,
+                  "asset": "chart.svg",
+                  "runtime": []
+                },
+                "checked_projection": {
+                  "profile": "example/chart/v1",
+                  "artifact_ref": "chart:sample",
+                  "manifest_digest": "sha256:f4a37edeeefe965f833d8af05cf87ddf513c5107c801761682d598cc93641298",
+                  "subjects": [
+                    {
+                      "anchor": "sample",
+                      "subject_ref": "chart:sample#sample",
+                      "subject_kind": "example/measurement",
+                      "subject_id": "sample"
+                    }
+                  ],
+                  "limitations": [
+                    "Illustrative data; not a measured result."
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "asset_urls": {
+          "chart.svg": "assets/chart-4ae0b59e5d1a.svg"
+        }
+      },
+      "observations": {
+        "caption": "Sample mass",
+        "description": "One sample has a mass of 12 kg.",
+        "locale": "en",
+        "anchors": [
+          "chart",
+          "sample"
+        ],
+        "text": [
+          "Sample: 12 kg.",
+          "Illustrative data; not a measured result."
+        ],
+        "limitations": [
+          "Illustrative data; not a measured result."
+        ],
+        "state": "fallback",
+        "variant_id": "still"
+      }
+    },
+    {
+      "id": "drawing",
+      "input_schema": {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "type": "object",
+        "properties": {
+          "schema_version": {
+            "const": "example-drawing/v1"
+          },
+          "subjects": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[a-z]+$"
+                },
+                "kind": {
+                  "const": "example/part"
+                },
+                "label": {
+                  "type": "string",
+                  "minLength": 1
+                }
+              },
+              "required": [
+                "id",
+                "kind",
+                "label"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "limitation": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "schema_version",
+          "subjects",
+          "limitation"
+        ],
+        "additionalProperties": false
+      },
+      "descriptor": {
+        "profile": "example/drawing/v1",
+        "revision": "1",
+        "input_schema_digest": "sha256:05ead433d1a2e4cc8ec47b2741bfc2bb370286fa87700d81642a6442c7382b62",
+        "subject_vocabulary": [
+          "example/part"
+        ],
+        "media_types": [
+          "image/svg+xml"
+        ],
+        "fallback": "complete-text",
+        "limits": {
+          "subjects": 8
+        }
+      },
+      "original_manifest": "{\"limitation\":\"Schematic only; dimensions are not to scale.\",\"schema_version\":\"example-drawing/v1\",\"subjects\":[{\"id\":\"plate\",\"kind\":\"example/part\",\"label\":\"Plate A\"}]}",
+      "assets": [
+        {
+          "path": "drawing.svg",
+          "media_type": "image/svg+xml",
+          "base64": "PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNDAiIGhlaWdodD0iMTAwIiB2aWV3Qm94PSIwIDAgMjQwIDEwMCI+PHRpdGxlPlBsYXRlIEE8L3RpdGxlPjxyZWN0IHg9IjIwIiB5PSIyMCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSI0MCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjMzM0MTU1Ii8+PHRleHQgeD0iMjAiIHk9Ijg1Ij5QbGF0ZSBBPC90ZXh0Pjwvc3ZnPgo="
+        }
+      ],
+      "content": [
+        {
+          "tag": "artifact",
+          "attrs": {
+            "id": "drawing"
+          },
+          "content": [
+            {
+              "tag": "span",
+              "attrs": {
+                "id": "plate"
+              },
+              "content": [],
+              "meta": {}
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "content": [
+                "Plate A is the only subject in the schematic."
+              ],
+              "meta": {}
+            },
+            {
+              "tag": "p",
+              "attrs": {},
+              "content": [
+                "Schematic only; dimensions are not to scale."
+              ],
+              "meta": {}
+            }
+          ],
+          "meta": {
+            "artifact": {
+              "schema_version": "doc-shell-artifact-block/v1",
+              "profile": "example/drawing/v1",
+              "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+              "artifact_ref": "drawing:sample",
+              "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+              "caption": "Plate assembly",
+              "description": "Plate A is the only subject in the schematic.",
+              "locale": "en",
+              "bindings": [
+                {
+                  "anchor": "plate",
+                  "subject_ref": "drawing:sample#plate",
+                  "subject_kind": "example/part",
+                  "subject_id": "plate"
+                }
+              ],
+              "variants": [
+                {
+                  "id": "still",
+                  "profile": "example/drawing/v1",
+                  "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+                  "state": "fallback",
+                  "media_type": "image/svg+xml",
+                  "blob_digest": "sha256:10a55193c3b71e6a94ed42db1d1e6bd0eab2fbe27162de0a369c96b80d594920",
+                  "byte_length": 224,
+                  "asset": "drawing.svg",
+                  "runtime": []
+                }
+              ],
+              "acceptable_states": [
+                "fallback"
+              ],
+              "essential": true,
+              "fallback_digest": "sha256:f7cf760aa05c3841ef7818b214cdc5c9e10c190e1ff22abc3bbfd328a9b18328"
+            }
+          }
+        }
+      ],
+      "canonical_content": "[{\"attrs\":{\"id\":\"drawing\"},\"content\":[{\"attrs\":{\"id\":\"plate\"},\"content\":[],\"meta\":{},\"tag\":\"span\"},{\"attrs\":{},\"content\":[\"Plate A is the only subject in the schematic.\"],\"meta\":{},\"tag\":\"p\"},{\"attrs\":{},\"content\":[\"Schematic only; dimensions are not to scale.\"],\"meta\":{},\"tag\":\"p\"}],\"meta\":{\"artifact\":{\"acceptable_states\":[\"fallback\"],\"artifact_ref\":\"drawing:sample\",\"bindings\":[{\"anchor\":\"plate\",\"subject_id\":\"plate\",\"subject_kind\":\"example/part\",\"subject_ref\":\"drawing:sample#plate\"}],\"caption\":\"Plate assembly\",\"description\":\"Plate A is the only subject in the schematic.\",\"essential\":true,\"fallback_digest\":\"sha256:f7cf760aa05c3841ef7818b214cdc5c9e10c190e1ff22abc3bbfd328a9b18328\",\"locale\":\"en\",\"manifest_digest\":\"sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a\",\"profile\":\"example/drawing/v1\",\"profile_digest\":\"sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a\",\"schema_version\":\"doc-shell-artifact-block/v1\",\"variants\":[{\"asset\":\"drawing.svg\",\"blob_digest\":\"sha256:10a55193c3b71e6a94ed42db1d1e6bd0eab2fbe27162de0a369c96b80d594920\",\"byte_length\":224,\"id\":\"still\",\"media_type\":\"image/svg+xml\",\"profile\":\"example/drawing/v1\",\"profile_digest\":\"sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a\",\"runtime\":[],\"state\":\"fallback\"}]}},\"tag\":\"artifact\"}]",
+      "capabilities": {
+        "schema_version": "doc-shell-renderer-capabilities/v2",
+        "renderer_id": "example/portable-static",
+        "renderer_version": "1.0.0",
+        "output_modes": [
+          "static"
+        ],
+        "features": [
+          {
+            "id": "still",
+            "profile": "example/drawing/v1",
+            "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+            "schema_digest": "sha256:05ead433d1a2e4cc8ec47b2741bfc2bb370286fa87700d81642a6442c7382b62",
+            "output_mode": "static",
+            "state": "fallback",
+            "media_types": [
+              "image/svg+xml"
+            ],
+            "runtime": []
+          }
+        ]
+      },
+      "constraints": {
+        "output_mode": "static",
+        "reader_mode": "file",
+        "preferences": [
+          "still"
+        ],
+        "available_runtime": [],
+        "forbidden_runtime": [
+          "browser_js",
+          "live_transport",
+          "native_host"
+        ]
+      },
+      "checked_projection": {
+        "profile": "example/drawing/v1",
+        "artifact_ref": "drawing:sample",
+        "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+        "subjects": [
+          {
+            "anchor": "plate",
+            "subject_ref": "drawing:sample#plate",
+            "subject_kind": "example/part",
+            "subject_id": "plate"
+          }
+        ],
+        "limitations": [
+          "Schematic only; dimensions are not to scale."
+        ]
+      },
+      "receipt": {
+        "schema_version": "doc-shell-artifact-presentation/v1",
+        "page_digest": "sha256:2891331b361d88d729a7fd70f5cccab1e285477e191bfb5be5a91234911d6e1c",
+        "descriptor_set_digest": "sha256:2411b23e4dd917678cb84d758bd8491c45f1b9afa90f20cc53304affa15324b2",
+        "constraints_digest": "sha256:74406850e8f2f40c7f5f4b3604a456b2e0b2d22ce09f4307b537635634361091",
+        "capabilities": {
+          "schema_version": "doc-shell-renderer-capabilities/v2",
+          "renderer_id": "example/portable-static",
+          "renderer_version": "1.0.0",
+          "output_modes": [
+            "static"
+          ],
+          "features": [
+            {
+              "id": "still",
+              "profile": "example/drawing/v1",
+              "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+              "schema_digest": "sha256:05ead433d1a2e4cc8ec47b2741bfc2bb370286fa87700d81642a6442c7382b62",
+              "output_mode": "static",
+              "state": "fallback",
+              "media_types": [
+                "image/svg+xml"
+              ],
+              "runtime": []
+            }
+          ]
+        },
+        "constraints": {
+          "output_mode": "static",
+          "reader_mode": "file",
+          "preferences": [
+            "still"
+          ],
+          "available_runtime": [],
+          "forbidden_runtime": [
+            "browser_js",
+            "live_transport",
+            "native_host"
+          ]
+        },
+        "blocks": [
+          {
+            "profile": "example/drawing/v1",
+            "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+            "artifact_ref": "drawing:sample",
+            "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+            "bindings": [
+              {
+                "anchor": "plate",
+                "subject_ref": "drawing:sample#plate",
+                "subject_kind": "example/part",
+                "subject_id": "plate"
+              }
+            ],
+            "fallback_digest": "sha256:f7cf760aa05c3841ef7818b214cdc5c9e10c190e1ff22abc3bbfd328a9b18328",
+            "block_id": "drawing",
+            "status": "available",
+            "presentation_id": "still",
+            "variant": {
+              "id": "still",
+              "profile": "example/drawing/v1",
+              "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+              "state": "fallback",
+              "media_type": "image/svg+xml",
+              "blob_digest": "sha256:10a55193c3b71e6a94ed42db1d1e6bd0eab2fbe27162de0a369c96b80d594920",
+              "byte_length": 224,
+              "asset": "drawing.svg",
+              "runtime": []
+            },
+            "checked_projection": {
+              "profile": "example/drawing/v1",
+              "artifact_ref": "drawing:sample",
+              "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+              "subjects": [
+                {
+                  "anchor": "plate",
+                  "subject_ref": "drawing:sample#plate",
+                  "subject_kind": "example/part",
+                  "subject_id": "plate"
+                }
+              ],
+              "limitations": [
+                "Schematic only; dimensions are not to scale."
+              ]
+            }
+          }
+        ]
+      },
+      "manifest": {
+        "schema_version": "doc-shell-presentation-manifest/v1",
+        "pages": {
+          "drawing": {
+            "schema_version": "doc-shell-artifact-presentation/v1",
+            "page_digest": "sha256:2891331b361d88d729a7fd70f5cccab1e285477e191bfb5be5a91234911d6e1c",
+            "descriptor_set_digest": "sha256:2411b23e4dd917678cb84d758bd8491c45f1b9afa90f20cc53304affa15324b2",
+            "constraints_digest": "sha256:74406850e8f2f40c7f5f4b3604a456b2e0b2d22ce09f4307b537635634361091",
+            "capabilities": {
+              "schema_version": "doc-shell-renderer-capabilities/v2",
+              "renderer_id": "example/portable-static",
+              "renderer_version": "1.0.0",
+              "output_modes": [
+                "static"
+              ],
+              "features": [
+                {
+                  "id": "still",
+                  "profile": "example/drawing/v1",
+                  "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+                  "schema_digest": "sha256:05ead433d1a2e4cc8ec47b2741bfc2bb370286fa87700d81642a6442c7382b62",
+                  "output_mode": "static",
+                  "state": "fallback",
+                  "media_types": [
+                    "image/svg+xml"
+                  ],
+                  "runtime": []
+                }
+              ]
+            },
+            "constraints": {
+              "output_mode": "static",
+              "reader_mode": "file",
+              "preferences": [
+                "still"
+              ],
+              "available_runtime": [],
+              "forbidden_runtime": [
+                "browser_js",
+                "live_transport",
+                "native_host"
+              ]
+            },
+            "blocks": [
+              {
+                "profile": "example/drawing/v1",
+                "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+                "artifact_ref": "drawing:sample",
+                "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+                "bindings": [
+                  {
+                    "anchor": "plate",
+                    "subject_ref": "drawing:sample#plate",
+                    "subject_kind": "example/part",
+                    "subject_id": "plate"
+                  }
+                ],
+                "fallback_digest": "sha256:f7cf760aa05c3841ef7818b214cdc5c9e10c190e1ff22abc3bbfd328a9b18328",
+                "block_id": "drawing",
+                "status": "available",
+                "presentation_id": "still",
+                "variant": {
+                  "id": "still",
+                  "profile": "example/drawing/v1",
+                  "profile_digest": "sha256:6b720522e9a13af12eaf875799f3f5fc5342c50e8c6a32ec872128c845fc716a",
+                  "state": "fallback",
+                  "media_type": "image/svg+xml",
+                  "blob_digest": "sha256:10a55193c3b71e6a94ed42db1d1e6bd0eab2fbe27162de0a369c96b80d594920",
+                  "byte_length": 224,
+                  "asset": "drawing.svg",
+                  "runtime": []
+                },
+                "checked_projection": {
+                  "profile": "example/drawing/v1",
+                  "artifact_ref": "drawing:sample",
+                  "manifest_digest": "sha256:e2ded414995defe77bc2a9e378a609f0e7e9aa8ba539b4e517652652000e879a",
+                  "subjects": [
+                    {
+                      "anchor": "plate",
+                      "subject_ref": "drawing:sample#plate",
+                      "subject_kind": "example/part",
+                      "subject_id": "plate"
+                    }
+                  ],
+                  "limitations": [
+                    "Schematic only; dimensions are not to scale."
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "asset_urls": {
+          "drawing.svg": "assets/drawing-10a55193c3b7.svg"
+        }
+      },
+      "observations": {
+        "caption": "Plate assembly",
+        "description": "Plate A is the only subject in the schematic.",
+        "locale": "en",
+        "anchors": [
+          "drawing",
+          "plate"
+        ],
+        "text": [
+          "Plate A is the only subject in the schematic.",
+          "Schematic only; dimensions are not to scale."
+        ],
+        "limitations": [
+          "Schematic only; dimensions are not to scale."
+        ],
+        "state": "fallback",
+        "variant_id": "still"
+      }
+    }
+  ]
+}

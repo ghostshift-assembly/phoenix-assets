@@ -20,7 +20,7 @@ qualification are recorded separately.
 | PHA-P11 | source implemented; expanded target/archive qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
-| PHA-P14 | in progress: passive media checks implemented; receipt views/preview pending | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
+| PHA-P14 | receipt views and diagnostics implemented; expanded qualification pending | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
 | PHA-P15 | partial fixed-corpus evidence; extensions planned | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
 | PHA-P16 | planned; new archive receipts required | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
 
@@ -343,3 +343,47 @@ The downstream full current-runtime gate passes 499 backend checks (18 doctests,
 audit checks and 17 release-script tests. Targeted DOM checks also pass after
 reordering the regression to assert the missing warning in rendered HTML.
 Artifact receipt views and fresh browser/archive qualification remain open.
+
+
+### Verified artifact document and preview source
+
+The shared chart/drawing corpus now exercises the same passive selection in
+Svelte, HEEx and static page paths. New receipt helpers check exact identities,
+fallbacks, checked subject membership, runtime declarations and original media
+before rendering. Both renderers retain caption, description, locale, complete
+fallback and source anchors. Projected IDs also survive specialized code,
+diagram, tabs and directive wrappers, including binding targets outside fallback.
+
+The local diagnostic preview adds read-only receipt/constraint/projection and
+anchor data in light/dark/monochrome/enlarged modes. It has no approval workflow,
+producer discovery, geometry or semantic calculations. Static/HEEx passive pages
+omit import maps, browser modules and enhancement-only controls; navigation is
+native and unavailable search is disclosed. The native helper explicitly refuses
+portable artifacts with older installed producer APIs. Ordinary documents keep
+their existing compatibility path.
+
+The corpus is an exact copy from upstream `20e9425`, SHA-256
+`2d812d1849126f20d6aaea583037e94c11e9c83d1f4a011410b01ac104c05e37`.
+Candidate producer tests exercise actual receipt admission independently of pure
+HTML formatting fixtures. Browser/print/offline targets, supplied comparison
+images, independent native observations and fresh archives remain open.
+
+
+The full current-runtime gate passes: 505 backend checks (18 doctests, 487 tests),
+87.5% coverage, 555 frontend tests (322 DocShell), all 25 required checks,
+17 release-script tests and the optional-free/older-producer/HTTP consumers.
+The actual sibling producer at `a055500` passes 37 native integration/projection/
+conformance tests, including 11 artifact checks. The baseline producer also
+passes ordinary-document and explicit unavailable-API checks. The optional API
+is dispatched only after availability validation; no broad compiler or Dialyzer
+suppression is used.
+
+Live GitHub checks on 2026-10-29 still show the previously recorded successful
+remote revisions. The root job log confirms that all three Codecov uploads
+returned `Repository not found`; their configured `fail_ci_if_error: false`
+left the job green. The log establishes upload failure, not whether repository
+activation, app access or the upload credential caused it. The maintainer must
+verify the current repository's Codecov access/credential configuration; see
+[Codecov connection guidance](https://docs.codecov.com/v4.6/docs/video-guide-connecting-codecov-to-github).
+No repository visibility or remote refs were changed. New local commits still
+need the maintainer's push before remote CI can verify them.

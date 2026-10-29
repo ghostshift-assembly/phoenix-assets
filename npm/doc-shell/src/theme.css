@@ -441,3 +441,79 @@
 :where(.doc-shell) [data-doc-template="splash"] .doc-hero ul {
   justify-content: center;
 }
+
+.doc-shell .doc-artifact {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border: 1px solid var(--doc-border);
+  border-radius: var(--doc-radius);
+  break-inside: avoid;
+}
+.doc-shell .doc-artifact > figcaption {
+  font-weight: 700;
+}
+.doc-shell .artifact-description {
+  color: var(--doc-muted);
+}
+.doc-shell .artifact-media {
+  overflow: auto;
+  background: white;
+  color: black;
+  border: 1px solid var(--doc-border);
+  padding: 0.5rem;
+}
+.doc-shell .artifact-media img {
+  display: block;
+  max-inline-size: 100%;
+  block-size: auto;
+  margin-inline: auto;
+}
+.doc-shell .artifact-fallback {
+  margin-block-start: 1rem;
+  overflow-wrap: anywhere;
+}
+.doc-shell .artifact-status {
+  border-inline-start: 0.25rem solid var(--doc-accent);
+  padding-inline-start: 0.75rem;
+}
+.doc-artifact-preview {
+  padding: 1rem;
+  background: var(--doc-background);
+  color: var(--doc-foreground);
+  border: 1px solid var(--doc-border);
+}
+.doc-artifact-preview[data-artifact-preview="dark"] {
+  --doc-background: #111827;
+  --doc-foreground: #f1f5f9;
+  --doc-muted: #cbd5e1;
+  --doc-border: #64748b;
+  --doc-accent: #93c5fd;
+}
+.doc-artifact-preview[data-artifact-preview="monochrome"] .preview-document {
+  filter: grayscale(1);
+}
+.doc-artifact-preview[data-artifact-preview="enlarged"] .preview-document {
+  zoom: 1.5;
+}
+.doc-artifact-preview .preview-diagnostics {
+  margin-block-start: 1.5rem;
+}
+.doc-artifact-preview dl {
+  display: grid;
+  grid-template-columns: minmax(8rem, 1fr) minmax(0, 3fr);
+  gap: 0.5rem 1rem;
+}
+.doc-artifact-preview dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.doc-artifact-preview pre {
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 40rem) {
+  .doc-artifact-preview dl {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -11,7 +11,7 @@ export default defineConfig({
       reporter: ["text", "lcov"],
       thresholds: { lines: 80, functions: 80, branches: 80, statements: 80 },
       include: [
-        "src/{admission,artifact-json,artifact-media,ast,capabilities,directives,highlighter,hosted-pair,labels,openapi,page-presentation,presentation,url}.ts",
+        "src/{admission,artifact-context,artifact-json,artifact-media,artifacts,ast,capabilities,directives,highlighter,hosted-pair,labels,openapi,page-presentation,presentation,url}.ts",
         "src/browser/*.ts",
       ],
       exclude: ["src/browser/entry.ts"],
