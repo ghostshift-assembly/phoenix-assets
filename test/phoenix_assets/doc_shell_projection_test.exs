@@ -36,9 +36,12 @@ defmodule PhoenixAssets.DocShellProjectionTest do
     end
   end
 
-  test "mounted Svelte fixture contains the exact public site projection" do
+  test "mounted Svelte fixture matches the projection with absent presentation settings defaulted" do
     path = Path.expand("../../npm/doc-shell/test/fixtures/projected-site.json", __DIR__)
     projected = DocShellProjectionFixture.site!() |> Jason.encode!() |> Jason.decode!()
-    assert Jason.decode!(File.read!(path)) == projected
+    expected = Jason.decode!(File.read!(path))
+
+    assert Map.put_new(expected, "presentation", %{}) ==
+             Map.put_new(projected, "presentation", %{})
   end
 end

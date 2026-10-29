@@ -21,13 +21,14 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     @typedoc "A Phoenix HTML-safe value produced from DocShell AST."
     @type safe :: {:safe, iodata()}
 
-    @doc "Renders a list of valid AST nodes into escaped HTML-safe iodata."
-    @spec render([DocShell.Ast.ast_node()]) :: safe()
-    def render(nodes) when is_list(nodes), do: {:safe, render_children(mark_positions(nodes, []))}
+    @doc "Renders valid AST as escaped HTML-safe iodata with optional host control labels."
+    @spec render([DocShell.Ast.ast_node()], map()) :: safe()
+    def render(nodes, labels \\ %{}) when is_list(nodes) and is_map(labels),
+      do: {:safe, render_children(mark_positions(nodes, [], labels))}
 
     @doc "Renders one AST node through the closed element policy."
     @spec render_node(DocShell.Ast.ast_node()) :: iodata()
-    def render_node(node), do: render_marked(hd(mark_positions([node], [])))
+    def render_node(node), do: render_marked(hd(mark_positions([node], [], %{})))
 
     @doc "Checks a dynamic link through the renderer URL policy without emitting HTML."
     @spec link_target(term()) :: {:ok, String.t(), boolean()} | :error
@@ -48,7 +49,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     defp render_tag("pre", attrs, content), do: render_pre(attrs, content)
     defp render_tag("a", attrs, content), do: render_link(attrs, content)
     defp render_tag("img", attrs, _), do: render_image(attrs)
-    defp render_tag("mermaid", _, content), do: render_mermaid(content)
+    defp render_tag("mermaid", attrs, content), do: render_mermaid(attrs, content)
 
     defp render_tag(tag, attrs, content) when tag in @elements,
       do: element(tag, admitted_attributes(attrs), render_children(content))
@@ -64,7 +65,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
     defp render_children(content), do: Enum.map(content, &render_marked/1)
 
-    defp mark_positions(nodes, prefix) do
+    defp mark_positions(nodes, prefix, labels) do
       nodes
       |> Enum.with_index()
       |> Enum.map(fn
@@ -73,8 +74,13 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
           position = prefix ++ [index]
 
           node
-          |> Map.put("attrs", Map.put(attrs, "__doc_shell_position", Enum.join(position, "-")))
-          |> Map.put("content", mark_positions(content, position))
+          |> Map.put(
+            "attrs",
+            attrs
+            |> Map.put("__doc_shell_position", Enum.join(position, "-"))
+            |> Map.put("__doc_shell_labels", labels)
+          )
+          |> Map.put("content", mark_positions(content, position, labels))
 
         {node, _} ->
           node
@@ -133,7 +139,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         (string(code_attrs["class"]) || "language-text") |> String.replace_prefix("language-", "")
 
       if language == "mermaid",
-        do: render_mermaid(content),
+        do: render_mermaid(attrs, content),
         else: render_code(attrs, source, language)
     end
 
@@ -150,7 +156,13 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         escape_attribute(language),
         "\"><button type=\"button\" class=\"pa-button\" data-pa-variant=\"secondary\" data-doc-copy=\"",
         id,
-        "\" aria-label=\"Copy code\">Copy</button><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"highlight\" hidden>Highlight code</button><pre><code id=\"",
+        "\" aria-label=\"",
+        escape_attribute(label(attrs, "copy_code", "Copy code")),
+        "\">",
+        escape(label(attrs, "copy", "Copy")),
+        "</button><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"highlight\" hidden>",
+        escape(label(attrs, "highlight_code", "Highlight code")),
+        "</button><pre><code id=\"",
         id,
         "\">",
         escape(source),
@@ -158,13 +170,17 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       ]
     end
 
-    defp render_mermaid(content) do
+    defp render_mermaid(attrs, content) do
       source = text_content(content)
 
       [
-        "<figure class=\"doc-mermaid\" data-doc-mermaid><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"mermaid\" hidden>Render diagram</button><pre><code>",
+        "<figure class=\"doc-mermaid\" data-doc-mermaid><button type=\"button\" class=\"pa-button\" data-doc-enhance=\"mermaid\" hidden>",
+        escape(label(attrs, "render_diagram", "Render diagram")),
+        "</button><pre><code>",
         escape(source),
-        "</code></pre><figcaption>Diagram source</figcaption></figure>"
+        "</code></pre><figcaption>",
+        escape(label(attrs, "diagram_source", "Diagram source")),
+        "</figcaption></figure>"
       ]
     end
 
@@ -184,7 +200,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     defp render_directive("accordion", attrs, content) do
       [
         "<details class=\"doc-directive doc-accordion\"><summary>",
-        escape(string(attrs["title"]) || "Details"),
+        escape(string(attrs["title"]) || label(attrs, "details", "Details")),
         "</summary>",
         render_children(content),
         "</details>"
@@ -192,7 +208,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     end
 
     defp render_directive("link-card", attrs, content) do
-      label = string(attrs["title"]) || "Link card"
+      label = string(attrs["title"]) || label(attrs, "directive_link_card", "Link card")
 
       element("section", [{"class", "doc-directive doc-link-card"}], [
         element("strong", [], render_link(attrs, [label])),
@@ -201,7 +217,9 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     end
 
     defp render_directive(tag, attrs, content) do
-      label = string(attrs["title"]) || humanize(tag)
+      label =
+        string(attrs["title"]) ||
+          label(attrs, "directive_" <> String.replace(tag, "-", "_"), humanize(tag))
 
       [
         "<section class=\"doc-directive doc-",
@@ -224,7 +242,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
       buttons =
         Enum.map(tabs, fn {node, index} ->
-          label = tab_label(node, index)
+          label = tab_label(node, index, attrs)
           tab_id = "#{group}-tab-#{index}"
           panel_id = "#{group}-panel-#{index}"
 
@@ -245,7 +263,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
       panels =
         Enum.map(tabs, fn {node, index} ->
-          label = tab_label(node, index)
+          label = tab_label(node, index, attrs)
 
           [
             "<div role=\"tabpanel\" tabindex=\"0\" id=\"#{group}-panel-#{index}\" aria-labelledby=\"#{group}-tab-#{index}\"><h3>",
@@ -258,7 +276,9 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
 
       [
         "<section class=\"pa-tabs doc-tabs\"><div role=\"tablist\" aria-label=\"",
-        escape_attribute(string(attrs["title"]) || "Documentation tabs"),
+        escape_attribute(
+          string(attrs["title"]) || label(attrs, "documentation_tabs", "Documentation tabs")
+        ),
         "\">",
         buttons,
         "</div>",
@@ -267,8 +287,13 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       ]
     end
 
-    defp tab_label(%{"attrs" => %{"title" => title}}, _) when is_binary(title), do: title
-    defp tab_label(_, index), do: "Tab #{index + 1}"
+    defp tab_label(%{"attrs" => %{"title" => title}}, _, _) when is_binary(title), do: title
+    defp tab_label(_, index, attrs), do: "#{label(attrs, "tab", "Tab")} #{index + 1}"
+
+    defp label(attrs, key, fallback) do
+      value = Map.get(attrs, "__doc_shell_labels", %{})[key]
+      if is_binary(value), do: value, else: fallback
+    end
 
     defp unknown(tag, content) do
       [

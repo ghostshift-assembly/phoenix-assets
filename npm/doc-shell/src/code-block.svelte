@@ -1,6 +1,7 @@
 <script lang="ts">
 import { copyText } from "./browser/controllers.js"
 import { highlight } from "./highlighter"
+import { inheritLabels } from "./labels.js"
 
 interface Props {
   code: string
@@ -8,12 +9,12 @@ interface Props {
 }
 const { code, language = "text" }: Props = $props()
 let html = $state("")
-let copyState = $state("Copy")
+let copyState = $state<"copy" | "copied" | "copy_unavailable">("copy")
 $effect(() => {
   // Two edits in quick succession can settle out of order; the flag drops
   // whichever result the component has already moved past.
   let current = true
-  copyState = "Copy"
+  copyState = "copy"
   void highlight(code, language)
     .then((value) => {
       if (current) html = value ?? ""
@@ -25,10 +26,11 @@ $effect(() => {
     current = false
   }
 })
+const label = inheritLabels()
 </script>
 
 <div class="code-block" data-language={language}>
-  <button type="button" aria-label={copyState === "Copy" ? "Copy code" : copyState} onclick={() => void copyText(code).then(() => { copyState = "Copied" }, () => { copyState = "Copy unavailable; select source" })}>{copyState}</button>
+  <button type="button" aria-label={label(copyState === "copy" ? "copy_code" : copyState, copyState === "copy" ? "Copy code" : copyState === "copied" ? "Copied" : "Copy unavailable; select source")} onclick={() => void copyText(code).then(() => { copyState = "copied" }, () => { copyState = "copy_unavailable" })}>{label(copyState, copyState === "copy" ? "Copy" : copyState === "copied" ? "Copied" : "Copy unavailable; select source")}</button>
   {#if html}<div class="highlighted">{@html html}</div>{:else}<pre><code>{code}</code></pre>{/if}
 </div>
 

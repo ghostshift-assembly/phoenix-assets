@@ -1,4 +1,5 @@
 <script lang="ts">
+import { inheritLabels } from "./labels.js"
 import { renderMermaid } from "./mermaid.js"
 
 interface Props {
@@ -23,10 +24,11 @@ $effect(() => {
     active = false
   }
 })
+const label = inheritLabels()
 </script>
 
 <figure class="mermaid" data-testid="mermaid-diagram">
-  {#if svg}<div>{@html svg}</div><details><summary>Diagram source</summary><pre><code>{code}</code></pre></details>{:else}<pre><code>{code}</code></pre><figcaption>{error || "Diagram source"}</figcaption>{/if}
+  {#if svg}<div>{@html svg}</div><details><summary>{label("diagram_source", "Diagram source")}</summary><pre><code>{code}</code></pre></details>{:else}<pre><code>{code}</code></pre><figcaption>{error ? label("diagram_unavailable", "Diagram unavailable; source retained") : label("diagram_source", "Diagram source")}</figcaption>{/if}
 </figure>
 
 <style>.mermaid { overflow: auto; margin: 1rem 0; padding: 1rem; border: 1px solid var(--doc-border); border-radius: var(--doc-radius); text-align: center; } .mermaid :global(svg) { background: white; border-radius: .25rem; } figcaption { color: var(--doc-muted); }</style>

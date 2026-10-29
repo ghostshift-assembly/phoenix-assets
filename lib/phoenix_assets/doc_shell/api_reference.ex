@@ -10,7 +10,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     use Phoenix.Component
 
-    alias PhoenixAssets.DocShell.Ast
+    alias PhoenixAssets.DocShell.{Ast, Settings}
 
     @methods ~w(get post put patch delete options head)
     @max_depth 12
@@ -24,6 +24,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     attr(:spec, :map, required: true)
     attr(:expected, :map, required: true)
     attr(:current_id, :string, required: true)
+    attr(:settings, :map, default: %{})
     attr(:request_enabled, :boolean, default: false)
     attr(:api_origin, :string, default: nil)
 
@@ -42,13 +43,13 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
               else: "ltr"
             )
           )
-          |> assign(:content, Ast.render(content))
+          |> assign(:content, Ast.render(content, assigns.settings["labels"] || %{}))
           |> assign(:spec, pair.openapi)
 
         ~H"""
         <section class="doc-shell" data-doc-publication={@publication["publication_id"]} lang={@publication["locale"]} dir={@direction}>
           <article>{@content}</article>
-          <.api_reference spec={@spec} request_enabled={@request_enabled} api_origin={@api_origin} />
+          <.api_reference spec={@spec} request_enabled={@request_enabled} api_origin={@api_origin} settings={@settings} />
         </section>
         """
       else
@@ -65,6 +66,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     end
 
     attr(:spec, :map, required: true)
+    attr(:settings, :map, default: %{})
     attr(:request_enabled, :boolean, default: false)
     attr(:api_origin, :string, default: nil)
 
@@ -85,11 +87,11 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
             |> assign(:origin, origin)
 
           ~H"""
-          <section class="doc-api-reference">
+          <section class="doc-api-reference" data-doc-labels={Jason.encode!(@settings["labels"] || %{})}>
             <header><p>OpenAPI {@version}</p><h2>{Map.get(@info, "title", "API reference")}</h2><small :if={@info["version"]}>v{@info["version"]}</small><p :if={@info["description"]}>{@info["description"]}</p></header>
-            <nav aria-label="API operations"><section :for={{tag, operations} <- @groups}><h3>{tag}</h3><ul><li :for={operation <- operations}><a href={"##{operation.id}"}><strong>{operation.method}</strong> {operation.path}</a></li></ul></section></nav>
-            <.operation :for={operation <- @operations} operation={operation} origin={@origin} request_enabled={@request_enabled} />
-            <details><summary>Complete admitted OpenAPI JSON</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details>
+            <nav aria-label={Settings.label(@settings, "api_operations", "API operations")}><section :for={{tag, operations} <- @groups}><h3>{tag}</h3><ul><li :for={operation <- operations}><a href={"##{operation.id}"}><strong>{operation.method}</strong> {operation.path}</a></li></ul></section></nav>
+            <.operation :for={operation <- @operations} operation={operation} origin={@origin} request_enabled={@request_enabled} settings={@settings} />
+            <details><summary>{Settings.label(@settings, "openapi_json", "Complete admitted OpenAPI JSON")}</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details>
           </section>
           """
 
@@ -97,37 +99,38 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           assigns = assign(assigns, :reason, inspect(reason))
 
           ~H"""
-          <section class="pa-state" data-pa-state="error" role="alert"><h2>API reference unavailable</h2><p>{@reason}</p><details><summary>Complete admitted OpenAPI JSON</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details></section>
+          <section class="pa-state" data-pa-state="error" role="alert"><h2>{Settings.label(@settings, "api_unavailable", "API reference unavailable")}</h2><p>{@reason}</p><details><summary>{Settings.label(@settings, "openapi_json", "Complete admitted OpenAPI JSON")}</summary><pre><code>{Jason.encode!(@spec, pretty: true)}</code></pre></details></section>
           """
       end
     end
 
     attr(:operation, :map, required: true)
     attr(:origin, :string, default: nil)
+    attr(:settings, :map, default: %{})
     attr(:request_enabled, :boolean, default: false)
 
     @doc "Renders one operation, its parameters, payloads, and optional request boundary."
     @spec operation(map()) :: Phoenix.LiveView.Rendered.t()
     def operation(assigns) do
       ~H"""
-      <article id={@operation.id} class="doc-api-operation">
+      <article id={@operation.id} class="doc-api-operation" data-doc-labels={Jason.encode!(@settings["labels"] || %{})}>
         <header><strong>{@operation.method}</strong> <code>{@operation.path}</code><h3>{@operation.summary}</h3><p :if={@operation.description}>{@operation.description}</p></header>
-        <section :if={@operation.parameters != []}><h4>Parameters</h4><table><thead><tr><th>Name</th><th>Location</th><th>Required</th><th>Description</th></tr></thead><tbody><tr :for={parameter <- @operation.parameters}><th scope="row">{parameter["name"]}</th><td>{parameter["in"]}</td><td>{if parameter["required"], do: "Required", else: "Optional"}</td><td>{parameter["description"]}</td></tr></tbody></table></section>
-        <.schema_section title="Request body" value={@operation.request_body} />
-        <.schema_section title="Responses" value={@operation.responses} />
+        <section :if={@operation.parameters != []}><h4>{Settings.label(@settings, "parameters", "Parameters")}</h4><table><thead><tr><th>{Settings.label(@settings, "name", "Name")}</th><th>{Settings.label(@settings, "location", "Location")}</th><th>{Settings.label(@settings, "required", "Required")}</th><th>{Settings.label(@settings, "description", "Description")}</th></tr></thead><tbody><tr :for={parameter <- @operation.parameters}><th scope="row">{parameter["name"]}</th><td>{parameter["in"]}</td><td>{if parameter["required"], do: Settings.label(@settings, "required", "Required"), else: Settings.label(@settings, "optional", "Optional")}</td><td>{parameter["description"]}</td></tr></tbody></table></section>
+        <.schema_section title={Settings.label(@settings, "request_body", "Request body")} value={@operation.request_body} />
+        <.schema_section title={Settings.label(@settings, "responses", "Responses")} value={@operation.responses} />
         <form :if={@request_enabled && @origin} method="dialog" class="doc-api-request" data-doc-api-request data-api-origin={@origin} data-operation-method={@operation.method}>
           <fieldset disabled data-doc-api-controls>
-          <legend>Send request</legend><p>Destination: {@origin}</p>
-          <label>Operation path<input class="pa-field" name="path" value={@operation.path} required /></label>
-          <label>Bearer token<input class="pa-field" name="token" type="password" autocomplete="off" /></label>
-          <label :if={@operation.method not in ["GET", "HEAD"]}>Request body<textarea class="pa-field" name="body"></textarea></label>
-          <label><input type="checkbox" name="confirm" required />Send this request to {@origin}</label>
-          <button type="submit" class="pa-button" data-pa-variant="primary">Send request</button>
+          <legend>{Settings.label(@settings, "send_request", "Send request")}</legend><p>{Settings.label(@settings, "destination", "Destination")}: {@origin}</p>
+          <label>{Settings.label(@settings, "operation_path", "Operation path")}<input class="pa-field" name="path" value={@operation.path} required /></label>
+          <label>{Settings.label(@settings, "bearer_token", "Bearer token")}<input class="pa-field" name="token" type="password" autocomplete="off" /></label>
+          <label :if={@operation.method not in ["GET", "HEAD"]}>{Settings.label(@settings, "request_body", "Request body")}<textarea class="pa-field" name="body"></textarea></label>
+          <label><input type="checkbox" name="confirm" required />{Settings.label(@settings, "confirm_request", "Send this request to")} {@origin}</label>
+          <button type="submit" class="pa-button" data-pa-variant="primary">{Settings.label(@settings, "send_request", "Send request")}</button>
           <p role="status" data-doc-api-status></p><pre data-doc-api-response></pre>
           </fieldset>
-          <noscript>Request execution requires JavaScript.</noscript>
+          <noscript>{Settings.label(@settings, "request_requires_js", "Request execution requires JavaScript.")}</noscript>
         </form>
-        <details><summary>Complete admitted operation JSON</summary><pre><code>{Jason.encode!(@operation.raw, pretty: true)}</code></pre></details>
+        <details><summary>{Settings.label(@settings, "operation_json", "Complete admitted operation JSON")}</summary><pre><code>{Jason.encode!(@operation.raw, pretty: true)}</code></pre></details>
       </article>
       """
     end

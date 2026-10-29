@@ -1,3 +1,4 @@
+import { browserLabel } from "./labels.js"
 import type { BrowserController } from "./types.js"
 
 type Enhancement = { enhance: (source: string, language: string) => Promise<string | null> }
@@ -42,7 +43,11 @@ export const mountEnhancements = (
       if (!button || !container || !source || !path || button.disabled) return
       const value = source.textContent ?? ""
       if (value.length > 262144) {
-        button.textContent = "Source exceeds the enhancement limit"
+        button.textContent = browserLabel(
+          button,
+          "enhancement_limit",
+          "Source exceeds the enhancement limit",
+        )
         return
       }
       const current = generation
@@ -66,7 +71,7 @@ export const mountEnhancements = (
           )
             return
           if (!html) {
-            button.textContent = "Plain source retained"
+            button.textContent = browserLabel(button, "plain_source", "Plain source retained")
             return
           }
           const output = document.createElement("div")
@@ -75,7 +80,7 @@ export const mountEnhancements = (
           output.innerHTML = html
           const details = document.createElement("details")
           const summary = document.createElement("summary")
-          summary.textContent = "Source"
+          summary.textContent = browserLabel(button, "source", "Source")
           source.replaceWith(output)
           details.append(summary, source)
           container.append(details)
@@ -84,7 +89,11 @@ export const mountEnhancements = (
         })
         .catch(() => {
           if (!controller.signal.aborted && button.isConnected)
-            button.textContent = "Enhancement unavailable; source retained"
+            button.textContent = browserLabel(
+              button,
+              "enhancement_unavailable",
+              "Enhancement unavailable; source retained",
+            )
         })
         .finally(() => {
           button.disabled = false

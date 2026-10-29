@@ -1,4 +1,5 @@
 import { safeLinkTarget } from "../url.js"
+import { browserLabel } from "./labels.js"
 import { admitRequest, readResponseText } from "./request.js"
 import {
   createContractPagefindSearch,
@@ -507,10 +508,13 @@ export const mountCopy = (root: HTMLElement): BrowserController => {
         if (!navigator.clipboard) throw new Error("Clipboard unavailable")
         await navigator.clipboard.writeText(code.textContent ?? "")
         trigger.dataset.docCopyState = "copied"
-        trigger.setAttribute("aria-label", "Copied")
+        trigger.setAttribute("aria-label", browserLabel(trigger, "copied", "Copied"))
       } catch {
         trigger.dataset.docCopyState = "unavailable"
-        trigger.setAttribute("aria-label", "Copy unavailable; select the source")
+        trigger.setAttribute(
+          "aria-label",
+          browserLabel(trigger, "copy_unavailable", "Copy unavailable; select the source"),
+        )
       }
     },
     { signal: controller.signal },
@@ -577,7 +581,7 @@ export const mountRequests = (
         if (body) headers.set("content-type", "application/json")
         const abort = new AbortController()
         pending.set(form, abort)
-        if (status) status.textContent = "Sending…"
+        if (status) status.textContent = browserLabel(form, "sending", "Sending…")
         if (output) output.textContent = ""
         void request(target.url, {
           method,
@@ -598,15 +602,22 @@ export const mountRequests = (
           })
           .catch(() => {
             if (!abort.signal.aborted && status)
-              status.textContent =
-                "Response unavailable. The operation outcome may be unknown; check its owner before retrying."
+              status.textContent = browserLabel(
+                form,
+                "response_unknown",
+                "Response unavailable. The operation outcome may be unknown; check its owner before retrying.",
+              )
           })
           .finally(() => {
             if (pending.get(form) === abort) pending.delete(form)
           })
       } catch (error) {
         if (status)
-          status.textContent = error instanceof Error ? error.message : "Request unavailable"
+          status.textContent = browserLabel(
+            form,
+            "request_error",
+            error instanceof Error ? error.message : "Request unavailable",
+          )
       }
     },
     { signal: controller.signal },

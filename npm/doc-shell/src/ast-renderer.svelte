@@ -12,6 +12,7 @@ import RecursiveAstRenderer from "./ast-renderer.svelte"
 import CodeBlock from "./code-block.svelte"
 import Directive from "./directive.svelte"
 import { isDirective } from "./directives.js"
+import { inheritLabels } from "./labels.js"
 import MermaidDiagram from "./mermaid-diagram.svelte"
 import Tabs from "./tabs.svelte"
 import type { DocAstNode } from "./types.js"
@@ -20,8 +21,10 @@ import { safeLinkTarget } from "./url.js"
 interface Props {
   nodes: DocAstNode[] | string | null
   legacyHeadingIds?: boolean
+  labels?: Record<string, string>
 }
-const { nodes, legacyHeadingIds = true }: Props = $props()
+const { nodes, legacyHeadingIds = true, labels }: Props = $props()
+inheritLabels(() => labels)
 const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
 </script>
 

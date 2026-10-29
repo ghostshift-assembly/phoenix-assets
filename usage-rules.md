@@ -237,7 +237,8 @@ product routes.
 
 The [coordinated renderer tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
 separates implemented APIs from the remaining DocShell work. Inert settings
-supply selector links, brand/footer data, shell/search labels and SEO metadata.
+supply selector links, brand/footer data, shell/search and nested control labels,
+and SEO metadata.
 Hosted publication consumption, complete page presentation, artifact rendering
 and fresh qualification retain their recorded prerequisites. Keep host routing,
 authorization, product task state, native readers and producer algorithms at

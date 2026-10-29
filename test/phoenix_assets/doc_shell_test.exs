@@ -327,6 +327,97 @@ defmodule PhoenixAssets.DocShellTest do
     refute html =~ "data-doc-enhance=\"highlight\""
   end
 
+  test "nested AST controls inherit escaped host labels while source text stays unchanged" do
+    nodes = [
+      node("blockquote", [
+        node("pre", [node("code", ["source wording"], %{"class" => "language-elixir"})]),
+        node("mermaid", ["graph TD; A-->B"]),
+        node("accordion", ["explanation"]),
+        node("tabs", [node("p", ["first"]), node("p", ["second"])])
+      ])
+    ]
+
+    labels = %{
+      "copy" => "Kopiera",
+      "copy_code" => "Kopiera kod",
+      "highlight_code" => "Markera kod",
+      "render_diagram" => "Visa diagram",
+      "diagram_source" => "Diagramkälla",
+      "details" => "Detaljer",
+      "documentation_tabs" => "Exempel",
+      "tab" => "Flik"
+    }
+
+    html = nodes |> Ast.render(labels) |> HTML.safe_to_string()
+    assert html =~ ~s(aria-label="Kopiera kod">Kopiera</button>)
+    assert html =~ "Markera kod"
+    assert html =~ "Visa diagram"
+    assert html =~ "Diagramkälla"
+    assert html =~ "<summary>Detaljer</summary>"
+    assert html =~ ~s(aria-label="Exempel")
+    assert html =~ "Flik 1"
+    assert html =~ "source wording"
+    refute html =~ "__doc_shell_labels"
+    escaped = nodes |> Ast.render(%{"copy" => "<script>bad()</script>"}) |> HTML.safe_to_string()
+    assert escaped =~ "&lt;script&gt;bad()&lt;/script&gt;"
+    refute escaped =~ "<script>bad()"
+  end
+
+  test "API controls carry host labels into forms and browser status scope" do
+    spec = %{
+      "openapi" => "3.1.0",
+      "info" => %{"title" => "Source API"},
+      "paths" => %{
+        "/items" => %{
+          "post" => %{
+            "summary" => "Source summary",
+            "parameters" => [
+              %{
+                "name" => "id",
+                "in" => "query",
+                "required" => true,
+                "description" => "Source parameter"
+              }
+            ],
+            "responses" => %{"200" => %{"description" => "Success"}}
+          }
+        }
+      }
+    }
+
+    settings = %{
+      "labels" => %{
+        "api_operations" => "API-metoder",
+        "parameters" => "Parametrar",
+        "send_request" => "Skicka",
+        "operation_path" => "Sökväg",
+        "bearer_token" => "Åtkomsttoken",
+        "request_requires_js" => "Kräver JavaScript",
+        "sending" => "Skickar",
+        "openapi_json" => "Hela JSON"
+      }
+    }
+
+    html =
+      render_component(&ApiReference.api_reference/1,
+        spec: spec,
+        request_enabled: true,
+        api_origin: "https://api.example.test",
+        settings: settings
+      )
+
+    assert html =~ ~s(aria-label="API-metoder")
+    assert html =~ "Parametrar"
+    assert html =~ "<legend>Skicka</legend>"
+    assert html =~ "Sökväg"
+    assert html =~ "Åtkomsttoken"
+    assert html =~ "Kräver JavaScript"
+    assert html =~ "Hela JSON"
+    assert html =~ "data-doc-labels="
+    assert html =~ "Skickar"
+    assert html =~ "Source summary"
+  end
+
   test "upstream-valid JSON attribute values cannot crash code fences or become HTML attributes" do
     for value <- [1, false, nil, ["text"], %{"nested" => "value"}] do
       nodes = [

@@ -2,6 +2,7 @@
 import ApiReference from "./api-reference.svelte"
 import AstRenderer from "./ast-renderer.svelte"
 import { admitHostedPair } from "./hosted-pair.js"
+import { inheritLabels } from "./labels.js"
 import type { DocShellPresentation, OpenApiDocument, PublicationBinding } from "./types.js"
 
 const {
@@ -11,6 +12,7 @@ const {
   currentId,
   baseUrl = "",
   allowedOrigins = [],
+  labels,
 }: {
   presentation: DocShellPresentation
   openapi: OpenApiDocument
@@ -18,7 +20,9 @@ const {
   currentId: string
   baseUrl?: string
   allowedOrigins?: readonly string[]
+  labels?: Record<string, string>
 } = $props()
+inheritLabels(() => labels)
 const admitted = $derived.by(() => {
   const pair = admitHostedPair(presentation, openapi, expected)
   const content = pair.presentation.content[currentId]

@@ -5,6 +5,7 @@ import AstRenderer from "./ast-renderer.svelte"
 import { mountBrowserCore } from "./browser/index.js"
 import type { PagefindContract } from "./browser/search.js"
 import { searchLabel } from "./browser/search.js"
+import { inheritLabels } from "./labels.js"
 import {
   admitNavigationPresentation,
   admitPagePresentation,
@@ -38,6 +39,7 @@ const settings = $derived.by(() => {
   return admitPresentation(site.presentation)
 })
 const label = (key: string, fallback: string) => presentationLabel(settings, key, fallback)
+inheritLabels(() => settings.labels)
 const assetUrl = (name: string | undefined) => {
   const target = safeLinkTarget(assetUrls[name ?? ""])
   return target?.href.startsWith("mailto:") ? undefined : target?.href
@@ -87,6 +89,7 @@ $effect(() => {
   bind:this={shellRoot}
   class="doc-shell pa-doc-shell"
   data-pa-doc-shell
+  data-doc-labels={JSON.stringify(settings.labels ?? {})}
   data-doc-theme="system"
   data-schema-version={site.schema_version}
   data-cohort-digest={site.cohort_digest}

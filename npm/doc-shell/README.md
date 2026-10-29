@@ -55,8 +55,25 @@ Host-authored `labels` override `search`, `skip`, `browse`, `close_navigation`,
 Search additionally recognizes `close`, `filter_all`, `filter_<facet>`,
 `search_loading`, `search_error`, `search_empty`, `search_result`, and
 `search_results`; result templates replace `{count}` with the observed count.
-Missing labels preserve defaults. Code/diagram/request enhancement messages
-retain their existing labels pending the remaining control-label work.
+Missing labels preserve defaults. Nested AST/API controls inherit the catalogue;
+standalone `AstRenderer`, `ApiReference`, `HostedReference` and legacy `DocShell`
+also accept a `labels` prop. HEEx `Ast.render/2` accepts the label map and API
+components accept the same `settings` map as the shell. Source titles, prose,
+schema names and API payloads retain their authored wording.
+
+Additional control keys are `copy`, `copy_code`, `copied`, `copy_unavailable`,
+`highlight_code`, `render_diagram`, `diagram_source`, `diagram_unavailable`,
+`enhancement_limit`, `plain_source`, `enhancement_unavailable`, `source`,
+`documentation_tabs`, `tab`, `details`, and `directive_<name>` (replace directive
+hyphens with underscores). API controls recognize `api_operations`,
+`api_unavailable`, `unsupported_openapi`, `openapi_json`, `operation_json`,
+`parameters`, `name`, `location`, `required`, `optional`, `field`, `type`,
+`description`, `schema_json`, `request_body`, `responses`, `request_unavailable`,
+`request_requires_js`, `hide`, `try_it`, `confirm_request`,
+`request_origin_blocked`, `operation_path`, `bearer_token`, `json_body`,
+`sending`, `send_request`, `status`, `destination`, `response_unknown`, and
+`request_error`. Legacy shell helpers also use `audience`, `locale` and
+`referenced_by`. These override control text; they do not authorize requests.
 
 Projected sites also render the upstream banner/hero records and
 `metadata["seo"]` overrides. A hero preserves plain text, ordinary action links

@@ -372,7 +372,14 @@ an `assetUrls` map; HEEx retains local slots. Static export obtains settings
 through renderer context. Nonempty HEEx settings require the upstream validator;
 older DocShell releases keep their default rendering. Targeted candidate tests
 exercise these additions, while package/browser qualification remains pending.
-Code/diagram/request enhancement labels remain tracked under PHA-P11.
+Nested code/diagram, tabs, directive and API/request controls now inherit host
+labels. Standalone Svelte AST/API/hosted/legacy shells accept a `labels` map;
+HEEx `Ast.render/2` accepts that map and API components accept `settings`.
+Browser copy/enhancement/request statuses read the nearest inert label scope.
+The [package documentation](../../npm/doc-shell/README.md) lists control keys.
+Source wording remains unchanged. Unit/component tests cover inheritance,
+escaping, catalogue isolation and status changes; expanded target qualification
+remains open under PHA-P15/P16.
 PHA-P12 now consumes validated hero/banner content, splash presentation,
 reserved per-page SEO and badge/collapse metadata. Static local image bytes use
 the existing asset handoff; absent hero images retain alt text. Projected sites

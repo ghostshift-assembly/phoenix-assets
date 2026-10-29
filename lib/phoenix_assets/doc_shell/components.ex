@@ -42,7 +42,10 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         assigns
         |> assign_new(:nonce, fn -> nil end)
         |> assign(:settings, Settings.get(assigns.context))
-        |> assign(:content, Ast.render(assigns.page.content))
+        |> assign(
+          :content,
+          Ast.render(assigns.page.content, Settings.get(assigns.context)["labels"] || %{})
+        )
         |> assign(:direction, direction(assigns.page.locale))
         |> assign(:enhancement_assets, Map.get(assigns.context, :assets, %{}))
         |> assign(
@@ -55,6 +58,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       <div
         class="doc-shell pa-doc-shell"
         data-pa-doc-shell
+        data-doc-labels={Jason.encode!(@settings["labels"] || %{})}
         data-doc-enhancement-assets={Jason.encode!(@enhancement_assets)}
         data-doc-theme="system"
         data-content-digest={@page.content_digest}

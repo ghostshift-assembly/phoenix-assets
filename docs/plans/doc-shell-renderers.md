@@ -17,7 +17,7 @@ qualification are recorded separately.
 | PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
 | PHA-P09 | fixed corpus implemented; selectors and broader accessibility evidence open | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
 | PHA-P10 | qualification workflow implemented; exact receipt required | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
-| PHA-P11 | settings, links, seams and shell/search labels implemented; enhancement labels and qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
+| PHA-P11 | source implemented; expanded target/archive qualification pending | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
 | PHA-P12 | source implemented; expanded browser/archive qualification pending | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
 | PHA-P13 | source implemented; coordinated qualification pending | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
 | PHA-P14 | planned; no artifact profile support claimed | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
@@ -119,15 +119,13 @@ including separate review of retained screenshots. Source status alone is not
 release qualification. Host routes, branding, translation catalogues, backend
 authorization and deployment remain outside this fixture cohort.
 
-The site shells do not yet provide locale/release selectors. Hosted HEEx exposes
-brand/footer slots, but the static adapter supplies empty slots and Svelte
-`SiteShell` has no equivalent slots. The fixed corpus does not exercise those
-missing surfaces. Its zoom check uses an equivalent viewport; selected contrast
+The retained fixed-corpus receipt predates the selector, brand/footer,
+hero/banner, SEO, navigation metadata and hosted-pair additions recorded below.
+It does not qualify those new surfaces. Its zoom check uses an equivalent viewport; selected contrast
 and keyboard assertions do not close a complete accessibility assessment.
 These gaps remain open under PHA.01 instead of being inferred from a passing receipt.
-Navigation badges/collapse defaults, splash/hero rendering, full banner and SEO
-metadata, hosted publication pairing and portable-artifact rendering also need
-the implementation and evidence assigned in PHA-P11–P16.
+Portable-artifact rendering and the expanded evidence assigned in PHA-P14–P16
+remain open.
 
 ## Prior executed source checks (2026-10-29)
 
@@ -256,3 +254,31 @@ empty group path as the current route. The full current-runtime gate passes: 431
 The candidate path passes 21 targeted HEEx checks. The full gate also passes
 compiler, Dialyzer, exports, audits, packaged older-producer consumers and HTTP-only
 isolation. Fresh expanded browser and coordinated archive qualification remain open.
+
+### Control label completion and current CI
+
+Recursive Svelte controls inherit host labels from the projected shell or
+standalone AST/API/hosted/legacy shell. HEEx AST rendering accepts the same label
+map, API components carry settings into their controls, and browser controllers
+read current labels from the nearest shell/control scope. Copy outcomes,
+diagram/source disclosures, tabs, generic directive titles, schema headings and
+request controls/statuses preserve authored content and existing request policy.
+Tests cover separate catalogues in simultaneous hosts, escaped labels, nested
+inheritance, copy success/refusal, failed/successful enhancements and unknown
+request outcomes. The fixture comparison now defaults only an absent empty
+`presentation` field, preserving old/new producer compatibility and all other
+projection comparisons.
+
+The full current-runtime gate passes: 433 backend checks (18 doctests, 415 tests),
+91.1% line coverage, 417 frontend tests (184 DocShell), all 25 required checks,
+17 release-script tests and the extracted/optional-free/HTTP-only consumers.
+The sibling producer at `2a00216` passes 25 renderer/projection/conformance tests;
+the published producer also passes the two projection checks. These results do
+not replace expanded browser or fresh coordinated archive qualification.
+
+GitHub was checked again on 2026-10-29. The latest
+[Phoenix Assets CI](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/40860204683)
+succeeded for `9190de09d6dfdf691d3d237e498ddf2c2ea0c7b3`; the latest
+[DocShell CI](https://github.com/futhr/doc_shell/actions/runs/40842385182) succeeded
+for `84e11cb8cce130f45e604b4439e04c09b1dd7ae6`. Neither run includes this local
+buildout. Repository policy reserves all pushes for the user; no refs were pushed.
