@@ -202,3 +202,19 @@ passed. A narrow absent-module annotation prevents compiler warnings when an old
 producer lacks the new settings API; nonempty unsupported settings still refuse.
 Fresh coordinated archive receipts and browser screenshots remain pending; the
 previous retained qualification receipt does not cover these edits.
+
+### JSON attribute regression
+
+The upstream AST accepts JSON attribute values. Svelte's old declaration assumed
+strings, and both code-fence renderers called string functions on arbitrary
+class values. The regression uses numeric, boolean, null, array and object
+attributes accepted by `DocShell.Ast.valid?/1`. Before the fix, all five Svelte
+cases fail at `class.replace`, and HEEx fails at `String.replace_prefix/3`.
+Supported string attributes still render; other values are ignored, unsafe
+links/media retain visible fallbacks and code remains plain readable text.
+
+After this correction, the full current-runtime `mix check --no-retry --no-parallel`
+passes: 428 backend checks (18 doctests, 410 tests), 92.1% line coverage and
+395 frontend tests (including 162 DocShell tests). Exports, audits and extracted
+consumer checks passed again. This source evidence does not replace the pending
+coordinated archive/browser receipt.

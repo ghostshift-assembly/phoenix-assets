@@ -64,6 +64,11 @@ matches the supplied records with the built-in deterministic matcher. The
 exported `Search` component accepts a replacement `search` callback. Navigation
 uses the host's `navigate` callback when supplied.
 
+DocShell AST attribute maps may contain arbitrary JSON values. Both renderers
+use only supported string attributes; other values remain inert and are ignored
+by the HTML/URL policy. A non-text code-fence class falls back to plain text
+without hiding the source or crashing the page.
+
 The recursive AST renderer handles content directives plus Shiki and
 Mermaid code fences. `ApiReference` renders tag-grouped OpenAPI operations,
 recursive schemas and examples. Every operation has an ordinary link and stays

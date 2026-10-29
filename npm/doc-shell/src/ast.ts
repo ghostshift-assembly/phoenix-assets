@@ -20,20 +20,33 @@ const ATTRIBUTES = new Set(["id", "title", "class", "colspan", "rowspan", "scope
 
 export const projectedHeadingId = (node: DocAstElement): string | undefined => {
   const id = node.attrs?.id
-  return id && SAFE_ID.test(id) ? id : undefined
+  return typeof id === "string" && SAFE_ID.test(id) ? id : undefined
+}
+
+/** Read a textual attribute without coercing arbitrary producer JSON into UI. */
+export const stringAttribute = (node: DocAstElement, name: string): string | undefined => {
+  const value = node.attrs?.[name]
+  return typeof value === "string" ? value : undefined
 }
 
 export const admittedAttributes = (node: DocAstElement): Record<string, string> =>
   Object.fromEntries(
     Object.entries(node.attrs ?? {}).filter(
-      ([name, value]) =>
-        ATTRIBUTES.has(name) && typeof value === "string" && (name !== "id" || SAFE_ID.test(value)),
+      (entry): entry is [string, string] =>
+        ATTRIBUTES.has(entry[0]) &&
+        typeof entry[1] === "string" &&
+        (entry[0] !== "id" || SAFE_ID.test(entry[1])),
     ),
   )
 
-export const safeMediaTarget = (value: string | undefined): string | undefined => {
-  const src = value?.trim()
-  return src?.startsWith("/") && !src.startsWith("//") && !src.includes("\\") ? src : undefined
+export const safeMediaTarget = (value: unknown): string | undefined => {
+  const src = typeof value === "string" ? value.trim() : undefined
+  return src?.startsWith("/") &&
+    !src.startsWith("//") &&
+    !src.includes("\\") &&
+    !src.includes("\u0000")
+    ? src
+    : undefined
 }
 
 export const preCodeInfo = (
@@ -47,7 +60,7 @@ export const preCodeInfo = (
   return {
     code: typeof code.content === "string" ? code.content : extractText(code.content),
     language:
-      code.attrs?.class?.replace(/^language-/, "") ??
+      stringAttribute(code, "class")?.replace(/^language-/, "") ??
       (node.attrs?.class === "mermaid" ? "mermaid" : "text"),
   }
 }

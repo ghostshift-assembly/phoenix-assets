@@ -57,10 +57,10 @@ function hasSchemeRelativePrefix(value: string): boolean {
  * scheme-relative URLs are rejected rather than rendered into an `href`.
  */
 export function safeLinkTarget(
-  value: string | undefined,
+  value: unknown,
   currentHref = browserHref(),
 ): SafeLinkTarget | undefined {
-  const href = value?.trim()
+  const href = typeof value === "string" ? value.trim() : undefined
   if (!href || href.includes("\\")) return undefined
 
   const policyValue = decodeForPolicy(href)

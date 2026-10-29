@@ -12,7 +12,8 @@ export type DocAstNode = string | DocAstElement
 
 export interface DocAstElement {
   tag: string
-  attrs?: Record<string, string>
+  /** Upstream permits JSON values; renderers admit supported string attributes only. */
+  attrs?: Record<string, unknown>
   content?: DocAstNode[] | string
   /** Parser metadata (source line, and so on). Opaque to the renderer. */
   meta?: Record<string, unknown>

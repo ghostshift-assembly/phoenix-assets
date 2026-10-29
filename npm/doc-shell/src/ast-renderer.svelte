@@ -6,6 +6,7 @@ import {
   preCodeInfo,
   projectedHeadingId,
   safeMediaTarget,
+  stringAttribute,
 } from "./ast.js"
 import RecursiveAstRenderer from "./ast-renderer.svelte"
 import CodeBlock from "./code-block.svelte"
@@ -27,13 +28,13 @@ const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
 {#each list as node, index (index)}
   {#if typeof node === "string"}{node}
   {:else if node.tag === "tabs" || node.tag === "code-group"}
-    <Tabs nodes={Array.isArray(node.content) ? node.content : []} title={node.attrs?.title} {legacyHeadingIds} />
+    <Tabs nodes={Array.isArray(node.content) ? node.content : []} title={stringAttribute(node, "title")} {legacyHeadingIds} />
   {:else if node.tag === "steps"}
-    <ol class="doc-steps">{#each Array.isArray(node.content) ? node.content : [] as step, stepIndex (stepIndex)}<li>{#if typeof step !== "string" && step.tag === "step"}{#if step.attrs?.title}<h3>{step.attrs.title}</h3>{/if}<RecursiveAstRenderer nodes={step.content ?? null} {legacyHeadingIds} />{:else}<RecursiveAstRenderer nodes={[step]} {legacyHeadingIds} />{/if}</li>{/each}</ol>
-  {:else if node.tag === "step"}<li>{#if node.attrs?.title}<h3>{node.attrs.title}</h3>{/if}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></li>
+    <ol class="doc-steps">{#each Array.isArray(node.content) ? node.content : [] as step, stepIndex (stepIndex)}<li>{#if typeof step !== "string" && step.tag === "step"}{#if stringAttribute(step, "title")}<h3>{stringAttribute(step, "title")}</h3>{/if}<RecursiveAstRenderer nodes={step.content ?? null} {legacyHeadingIds} />{:else}<RecursiveAstRenderer nodes={[step]} {legacyHeadingIds} />{/if}</li>{/each}</ol>
+  {:else if node.tag === "step"}<li>{#if stringAttribute(node, "title")}<h3>{stringAttribute(node, "title")}</h3>{/if}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></li>
   {:else if node.tag === "mermaid"}<MermaidDiagram code={extractText(node.content)} />
   {:else if isDirective(node.tag)}
-    <Directive name={node.tag} title={node.attrs?.title} href={node.attrs?.href}>{#snippet children()}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} />{/snippet}</Directive>
+    <Directive name={node.tag} title={stringAttribute(node, "title")} href={stringAttribute(node, "href")}>{#snippet children()}<RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} />{/snippet}</Directive>
   {:else if node.tag === "pre"}
     {const info = $derived(preCodeInfo(node))}
     {#if info?.language === "mermaid"}<MermaidDiagram code={info.code} />{:else if info}<CodeBlock code={info.code} language={info.language} />{:else}<pre><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></pre>{/if}
@@ -46,7 +47,7 @@ const list = $derived(!nodes ? [] : typeof nodes === "string" ? [nodes] : nodes)
     {#if link}<a href={link.href} target={link.external ? "_blank" : undefined} rel={link.external ? "noopener noreferrer" : undefined}><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></a>{:else}<span data-unsafe-link><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></span>{/if}
   {:else if node.tag === "img"}
     {const src = $derived(safeMediaTarget(node.attrs?.src))}
-    {#if src}<img {src} alt={node.attrs?.alt ?? ""} title={node.attrs?.title} loading="lazy" />{:else}<span data-unsafe-media>{node.attrs?.alt ?? "Image"}</span>{/if}
+    {#if src}<img {src} alt={stringAttribute(node, "alt") ?? ""} title={stringAttribute(node, "title")} loading="lazy" />{:else}<span data-unsafe-media>{stringAttribute(node, "alt") ?? "Image"}</span>{/if}
   {:else if node.tag === "br"}<br />{:else if node.tag === "hr"}<hr />
   {:else}<div data-unknown-tag={node.tag}><RecursiveAstRenderer nodes={node.content ?? null} {legacyHeadingIds} /></div>{/if}
 {/each}

@@ -1,4 +1,5 @@
 <script lang="ts">
+import { stringAttribute } from "./ast.js"
 import AstRenderer from "./ast-renderer.svelte"
 import { mountTabs } from "./browser/controllers.js"
 import type { DocAstNode } from "./types.js"
@@ -18,7 +19,9 @@ $effect(() => {
   return () => controller.destroy()
 })
 const label = (node: DocAstNode, index: number) =>
-  typeof node !== "string" && node.attrs?.title ? node.attrs.title : `Tab ${index + 1}`
+  typeof node !== "string" && stringAttribute(node, "title")
+    ? stringAttribute(node, "title")
+    : `Tab ${index + 1}`
 </script>
 <section bind:this={root} class="doc-tabs">
   <div role="tablist" aria-label={title}>{#each nodes as node, index (index)}<button class="pa-button" type="button" role="tab" id={`${id}-tab-${index}`} aria-controls={`${id}-panel-${index}`} aria-selected={index === 0} tabindex={index === 0 ? 0 : -1}>{label(node, index)}</button>{/each}</div>

@@ -28,6 +28,46 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
+it.each([1, false, null, ["text"], { nested: "value" }])(
+  "safely ignores non-text JSON attributes: %j",
+  (value) => {
+    const element = target()
+    mounted.push(
+      mount(AstRenderer, {
+        target: element,
+        props: {
+          nodes: [
+            {
+              tag: "pre",
+              attrs: {},
+              content: [
+                { tag: "code", attrs: { class: value }, content: ["source stays readable"] },
+              ],
+            },
+            { tag: "a", attrs: { href: value }, content: ["Link text"] },
+            { tag: "img", attrs: { src: value, alt: value }, content: [] },
+            { tag: "h2", attrs: { id: value }, content: ["A heading"] },
+            {
+              tag: "tabs",
+              attrs: { title: value },
+              content: [{ tag: "p", attrs: { title: value }, content: ["Tab body"] }],
+            },
+          ],
+        },
+      }),
+    )
+    flushSync()
+    expect(element.querySelector("code")?.textContent).toBe("source stays readable")
+    expect(element.querySelector("[data-unsafe-link]")?.textContent).toBe("Link text")
+    expect(element.querySelector("img")).toBeNull()
+    expect(element.querySelector("h2")?.id).toBe("a-heading")
+    expect(element.querySelector('[role="tab"]')?.textContent).toBe("Tab 1")
+    expect(element.querySelector("[role=tablist]")?.getAttribute("aria-label")).toBe(
+      "Documentation tabs",
+    )
+  },
+)
+
 describe("dynamic link policy", () => {
   it("accepts relative, HTTP(S), and mailto links with external metadata", () => {
     expect(safeLinkTarget("/docs/start", "https://docs.example.test/current")).toEqual({

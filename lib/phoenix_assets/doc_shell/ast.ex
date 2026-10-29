@@ -126,7 +126,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       source = text_content(content)
 
       language =
-        code_attrs |> Map.get("class", "language-text") |> String.replace_prefix("language-", "")
+        (string(code_attrs["class"]) || "language-text") |> String.replace_prefix("language-", "")
 
       if language == "mermaid",
         do: render_mermaid(content),

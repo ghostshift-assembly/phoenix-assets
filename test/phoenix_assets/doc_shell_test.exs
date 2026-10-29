@@ -135,6 +135,26 @@ defmodule PhoenixAssets.DocShellTest do
     refute html =~ "data-doc-enhance=\"highlight\""
   end
 
+  test "upstream-valid JSON attribute values cannot crash code fences or become HTML attributes" do
+    for value <- [1, false, nil, ["text"], %{"nested" => "value"}] do
+      nodes = [
+        node("pre", [node("code", ["source stays readable"], %{"class" => value})]),
+        node("a", ["Link text"], %{"href" => value}),
+        node("img", [], %{"src" => value, "alt" => value}),
+        node("h2", ["A heading"], %{"id" => value})
+      ]
+
+      assert DocShell.Ast.valid?(nodes)
+      html = nodes |> Ast.render() |> HTML.safe_to_string()
+      assert html =~ "source stays readable"
+      assert html =~ ~s(data-language="text")
+      assert html =~ "data-unsafe-link"
+      assert html =~ "data-unsafe-media"
+      refute html =~ "<img"
+      refute html =~ ~s(<h2 id=)
+    end
+  end
+
   test "repeated code and tab groups have deterministic unique identifiers and SSR panels" do
     code = node("pre", [node("code", ["same source"], %{"class" => "language-elixir"})])
 
