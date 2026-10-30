@@ -39,13 +39,12 @@ and product state. Native readers and producer algorithms are separate owners.
 as ordinary links, and supplies title, description, canonical, Open Graph and
 robots metadata. Hosts may replace the brand/footer with Svelte `brand` and
 `footer` snippets (each receives the site). `assetUrls` maps logical brand-logo
-asset names to URLs supplied by the host. These are checkout additions awaiting
-release; the matching DocShell settings API is also awaiting release.
+asset names to URLs supplied by the host. The matching shared settings API is
+available in DocShell 2.0.0.
 
 The HEEx/static renderer reads the same data from `context.presentation` and
-retains its local brand/footer slots. Nonempty settings require a DocShell
-version containing `DocShell.Presentation.Settings`; older producers retain
-empty/default rendering and refuse unsupported new settings.
+retains its local brand/footer slots. The Hex integration requires DocShell
+`~> 2.0`, including settings and callback-free receipt verification.
 
 Host-authored `labels` override `search`, `skip`, `browse`, `close_navigation`,
 `documentation`, `navigation`, `language`, `release`, `reader_preferences`,
@@ -218,8 +217,8 @@ HEEx offers `PhoenixAssets.DocShell.Artifacts.admit/4` and `capabilities/2`, plu
 `Components.artifact_document/1` and `artifact_preview/1` with equivalent inputs.
 Its page/static paths also consume receipt metadata and context `artifact_assets`.
 They require the upstream `ArtifactBlock.verify_receipt/2` API implemented in the
-sibling producer; older installed versions explicitly refuse portable artifacts
-while continuing to render ordinary documents. Static export passes its checked
+released DocShell 2.0.0 package. The Hex dependency requirement selects
+that supported producer line. Static export passes its checked
 local URL map; standalone HEEx uses inline media by default. Custom hosts remain
 responsible for serving the checked bytes at any supplied local URLs.
 
@@ -227,7 +226,7 @@ These source paths use the two exact synthetic producer profiles from the
 upstream conformance corpus. Fresh coordinated archives pass the automated
 Svelte/HEEx browser, print and offline/file tasks recorded in the tracker.
 Producer algorithms and native applications remain consumer-owned; the
-checkout additions are unreleased.
+framework renderers consume the shared DocShell 2.0 contracts.
 
 ### Artifact media checks in the current checkout
 

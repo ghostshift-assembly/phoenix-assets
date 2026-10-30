@@ -26,8 +26,6 @@ jobs:
     name: quality (elixir ${{ matrix.elixir }} / otp ${{ matrix.otp }})
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    env:
-      DOC_SHELL_CANDIDATE: ${{ github.workspace }}/.candidates/doc_shell
     strategy:
       fail-fast: false
       # Main runs the full current gate; PRs run the reduced lane; manual runs cover both OTP versions.
@@ -37,13 +35,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
-          persist-credentials: false
-
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          repository: futhr/doc_shell
-          ref: 846b67fe34ca07cf7b7b0a744af235912f89e9d4
-          path: .candidates/doc_shell
           persist-credentials: false
 
       - uses: erlef/setup-beam@54075bcc5e249e4758d363f27d099f55d843f124 # v1.24.1

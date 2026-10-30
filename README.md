@@ -42,7 +42,7 @@ native path requires the current upstream receipt API.
 DocShell owns the shared contracts and validation. The tracker maps them to
 automated regressions, browser checks and extracted package consumers.
 Producer algorithms, native applications and deployment policy stay with their
-consumers. The checkout additions are not yet released.
+consumers. Phoenix Assets 3.0.0 consumes the DocShell 2.0 contracts.
 
 ## What it provides
 
@@ -190,9 +190,9 @@ config :phoenix_assets, preset: PhoenixAssets.Presets.SvelteHttp, serve_mode: :s
 
 Use `@phoenix-assets/svelte/core` for commands/locales/events and `/socket` for
 Phoenix sockets. Electric and TanStack peers are optional; the legacy root
-runtime barrel still imports Electric helpers. DocShell 0.4 remains compatible
-with the asset substrate; its optional site renderer supports DocShell 0.5 and
-1.0 presentation modules. Neither profile changes host authorization.
+runtime barrel still imports Electric helpers. The optional DocShell integration
+requires the released `doc_shell ~> 2.0` package and LiveView. Neither profile
+changes host authorization.
 
 Tuning an integration uses configuration:
 

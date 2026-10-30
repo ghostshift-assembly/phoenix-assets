@@ -20,8 +20,8 @@ invalidates reuse even when package versions stay fixed.
 The HTTP consumer installs Svelte and `/core` without Electric, TanStack, Phoenix
 or LayerChart. The full consumer installs the explicitly selected optional peers,
 checks exports and builds reporting, collection and DocShell entrypoints. Hex
-consumers compile without optional dependencies and with DocShell 0.4, 0.5 and 1.0.
-The DocShell 1.0 consumer exports a static site without starting an endpoint.
+consumers compile without optional dependencies and with released DocShell 2.0.0.
+The DocShell consumer exports a static site without starting an endpoint.
 Chromium checks both installed renderers and a connected LiveView consumer,
 including JSON/Pagefind locale indexes and filters, repeated DOM replacements,
 local optional enhancements, responsive themes, search focus, RTL, reduced motion
@@ -51,6 +51,10 @@ original scope; do not relabel them as proof for new source or schemas. Native
 reader and human assistive-task evidence comes from the owning consumer/target,
 separately from browser screenshots and the two libraries' gates. They are
 consumer deployment checks and do not block automated library completion.
+
+Phoenix Assets 3.0 requires Elixir 1.20 and raises the optional DocShell floor
+to its released 2.0 line. All four npm packages share the Hex release version.
+The versioned DocShell wire contracts retain their identifiers.
 
 Upgrades from 1.x to 2.x include breaking installation changes: reporting
 hosts must explicitly select `layerchart@2.9.1`, and Svelte consumers must select
@@ -86,9 +90,10 @@ license notices. Published Hex consumers use those packaged files without Node
 or pnpm. For direct renderer development, run `pnpm build:doc-shell-assets` after
 changing browser source.
 
-The DocShell site renderer supports DocShell 0.5 and 1.0. The extraction-only
-integration also accepts 0.4. Packaged consumers check all three versions and a
-consumer without optional dependencies. While preparing an upstream candidate,
+Phoenix Assets 3.0 requires DocShell `~> 2.0` when that optional integration is
+installed. Packaged consumers check the released 2.0.0 floor and a consumer
+without optional dependencies. Archive metadata checks reject older producer
+requirements and unintended future-major admission. While preparing an upstream candidate,
 set `DOC_SHELL_CANDIDATE` to its checkout for dependency installation and
 qualification. Artifact builds remove that override and retain the public Hex
 requirement. Use separate build directories when switching between the registry

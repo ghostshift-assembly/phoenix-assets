@@ -29,6 +29,7 @@ const STALE_REPOSITORY = "futhr/phoenix" + "_assets"
 const REPOSITORY_URL = `https://github.com/${REPOSITORY}`
 const NPM_REPOSITORY_URL = `git+${REPOSITORY_URL}.git`
 const RELEASE_SCHEMA = "phoenix-assets/release/v1"
+const DOC_SHELL_RELEASE = "2.0.0"
 const PACKAGES = [
   { directory: "npm/doc-shell", name: "@phoenix-assets/doc-shell", slug: "doc-shell" },
   { directory: "npm/lint", name: "@phoenix-assets/lint", slug: "lint" },
@@ -534,6 +535,12 @@ function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion, resourc
         if name in ["phoenix_sync", "electric"],
           do: raise("asset package must not constrain the host sync backend: #{name}")
       end
+      doc_shell = Enum.find(requirements, &(:proplists.get_value("name", &1) == "doc_shell"))
+      true = :proplists.get_value("optional", doc_shell)
+      requirement = :proplists.get_value("requirement", doc_shell)
+      true = Version.match?("${DOC_SHELL_RELEASE}", requirement)
+      false = Version.match?("1.0.0", requirement)
+      false = Version.match?("3.0.0", requirement)
       `,
       join(outer, "metadata.config"),
     ])
@@ -544,7 +551,7 @@ function smokeHexArtifact(sourceRoot, output, manifest, docShellVersion, resourc
       `
 defmodule Consumer.MixProject do
   use Mix.Project
-  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${docShellVersion ? `, {:doc_shell, "== ${docShellVersion}"}, {:phoenix_live_view, "~> 1.1"}` : ""}${docShellVersion === "1.0.0" && resources ? ', {:bandit, "~> 1.14.1"}' : ""}]]
+  def project, do: [app: :consumer, version: "0.0.0", deps: [{:phoenix_assets, path: ${JSON.stringify(source)}}${docShellVersion ? `, {:doc_shell, "== ${docShellVersion}"}, {:phoenix_live_view, "~> 1.1"}` : ""}${docShellVersion === DOC_SHELL_RELEASE && resources ? ', {:bandit, "~> 1.14.1"}' : ""}]]
 end
 `,
     )
@@ -595,11 +602,11 @@ end
         docShellVersion
           ? `
       true = Code.ensure_loaded?(PhoenixAssets.DocShell.Ast)
-      ${docShellVersion === "0.4.0" ? "false" : "true"} = Code.ensure_loaded?(DocShell.Presentation.Site)
+      true = Code.ensure_loaded?(DocShell.Presentation.Site)
       for module <- [PhoenixAssets.DocShell.Components, PhoenixAssets.DocShell.ApiReference,
                      PhoenixAssets.DocShell.StaticRenderer, PhoenixAssets.DocShell.Assets,
                      PhoenixAssets.DocShell.Pagefind] do
-        ${docShellVersion === "0.4.0" ? "false" : "true"} = Code.ensure_loaded?(module)
+        true = Code.ensure_loaded?(module)
       end
       `
           : ""
@@ -628,7 +635,7 @@ end
       ],
       consumerOptions,
     )
-    if (docShellVersion === "1.0.0") {
+    if (docShellVersion === DOC_SHELL_RELEASE) {
       run(
         "mix",
         [
@@ -667,7 +674,7 @@ end
       generated: readJson(join(consumer, "generated-digests.json")),
       result: "passed",
     }
-    if (docShellVersion === "1.0.0" && resources)
+    if (docShellVersion === DOC_SHELL_RELEASE && resources)
       resources.push({ root, consumer, env: consumerEnv })
   } finally {
     if (!resources?.some((resource) => resource.root === root))
@@ -676,7 +683,7 @@ end
   if (!docShellVersion) {
     return [
       evidence,
-      ...["0.4.0", "0.5.0", "1.0.0"].flatMap((version) =>
+      ...[DOC_SHELL_RELEASE].flatMap((version) =>
         smokeHexArtifact(sourceRoot, output, manifest, version, resources),
       ),
     ]

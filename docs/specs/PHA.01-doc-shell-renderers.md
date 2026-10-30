@@ -80,14 +80,11 @@ Phoenix HTML; the asset and Pagefind adapters need their DocShell presentation
 modules. A consumer that omits optional dependencies must compile without
 warnings and must not resolve frontend-only dependencies.
 
-The asset substrate also accepts DocShell 0.4 for hosts using its extraction
-contract. Site presentation adapters compile only when their required 0.5
-presentation modules exist; accepting 0.4 does not advertise those newer APIs.
-Packaged compatibility consumers must compile with 0.4 plus LiveView and with
-the site presentation adapters on DocShell 0.5 and 1.0. The npm renderer accepts
-its v2 presentation shape while keeping member-reference metadata opaque. This
-does not imply portable-artifact support on older producer APIs. The passive
-artifact subset below requires the current receipt-verification contract.
+Phoenix Assets 3.0 requires the released DocShell `~> 2.0` package for its
+optional extraction, site and artifact adapters. Package qualification checks
+2.0.0 plus LiveView and checks compilation without optional dependencies. The
+npm renderer accepts the versioned presentation/site contracts independently of
+an Elixir installation and keeps member-reference metadata opaque.
 
 No host application name, route, brand, source taxonomy, or authorization rule
 may appear under `lib/phoenix_assets/doc_shell/` or `npm/doc-shell/src/`.
@@ -359,7 +356,7 @@ documentation sites:
 
 | ID | Evidence |
 | --- | --- |
-| PHA-V01 | The Hex package compiles with no optional dependencies; installing DocShell 0.5 or 1.0 plus LiveView exposes every adapter module. DocShell 0.4 plus LiveView exposes the AST adapter while site presentation adapters remain absent. |
+| PHA-V01 | The Hex package compiles without optional dependencies; installing released DocShell 2.0.0 plus LiveView exposes every adapter and receipt API. The package requirement refuses older producer lines. |
 | PHA-V02 | Importing `@phoenix-assets/doc-shell/browser` resolves no Svelte module and passes DOM lifecycle tests. |
 | PHA-V03 | Svelte and LiveView render every DocShell conformance page with equal visible text, headings, links, navigation and accessible names. |
 | PHA-V04 | Static and LiveView HEEx output share page/cohort digests and normalized document semantics. |

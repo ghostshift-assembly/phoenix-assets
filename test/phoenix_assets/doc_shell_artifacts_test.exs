@@ -127,14 +127,12 @@ defmodule PhoenixAssets.DocShellArtifactsTest do
     end
   end
 
-  if System.get_env("DOC_SHELL_CANDIDATE") do
-    test "a configured candidate cannot silently omit receipt verification" do
-      for input <- @cases do
-        assert {:ok, %Artifacts.Page{receipt: receipt}} =
-                 Artifacts.admit(input["content"], input["receipt"], assets(input))
+  test "the installed producer verifies the frozen receipt corpus" do
+    for input <- @cases do
+      assert {:ok, %Artifacts.Page{receipt: receipt}} =
+               Artifacts.admit(input["content"], input["receipt"], assets(input))
 
-        assert receipt == input["receipt"]
-      end
+      assert receipt == input["receipt"]
     end
   end
 

@@ -207,7 +207,7 @@ consumer upgrade; use the exact artifact/peer closure and evidence in RELEASING.
   legacy `doc-shell/v1`, and `doc-shell-site/v1`. `SiteShell` consumes a
   projected site and page ID; `/browser` exposes the Svelte-free controllers.
   The optional `PhoenixAssets.DocShell.*` modules render HEEx and static sites
-  with DocShell 0.5 or 1.0 plus LiveView. Theme the renderers through the
+  with DocShell `~> 2.0` plus LiveView. Theme the renderers through the
   `--doc-*` custom properties; hosts supply routes, identity and authorization.
 
 ## Host-owned application composition

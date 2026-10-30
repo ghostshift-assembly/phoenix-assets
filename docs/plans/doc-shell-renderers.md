@@ -54,7 +54,7 @@ archive receipts retain their own exact source/producer/peer identities.
 | PHA-S09 | Upstream `Conformance` corpus and capability fixtures; source/native tests plus `conformance-qualification.mjs` | Independent extracted/hosted reader observations are archive-specific |
 | PHA-S10 | Module guards, runtime API guards and browser subpath; `package_test.exs`, `smoke-hex`, exports and fresh consumer checks | Optional-free and selected-producer modes are distinct |
 | PHA-S11 | Scoped editorial CSS, host slots/snippets, inert settings and generic artifact preview | Ownership review plus boundary gate; no product task/state/layout or producer algorithm was added |
-| PHA-V01 | `scripts/release.mjs smoke-hex`: optional-free and DocShell 0.4/0.5/1.0 consumers; current candidate receipt tests | Published compatibility does not imply new receipt support |
+| PHA-V01 | `scripts/release.mjs smoke-hex`: optional-free and released DocShell 2.0.0 consumers; receipt verification tests | Published compatibility does not imply new receipt support |
 | PHA-V02 | Browser entry/import checks, shared controller tests and packaged `Assets.validate/0` | No Svelte dependency is introduced through the browser entry |
 | PHA-V03 | `doc_shell_conformance_test.exs`, upstream frozen cohort and extracted Svelte/static/hosted surface comparisons | The expanded settings/artifact observations extend the baseline corpus |
 | PHA-V04 | Shared HEEx page body, source digest assertions, hosted fixture and surface validator | Byte-identical framework HTML is not required |
@@ -95,16 +95,15 @@ archive receipts retain their own exact source/producer/peer identities.
 `doc-shell-cohort/coordinated-proof.json` in that directory are local lookup
 paths for the current archived cohort. Verify those content-addressed receipts
 against their source revisions, locks, package hashes and browser output.
-Generated release artifacts remain ignored by Git. Neither repository has been
-published by this buildout.
+Generated release artifacts remain ignored by Git. Registry publication is verified against the exact release archives.
 
 The maintainer's pushed revisions passed
 [Phoenix Assets 41008416945](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41008416945)
 (`fc6e8f2`) and [DocShell 41008380235](https://github.com/futhr/doc_shell/actions/runs/41008380235)
 (`64e92b1`), including DocShell's Elixir 1.20/OTP 28 and 29 lanes. That Phoenix
-Assets run used the older candidate pin. CI now pins upstream `846b67f`, runs
-the full current gate on main pushes and has a regression that prevents silent
-receipt-API omission. New local commits need another maintainer push for CI.
+Assets run used the older candidate pin. CI now resolves the published DocShell
+2.0 dependency from its lock, runs the full gate on main pushes and verifies
+receipt support without a candidate-only test condition. New local commits need another maintainer push for CI.
 Codecov uploads reported `Repository not found`; the workflow tolerates that
 optional service failure. Coverage floors are enforced by the passing local gates.
 
