@@ -117,11 +117,11 @@ The full Svelte stack is the default, so no preset module is required.
 
 ```elixir
 # mix.exs
-{:phoenix_assets, "~> 2.0.1"}
+{:phoenix_assets, "~> 3.0.0"}
 ```
 
 ```bash
-cd assets && pnpm add -D --save-exact @phoenix-assets/vite@2.0.1 @phoenix-assets/svelte@2.0.1 @phoenix-assets/lint@2.0.1
+cd assets && pnpm add -D --save-exact @phoenix-assets/vite@3.0.0 @phoenix-assets/svelte@3.0.0 @phoenix-assets/lint@3.0.0
 ```
 
 ### PostgreSQL 18 and Electric

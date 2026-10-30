@@ -323,12 +323,11 @@ inside it. The configured root itself may be a symlink. Failed generation now
 raises from `Generated.stale?/1`; use `Generated.generate(ctx, check: true)` to
 handle tagged errors explicitly.
 
-For checkout DocShell settings, supply the upstream `presentation` object on the
-site or renderer context. `SiteShell` accepts local `brand`/`footer` snippets and
+For DocShell settings, supply the upstream `presentation` object on the site or
+renderer context. `SiteShell` accepts local `brand`/`footer` snippets and
 `assetUrls`; HEEx keeps its slots. Hosts supply exact locale/release destinations,
-translations, brand content and robots policy. Nonempty HEEx settings require
-the unreleased upstream settings validator; older supported producers keep
-empty/default behavior. New controls still need fresh browser/package qualification.
+translations, brand content and robots policy. The Hex integration uses the
+settings validator and receipt API included in released DocShell 2.0.0.
 
 For paired hosted reference content, use Svelte `HostedReference` or HEEx
 `ApiReference.hosted_reference/1` with the expected host-admitted publication.

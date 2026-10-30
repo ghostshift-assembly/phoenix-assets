@@ -23,7 +23,6 @@ and consumer producer/native application validation are not library gates.
 | PHA-P14 | implemented; automated evidence below | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
 | PHA-P15 | implemented; automated evidence below | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; consumer deployments stay separately owned |
 | PHA-P16 | implemented; automated evidence below | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
-| --- | --- | --- |
 
 ## Coordinated completion
 
@@ -74,10 +73,10 @@ archive receipts retain their own exact source/producer/peer identities.
 - DocShell full gate: 441 checks (16 doctests, 35 properties, 390 tests), 95.6%
   line coverage; compiler, optional-free compile, strict lint, docs/spec coverage,
   audits and Dialyzer pass on Elixir 1.20.4/OTP 29.0.4.
-- Phoenix Assets full gate: 507 backend checks at 87.6% coverage. The full gate
-  against the current sibling passes 514 checks at 92.5%. Both pass 557 frontend
-  tests (324 DocShell), all 25 required checks, frontend coverage floors,
-  17 release-script tests and packaged optional consumers.
+- Phoenix Assets 3.0.0 full gate with released DocShell 2.0.0: 514 backend checks
+  at 92.5% coverage, 557 frontend tests (324 DocShell), all 25 required checks,
+  frontend coverage floors, 17 release-script tests and packaged optional consumers.
+  The Elixir 1.20/OTP 28 compile and 514 backend checks also pass.
 - New regressions first failed on undeclared profile media/subject acceptance,
   a hidden nested receipt requirement, shell/search/code/tab ID collisions and
   dark-theme skip-link contrast. Chromium reproduces duplicate IDs and the 1.8:1
@@ -91,7 +90,7 @@ archive receipts retain their own exact source/producer/peer identities.
 
 ## Package and CI evidence
 
-`phoenix-assets/dist/release/spec-completion/qualification.json` and
+`phoenix-assets/dist/release/v3.0.0/qualification.json` and
 `doc-shell-cohort/coordinated-proof.json` in that directory are local lookup
 paths for the current archived cohort. Verify those content-addressed receipts
 against their source revisions, locks, package hashes and browser output.

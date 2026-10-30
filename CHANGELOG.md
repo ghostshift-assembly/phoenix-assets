@@ -5,6 +5,65 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v3.0.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v2.0.1...v3.0.0) (2026-10-30)
+### Breaking Changes:
+
+* require the released DocShell 2.0 producer by futhr
+
+* require Elixir 1.20 across supported OTP versions by futhr
+
+
+
+### Features:
+
+* doc-shell: render verified passive artifacts and diagnostic previews by futhr
+
+* doc-shell: validate passive artifact media before display by futhr
+
+* doc-shell: inherit host labels across reader controls by futhr
+
+* doc-shell: render projected page decorations and metadata by futhr
+
+* doc-shell: admit hosted publication pairs before rendering by futhr
+
+* doc-shell: render shared site presentation settings by futhr
+
+### Bug Fixes:
+
+* doc-shell: reserve control ID families and correct dark contrast by futhr
+
+* doc-shell: preserve document anchors and enforce receipt admission by futhr
+
+* doc-shell: retain passive site restrictions on missing pages by futhr
+
+* qualification: share the installed Svelte runtime during SSR by futhr
+
+* doc-shell: preserve inline anchors and mixed code content by futhr
+
+* doc-shell: preserve canonical bytes in fallback admission by futhr
+
+* doc-shell: ignore non-text JSON attributes safely by futhr
+
+* vite: load generated contracts from the backend default by futhr
+
+* doc-shell: space reading links and style HEEx content controls by futhr
+
+* doc-shell: preserve hosted canvas and theme link colors by futhr
+
+* doc-shell: keep contents ahead of narrow-screen articles by futhr
+
+* doc-shell: enforce capability admission before rendering by futhr
+
+* doc-shell: complete renderer parity and connected qualification by futhr
+
+* doc-shell: qualify multilingual Pagefind search in both renderers by futhr
+
+* deps: update audited HTTP and development integrations by futhr
+
+* deps: require patched Ash relationship loading by futhr
+
+* vite: watch gettext catalogs outside the project root by futhr
+
 ## [v2.0.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v2.0.0...v2.0.1) (2026-10-25)
 
 
