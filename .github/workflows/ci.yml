@@ -30,9 +30,9 @@ jobs:
       DOC_SHELL_CANDIDATE: ${{ github.workspace }}/.candidates/doc_shell
     strategy:
       fail-fast: false
-      # One automatic change lane; both supported toolchains remain local/release gates.
+      # Main runs the full current gate; PRs run the reduced lane; manual runs cover both OTP versions.
       matrix:
-        include: ${{ fromJSON((github.event_name == 'workflow_dispatch' || inputs.full_matrix) && '[{"elixir":"1.20","otp":"28","check":"elixir"},{"elixir":"1.20","otp":"29","check":"full"}]' || '[{"elixir":"1.20","otp":"29","check":"pr"}]') }}
+        include: ${{ fromJSON((github.event_name == 'workflow_dispatch' || inputs.full_matrix) && '[{"elixir":"1.20","otp":"28","check":"elixir"},{"elixir":"1.20","otp":"29","check":"full"}]' || github.event_name == 'push' && '[{"elixir":"1.20","otp":"29","check":"full"}]' || '[{"elixir":"1.20","otp":"29","check":"pr"}]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -42,7 +42,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: futhr/doc_shell
-          ref: 493e7e9399e72095a8efa684b32da9aa08443df8
+          ref: 846b67fe34ca07cf7b7b0a744af235912f89e9d4
           path: .candidates/doc_shell
           persist-credentials: false
 
@@ -99,7 +99,7 @@ jobs:
       - run: pnpm build:doc-shell-assets
         if: matrix.check == 'elixir'
 
-      # Floor leg: compile (warnings as errors) + ExUnit only. Formatting,
+      # OTP 28 leg: compile (warnings as errors) + ExUnit only. Formatting,
       # static analysis, and the frontend run once, on the latest toolchain.
       - run: mix compile --warnings-as-errors
         if: matrix.check == 'elixir'
