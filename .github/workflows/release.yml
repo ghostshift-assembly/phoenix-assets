@@ -161,6 +161,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           tar -czf "$RUNNER_TEMP/release-qualification.tar.gz" -C dist/release .
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || \
-            gh release create "$GITHUB_REF_NAME" --verify-tag --generate-notes
+          if gh release view "$GITHUB_REF_NAME" --json isDraft --jq '.isDraft' > "$RUNNER_TEMP/release-is-draft" 2>/dev/null; then
+            if test "$(cat "$RUNNER_TEMP/release-is-draft")" = false; then
+              mkdir -p "$RUNNER_TEMP/published-release"
+              gh release download "$GITHUB_REF_NAME" --dir "$RUNNER_TEMP/published-release" \
+                --pattern '*.tar' --pattern '*.tgz' --pattern release-manifest.json --pattern SHA256SUMS
+              for artifact in dist/release/*.tar dist/release/*.tgz dist/release/release-manifest.json dist/release/SHA256SUMS; do
+                cmp --silent "$artifact" "$RUNNER_TEMP/published-release/$(basename "$artifact")"
+              done
+              echo "Published release already retains the verified registry artifacts."
+              exit 0
+            fi
+          else
+            git for-each-ref "refs/tags/$GITHUB_REF_NAME" --format='%(contents)' > "$RUNNER_TEMP/release-notes.md"
+            gh release create "$GITHUB_REF_NAME" --verify-tag --draft \
+              --title "Phoenix Assets $GITHUB_REF_NAME" --notes-file "$RUNNER_TEMP/release-notes.md"
+          fi
           gh release upload "$GITHUB_REF_NAME" dist/release/*.tar dist/release/*.tgz dist/release/*.json dist/release/SHA256SUMS "$RUNNER_TEMP/release-qualification.tar.gz" --clobber
+          gh release edit "$GITHUB_REF_NAME" --draft=false --latest
