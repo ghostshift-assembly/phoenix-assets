@@ -173,6 +173,7 @@
   --pa-semantic-color-muted: #cbd5e1;
   --pa-semantic-color-border: #64748b;
   --pa-semantic-color-accent: #93c5fd;
+  --pa-semantic-color-accent-text: #101827;
   --pa-semantic-color-focus: #93c5fd;
 }
 @media (prefers-color-scheme: dark) {
@@ -184,6 +185,7 @@
     --pa-semantic-color-muted: #cbd5e1;
     --pa-semantic-color-border: #64748b;
     --pa-semantic-color-accent: #93c5fd;
+    --pa-semantic-color-accent-text: #101827;
     --pa-semantic-color-focus: #93c5fd;
   }
 }
@@ -195,6 +197,7 @@
   --pa-semantic-color-muted: #ffffff;
   --pa-semantic-color-border: #ffffff;
   --pa-semantic-color-accent: #ffff00;
+  --pa-semantic-color-accent-text: #000000;
   --pa-semantic-color-focus: #ffff00;
 }
 :where(.doc-shell) :focus-visible {

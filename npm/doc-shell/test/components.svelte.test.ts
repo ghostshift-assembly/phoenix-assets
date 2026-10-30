@@ -229,7 +229,7 @@ describe("rendered heading targets", () => {
 })
 
 describe("SiteShell browser controller ownership", () => {
-  it("keeps shell controls distinct from authored anchors, including suffix collisions", () => {
+  it("keeps shell controls distinct from authored anchors, including suffix collisions", async () => {
     const element = target()
     const page = site.pages["anchors:guide"]
     if (!page) throw new Error("guide fixture missing")
@@ -240,8 +240,12 @@ describe("SiteShell browser controller ownership", () => {
       "doc-search-query",
       "doc-search-results",
       "doc-search-1-query",
+      "doc-search-2-results-result-0",
     ]
-    const content = anchors.map((id) => ({ tag: "span", attrs: { id }, content: [id], meta: {} }))
+    const content = [
+      ...page.content,
+      ...anchors.map((id) => ({ tag: "span", attrs: { id }, content: [id], meta: {} })),
+    ]
     const decorated = {
       ...site,
       pages: {
@@ -267,11 +271,21 @@ describe("SiteShell browser controller ownership", () => {
     )
     expect(element.querySelector("[data-doc-nav]")?.id).toBe("doc-navigation-1")
     const query = element.querySelector<HTMLInputElement>("[data-doc-search-input]")
-    expect(query?.id).toBe("doc-search-2-query")
+    expect(query?.id).toBe("doc-search-3-query")
     expect(element.querySelector(`label[for="${query?.id}"]`)).not.toBeNull()
     expect(query?.getAttribute("aria-controls")).toBe(
       element.querySelector("[data-doc-search-results]")?.id,
     )
+    element.querySelector<HTMLButtonElement>("[data-doc-search-open]")?.click()
+    if (!query || !site.search[0]) throw new Error("Missing search fixture")
+    query.value = site.search[0].title
+    query.dispatchEvent(new Event("input", { bubbles: true }))
+    await settle()
+    expect(element.querySelector("[data-doc-search-results] [role=option]")?.id).toBe(
+      "doc-search-3-results-result-0",
+    )
+    const activeIds = [...element.querySelectorAll("[id]")].map((node) => node.id)
+    expect(new Set(activeIds).size).toBe(activeIds.length)
   })
   it("renders splash hero, full banner, navigation metadata and page SEO without requiring controls", () => {
     const element = target()

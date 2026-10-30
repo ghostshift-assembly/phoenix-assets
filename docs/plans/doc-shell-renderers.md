@@ -79,8 +79,9 @@ archive receipts retain their own exact source/producer/peer identities.
   tests (324 DocShell), all 25 required checks, frontend coverage floors,
   17 release-script tests and packaged optional consumers.
 - New regressions first failed on undeclared profile media/subject acceptance,
-  a hidden nested receipt requirement and duplicate shell/source IDs. Corrected
-  owners pass; Chromium also reproduces duplicate IDs against the previous archives.
+  a hidden nested receipt requirement, shell/search/code/tab ID collisions and
+  dark-theme skip-link contrast. Chromium reproduces duplicate IDs and the 1.8:1
+  skip-link ratio against the earlier archives; corrected owners pass.
 - Earlier coordinated archives passed 166 baseline and 152 expanded reader cases,
   with 158 reviewed screenshots. Fresh evidence for the current source belongs
   to its own archive receipt; old receipts are not relabelled.

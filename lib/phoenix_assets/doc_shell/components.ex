@@ -608,16 +608,21 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     defp shell_ids(nodes) do
       occupied = nodes |> source_ids() |> MapSet.new()
 
+      search_ids =
+        Enum.reduce(occupied, occupied, fn id, acc ->
+          MapSet.put(acc, Regex.replace(~r/-results-result-\d+\z/, id, ""))
+        end)
+
       %{
         main: available_id("doc-main", occupied, [""]),
         navigation: available_id("doc-navigation", occupied, [""]),
-        search: available_id("doc-search", occupied, ["-query", "-results"])
+        search: available_id("doc-search", search_ids, ["", "-query", "-results"])
       }
     end
 
     defp source_ids(nodes) when is_list(nodes), do: Enum.flat_map(nodes, &source_ids/1)
 
-    defp source_ids(%{"attrs" => attrs, "content" => content}) do
+    defp source_ids(%{"attrs" => attrs, "content" => content}) when is_map(attrs) do
       ids = if is_binary(attrs["id"]), do: [attrs["id"]], else: []
       ids ++ source_ids(content)
     end

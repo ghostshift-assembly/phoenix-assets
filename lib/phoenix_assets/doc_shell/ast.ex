@@ -25,22 +25,13 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     @spec render([DocShell.Ast.ast_node()], map(), keyword()) :: safe()
     def render(nodes, labels \\ %{}, options \\ [])
         when is_list(nodes) and is_map(labels) and is_list(options) do
-      environment = %{
-        labels: labels,
-        artifact_page: Keyword.get(options, :artifact_page),
-        passive?: Keyword.get(options, :passive, false)
-      }
-
-      {:safe, render_children(mark_positions(nodes, [], environment))}
+      {:safe, render_children(mark_positions(nodes, [], environment_for(nodes, labels, options)))}
     end
 
     @doc "Renders one AST node through the closed element policy."
     @spec render_node(DocShell.Ast.ast_node()) :: iodata()
     def render_node(node),
-      do:
-        render_marked(
-          hd(mark_positions([node], [], %{labels: %{}, artifact_page: nil, passive?: false}))
-        )
+      do: render_marked(hd(mark_positions([node], [], environment_for([node], %{}, []))))
 
     @doc "Checks a dynamic link through the renderer URL policy without emitting HTML."
     @spec link_target(term()) :: {:ok, String.t(), boolean()} | :error
@@ -108,6 +99,8 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
             "attrs",
             attrs
             |> Map.put("__doc_shell_position", Enum.join(position, "-"))
+            |> Map.put("__doc_shell_occupied_ids", environment.occupied_ids)
+            |> Map.put("__doc_shell_tab_ids", environment.tab_ids)
             |> Map.put("__doc_shell_labels", environment.labels)
             |> Map.put("__doc_shell_artifact_page", environment.artifact_page)
             |> Map.put("__doc_shell_passive", environment.passive?)
@@ -120,6 +113,40 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
         {node, _} ->
           node
       end)
+    end
+
+    defp environment_for(nodes, labels, options) do
+      occupied = nodes |> source_ids() |> MapSet.new()
+
+      tab_ids =
+        Enum.reduce(occupied, occupied, fn id, acc ->
+          MapSet.put(acc, Regex.replace(~r/-(?:tab|panel)-\d+\z/, id, ""))
+        end)
+
+      %{
+        occupied_ids: occupied,
+        tab_ids: tab_ids,
+        labels: labels,
+        artifact_page: Keyword.get(options, :artifact_page),
+        passive?: Keyword.get(options, :passive, false)
+      }
+    end
+
+    defp source_ids(nodes) when is_list(nodes), do: Enum.flat_map(nodes, &source_ids/1)
+
+    defp source_ids(%{"attrs" => attrs, "content" => children}) when is_map(attrs) do
+      ids = if is_binary(attrs["id"]), do: [attrs["id"]], else: []
+      ids ++ source_ids(children)
+    end
+
+    defp source_ids(_), do: []
+
+    defp available_id(base, occupied, attempt \\ 0) do
+      candidate = if attempt == 0, do: base, else: "#{base}-#{attempt}"
+
+      if MapSet.member?(occupied, candidate),
+        do: available_id(base, occupied, attempt + 1),
+        else: candidate
     end
 
     defp child_environment(%{"tag" => "artifact", "meta" => %{"artifact" => _}}, environment),
@@ -282,8 +309,11 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     defp render_code(attrs, source, language, code_attrs) do
       id =
         valid_id(code_attrs["id"], nil) ||
-          "doc-code-#{attrs["__doc_shell_position"]}-" <>
-            (:crypto.hash(:sha256, source) |> Base.encode16(case: :lower) |> binary_part(0, 12))
+          available_id(
+            "doc-code-#{attrs["__doc_shell_position"]}-" <>
+              (:crypto.hash(:sha256, source) |> Base.encode16(case: :lower) |> binary_part(0, 12)),
+            attrs["__doc_shell_occupied_ids"]
+          )
 
       [
         "<div",
@@ -405,7 +435,7 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
       tabs = Enum.with_index(content)
 
       group =
-        (attrs["id"] |> string() |> valid_id("doc-tabs")) <> "-" <> attrs["__doc_shell_position"]
+        available_id("doc-tabs-" <> attrs["__doc_shell_position"], attrs["__doc_shell_tab_ids"])
 
       buttons =
         Enum.map(tabs, fn {node, index} ->

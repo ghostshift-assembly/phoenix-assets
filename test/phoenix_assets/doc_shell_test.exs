@@ -257,7 +257,7 @@ defmodule PhoenixAssets.DocShellTest do
     page = site.pages["guide"]
 
     ids =
-      ~w(doc-main doc-main-1 doc-navigation doc-search-query doc-search-results doc-search-1-query)
+      ~w(doc-main doc-main-1 doc-navigation doc-search-query doc-search-results doc-search-1-query doc-search-2-results-result-0)
 
     content = page.content ++ Enum.map(ids, &node("span", [&1], %{"id" => &1}))
     page = %{page | content: content, content_digest: digest!(content)}
@@ -284,10 +284,10 @@ defmodule PhoenixAssets.DocShellTest do
     assert html =~ ~s(<main id="doc-main-2")
     assert html =~ ~s(aria-controls="doc-navigation-1")
     assert html =~ ~s(id="doc-navigation-1")
-    assert html =~ ~s(for="doc-search-2-query")
-    assert html =~ ~s(id="doc-search-2-query")
-    assert html =~ ~s(aria-controls="doc-search-2-results")
-    assert html =~ ~s(id="doc-search-2-results")
+    assert html =~ ~s(for="doc-search-3-query")
+    assert html =~ ~s(id="doc-search-3-query")
+    assert html =~ ~s(aria-controls="doc-search-3-results")
+    assert html =~ ~s(id="doc-search-3-results")
   end
 
   test "current producer settings reach static pages, not-found output and document metadata" do
@@ -505,6 +505,15 @@ defmodule PhoenixAssets.DocShellTest do
     assert html == nodes |> Ast.render() |> HTML.safe_to_string()
     assert length(Regex.scan(~r/role="tabpanel"/, html)) == 4
     refute html =~ ~r/role="tabpanel"[^>]* hidden/
+
+    collision_nodes = nodes ++ Enum.map(ids, &node("span", [&1], %{"id" => &1}))
+    collision_html = collision_nodes |> Ast.render() |> HTML.safe_to_string()
+
+    collision_ids =
+      Regex.scan(~r/ id="([^"]+)"/, collision_html, capture: :all_but_first) |> List.flatten()
+
+    assert length(collision_ids) == length(Enum.uniq(collision_ids))
+    for id <- ids, do: assert(collision_html =~ ~s(<span id="#{id}">#{id}</span>))
   end
 
   test "inline search composes with host chrome and bounded facets without an embedded corpus" do

@@ -16,17 +16,16 @@ export const shellIds = (nodes: readonly DocAstNode[]) => {
       for (const child of node.content) pending.push(child)
     }
   }
-  const available = (base: string, suffixes = [""]) => {
+  const searchOccupied = new Set([...occupied].map((id) => id.replace(/-results-result-\d+$/, "")))
+  const available = (base: string, suffixes = [""], pool = occupied) => {
     let attempt = 0
-    while (
-      suffixes.some((suffix) => occupied.has(`${base}${attempt ? `-${attempt}` : ""}${suffix}`))
-    )
+    while (suffixes.some((suffix) => pool.has(`${base}${attempt ? `-${attempt}` : ""}${suffix}`)))
       attempt++
     return `${base}${attempt ? `-${attempt}` : ""}`
   }
   return {
     main: available("doc-main"),
     navigation: available("doc-navigation"),
-    search: available("doc-search", ["-query", "-results"]),
+    search: available("doc-search", ["", "-query", "-results"], searchOccupied),
   }
 }
