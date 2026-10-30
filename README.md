@@ -39,10 +39,10 @@ locale/release links, brand/footer data, shell/search and nested control labels,
 and SEO metadata. Passive artifact documents and diagnostic previews consume
 verified receipts, original SVG/PNG bytes and complete fallback content; the
 native path requires the current upstream receipt API.
-The linked upstream checklist owns shared contracts and validation. Fresh local
-archives pass the automated renderer/browser qualification recorded there.
-External producer, native-application and human assistive-task evidence remains
-unverified; these local changes are not yet published.
+DocShell owns the shared contracts and validation. The tracker maps them to
+automated regressions, browser checks and extracted package consumers.
+Producer algorithms, native applications and deployment policy stay with their
+consumers. The checkout additions are not yet released.
 
 ## What it provides
 

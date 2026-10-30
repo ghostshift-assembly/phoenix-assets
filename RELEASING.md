@@ -49,7 +49,8 @@ qualified together as new contracts land. Extend the existing consumers for
 those requirements before claiming them. Preserve prior receipts at their
 original scope; do not relabel them as proof for new source or schemas. Native
 reader and human assistive-task evidence comes from the owning consumer/target,
-separately from browser screenshots and the two libraries' gates.
+separately from browser screenshots and the two libraries' gates. They are
+consumer deployment checks and do not block automated library completion.
 
 Upgrades from 1.x to 2.x include breaking installation changes: reporting
 hosts must explicitly select `layerchart@2.9.1`, and Svelte consumers must select

@@ -2,13 +2,13 @@
 
 Specification version: 0.3.2. Contract: accepted. Implementation status:
 source implemented, including presentation settings, hosted pairs and passive
-artifacts. Local archive/browser qualification is recorded for the named cohort;
-external producer, native-application and human evidence remains unverified.
+artifacts. Completion is checked by the automated contract, regression, browser
+and extracted-package suites recorded in the tracker.
 The [renderer completion tracker](../plans/doc-shell-renderers.md#coordinated-completion)
 and its linked upstream checklist assign the remaining work in dependency order.
 New shared presentation, publication-pair and artifact contracts land in
 DocShell before their renderer implementation. The tracker distinguishes current
-checkout APIs, unpublished archives and remaining external obligations.
+checkout APIs, automated evidence and registry publication.
 
 ## Purpose
 
@@ -42,8 +42,8 @@ The optional upstream presentation settings carry host-supplied inert identity, 
 Hosts choose the brand, locale/release destinations and disclosure policy;
 the library must not infer them from application names, sessions or repository
 layout. Framework slots/snippets, CSS and visual previews remain renderer-owned.
-The native reader, artifact producer and host retain their implementation and
-qualification duties under the upstream checklist.
+Native readers, artifact producers and hosts retain their implementations and
+deployment validation. Human verification is not a library completion gate.
 
 ## Hosted publication pair consumption
 
@@ -235,7 +235,7 @@ The default presentation includes:
 - an explicit 404 page with navigation and search.
 
 At viewport widths where three columns do not fit, the table of contents moves
-inline before the sidebar becomes a modal. Content must reflow at 400% zoom and
+inline before the sidebar becomes a modal. Content must reflow at a 400%-equivalent viewport and
 320 CSS pixels without hiding essential controls. Sidebar width may be user
 adjustable, but keyboard resizing and a bounded persisted value are required.
 
@@ -364,7 +364,7 @@ documentation sites:
 | PHA-V03 | Svelte and LiveView render every DocShell conformance page with equal visible text, headings, links, navigation and accessible names. |
 | PHA-V04 | Static and LiveView HEEx output share page/cohort digests and normalized document semantics. |
 | PHA-V05 | Keyboard tests cover skip link, search trigger/dialog/results, mobile menu, sidebar groups, tabs, disclosures, copy, theme and locale controls. |
-| PHA-V06 | Browser tests cover 320/768/1280 CSS pixel layouts, 400% zoom, reduced motion, light/dark/system themes and left-to-right/right-to-left pages. |
+| PHA-V06 | Browser tests cover 320/768/1280 CSS pixel layouts, 400%-equivalent reflow, reduced motion, light/dark/system themes and left-to-right/right-to-left pages. |
 | PHA-V07 | JavaScript-disabled tests retain article, navigation, table of contents, code, diagram source, API reference and all ordinary links. |
 | PHA-V08 | Unsafe AST/URL/OpenAPI fixtures are escaped, refused, or visibly degraded according to the closed policy in both renderers. |
 | PHA-V09 | JSON and Pagefind search behavior and filters match the fixed corpus in hosted LiveView, static HEEx and Svelte builds; Pagefind loads no index chunk before search use. |
@@ -395,8 +395,8 @@ Browser copy/enhancement/request statuses read the nearest inert label scope.
 The [package documentation](../../npm/doc-shell/README.md) lists control keys.
 Source wording remains unchanged. Unit/component tests cover inheritance,
 escaping, catalogue isolation and status changes. Automated archive/browser
-qualification is recorded under PHA-P15/P16; human and native-application
-observations remain unverified.
+qualification is recorded under PHA-P15/P16. Consumer deployment validation
+remains separate from the library gate.
 PHA-P12 now consumes validated hero/banner content, splash presentation,
 reserved per-page SEO and badge/collapse metadata. Static local image bytes use
 the existing asset handoff; absent hero images retain alt text. Projected sites
@@ -405,11 +405,15 @@ Locale markers match the active locale when that ID is among the supplied
 choices, without deriving destinations. The expanded archive reader lane checks
 these values, actual locale destinations and passive 404 behavior.
 
-Browser qualification tests a 400%-zoom-equivalent viewport rather than changing
-browser zoom itself. It checks selected text contrast and keyboard behavior;
-it does not establish contrast for every control/state or a complete WCAG 2.2 AA
-assessment. PHA-V05/V06 and the broader customization requirements remain open
-at that scope, even when the fixed-corpus receipt passes.
+Browser qualification uses 320/768/1280 CSS-pixel viewports, including the
+400%-equivalent reflow case. Chromium checks rendered text contrast and visible
+keyboard focus in the supplied light/dark/contrast fixtures, plus keyboard,
+landmark and modal behavior. These executable checks define library acceptance;
+they do not certify arbitrary host themes or deployments.
+
+Shell control IDs avoid authored document IDs without rewriting source anchors.
+The skip link, navigation trigger and search labels/results retain their exact
+targets even when content uses `doc-main`, `doc-navigation` or search-control IDs.
 
 ### Passive artifact media subset
 
@@ -452,5 +456,4 @@ The exact chart/drawing corpus is copied from DocShell `20e9425`, SHA-256
 Source tests cover receipt/byte refusal, both profiles, fallback/anchor parity,
 preview modes and HEEx passive shells. The tracker records the fresh paired
 archive run, including 152 reader cases and 26 reviewed screenshots. Actual
-producer comparison images, native applications and human assistive tasks
-retain their own unverified status.
+producer algorithms and native applications remain consumer responsibilities.

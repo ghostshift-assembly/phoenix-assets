@@ -1,462 +1,44 @@
 # DocShell renderer implementation plan
 
-This tracker implements
-[PHA.01](../specs/PHA.01-doc-shell-renderers.md) against DocShell's
-`doc-shell-site/v1` contract. Source implementation and exact-archive release
-qualification are recorded separately.
+The renderer code implements [PHA.01](../specs/PHA.01-doc-shell-renderers.md).
+Completion requires automated regressions, both owning full gates, independent
+browser observations and fresh extracted-package consumers. Human verification
+and consumer producer/native application validation are not library gates.
 
 | Package | Status | Requires | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
-| PHA-P01 | source implemented; qualification below | DSH-P03/P06 | Import the upstream conformance corpus and add a renderer capability manifest | PHA-V01/V03; schema and fixture drift fail CI |
-| PHA-P02 | source implemented; qualification below | PHA-P01 | Split URL, search, theme, navigation, copy, tabs and enhancement lifecycle into `@phoenix-assets/doc-shell/browser` | PHA-V02; Svelte renderer remains green |
-| PHA-P03 | source implemented; qualification below | PHA-P01/P02 | Add optional DocShell dependency and `PhoenixAssets.DocShell.Ast` | PHA-V01/V07/V08; no-optional compile remains green |
-| PHA-P04 | implemented; local archive/browser evidence below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
-| PHA-P05 | source implemented; qualification below | PHA-P03/P04 | Add directive, code, Mermaid fallback and browser enhancement components | PHA-V03/V05–V08 |
-| PHA-P06 | source implemented; qualification below | PHA-P03–P05 | Add OpenAPI reference and disabled-by-default request panel | PHA-V03/V07/V08 |
-| PHA-P07 | source implemented; qualification below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
-| PHA-P08 | source implemented; qualification below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
-| PHA-P09 | automated archive/browser evidence recorded; human/device checks unverified | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
-| PHA-P10 | local archive qualification recorded below | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
-| PHA-P11 | implemented; local archive/browser evidence below | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
-| PHA-P12 | implemented; local archive/browser evidence below | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
-| PHA-P13 | implemented; source and package admission evidence below | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
-| PHA-P14 | synthetic-profile archive readers qualified; external producer/native checks unverified | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
-| PHA-P15 | automated browser/print/offline evidence recorded; human/native checks unverified | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; human/native results recorded separately |
-| PHA-P16 | local coordinated archives qualified; external targets and new remote CI unverified | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
+| PHA-P01 | implemented; automated evidence below | DSH-P03/P06 | Import the upstream conformance corpus and add a renderer capability manifest | PHA-V01/V03; schema and fixture drift fail CI |
+| PHA-P02 | implemented; automated evidence below | PHA-P01 | Split URL, search, theme, navigation, copy, tabs and enhancement lifecycle into `@phoenix-assets/doc-shell/browser` | PHA-V02; Svelte renderer remains green |
+| PHA-P03 | implemented; automated evidence below | PHA-P01/P02 | Add optional DocShell dependency and `PhoenixAssets.DocShell.Ast` | PHA-V01/V07/V08; no-optional compile remains green |
+| PHA-P04 | implemented; automated evidence below | PHA-P03 | Add HEEx shell, navigation, breadcrumbs, table of contents, provenance and reading-flow components | PHA-V03–V07 |
+| PHA-P05 | implemented; automated evidence below | PHA-P03/P04 | Add directive, code, Mermaid fallback and browser enhancement components | PHA-V03/V05–V08 |
+| PHA-P06 | implemented; automated evidence below | PHA-P03–P05 | Add OpenAPI reference and disabled-by-default request panel | PHA-V03/V07/V08 |
+| PHA-P07 | implemented; automated evidence below | PHA-P02–P06; DSH-P07 | Implement `PhoenixAssets.DocShell.StaticRenderer` and packaged hashed assets | PHA-V04/V11/V12 |
+| PHA-P08 | implemented; automated evidence below | PHA-P02–P07 | Add shared JSON/Pagefind search integration and LiveView refresh hook | PHA-V05/V09; pinned Pagefind build and lazy chunk evidence |
+| PHA-P09 | implemented; automated evidence below | PHA-P04–P08 | Complete responsive, theme, locale, direction and accessibility behavior | PHA-V05/V06/V10 |
+| PHA-P10 | implemented; automated evidence below | PHA-P01–P09 | Qualify both renderers, archives and fresh consumers across supported runtimes | PHA-V01–V13 and `mix check` |
+| PHA-P11 | implemented; automated evidence below | DSH-P15; PHA-P04/P09 | Adopt inert presentation settings and finish locale/release selectors, brand/footer seams and control labels | Native links, host-provided destinations, current selection, default compatibility, invalid inputs and keyboard/no-JavaScript cases |
+| PHA-P12 | implemented; automated evidence below | DSH-P16; PHA-P11 | Render navigation badge/collapse metadata, splash/hero/banner content and required SEO metadata | Same admitted values in Svelte/HEEx/static output; description/canonical/Open Graph/robots, RTL and safe links; no product layout policy |
+| PHA-P13 | implemented; automated evidence below | DSH-P10; PHA-P06 | Consume the host-admitted presentation/OpenAPI pair before API rendering | Matching pairs render; stale, missing, mixed-generation and cross-surface bindings refuse; host authentication/authorization remain outside |
+| PHA-P14 | implemented; automated evidence below | DSH-P11–P13; PHA-P05/P07 | Render verified artifact selections and a local diagnostic preview | Exact receipts/assets, captions, descriptions, anchors, limitations and fallback; safe selected media; no geometry, producer discovery or review approval |
+| PHA-P15 | implemented; automated evidence below | PHA-P11–P14 | Complete browser and accessibility evidence for the expanded contract | Keyboard/focus, contrast/themes, RTL, zoom/reflow, print, offline/file/root/subpath and failed-enhancement cases; consumer deployments stay separately owned |
+| PHA-P16 | implemented; automated evidence below | DSH-P08/P17; PHA-P10–P15 | Qualify the coordinated packages and record cross-repository conformance | Both owning full gates/runtime cohorts, optional consumers, reviewed screenshots, exact upstream/downstream revisions and package digests; no stale receipt reuse |
+| --- | --- | --- |
 
 ## Coordinated completion
 
-The status table is current. Dated records below describe each earlier cut;
-where they say work was pending, the final coordinated archive record states
-the subsequent result without changing the historical observation.
-
-The [shared completion checklist](https://github.com/futhr/doc_shell/blob/main/docs/plans/documentation-sites.md#coordinated-completion)
-records the twelve-step dependency order across both repositories. DSH-P10 and
-DSH-P15/P16 own new shared data/validation; DSH-P11–P14 own portable-artifact
-contracts and qualification inputs. Phoenix Assets owns the Svelte/HEEx/browser
-implementations and visual preview. The row statuses distinguish implemented source from remaining work and release qualification.
-
-Implement shared shapes upstream first, add behavior/refusal fixtures, then
-consume those exact shapes here. Preserve existing DocShell 0.4 extraction and
-0.5/1.0 renderer compatibility at their supported scope; a new selected
-capability must declare its actual prerequisite rather than appearing to work
-against an older upstream package. Preserve the existing Vite path/stub fixes
-and their regressions while completing the DocShell work.
-
-The artifact producer owns semantics, geometry and comparison images. Native
-readers and their lifecycle belong to the native consumer. Phoenix Assets
-provides neither of those implementations nor an approval workflow. Human
-assistive tasks and native target checks remain external qualification items.
-PHA.03 remains conditional on its own admission evidence.
-
-### Consumer boundary review (2026-10-29)
-
-Static review covered configuration/generated contracts, command/auth/socket
-seams, reporting, DocShell and the supervised dev tools, plus DocShell's
-projection/profile/export/web boundaries. No consumer-specific runtime feature
-to move out was identified in those paths. The text boundary gate complements
-this review; it cannot establish semantic ownership by itself.
-The upstream review replaced a consumer name in a changelog API example/test
-locator with `graph://release-notes/example`; no runtime platform branch was found.
-
-Reporting `columns`/`order`/`spans` and its responsive table/chart layout belong
-to the existing upstream report renderer, not an application dashboard policy.
-DocShell CSS and controls are scoped to editorial rendering. Token/header,
-socket and profile callbacks carry host-selected values; they do not choose
-tenant scope, authorize operations or define product state. Example field
-names and retained producer fixtures are not runtime dependencies on consumers.
-
-The coordinated work must not introduce consumer task archetypes, application
-breakpoint profiles, business vocabulary, runtime inspection, repository
-discovery, deployment policy or producer algorithms. Host route/identity/label
-inputs stay inert; HEEx slots and Svelte snippets stay in their renderers.
-
-AshOaskit 0.4.5 is the released OpenAPI adapter baseline already selected in
-DocShell's lockfile, recorded in its shared checklist. Phoenix Assets has no
-direct AshOaskit dependency; qualify the admitted OpenAPI output without
-copying Ash schema generation or forcing the adapter onto other consumers.
-
-### Tracker and boundary checks (2026-10-29)
-
-The coordinated docs pass verified 41 tracked Markdown/Livebook files, 99
-local/repository reference paths and 29 anchors across both checkouts. The
-twelve shared steps and DSH-P01–P17/PHA-P01–P16 definitions resolve without
-duplicate tracker IDs. The existing boundary gate passes for 182 files; the
-upstream consumer-name check passes for 72 production files. Canonical skill
-links still resolve and remain ignored. Production syntax comparisons for
-this pass's comment/doc edits show no executable changes; dependency manifests
-and locks are unchanged.
-
-This pass did not rerun application suites, notebooks, browsers, benchmarks or
-archive/native/human qualification. The earlier Vite fixes and tests were
-subsequently committed; their recorded results below retain their prior scope.
-
-## Qualification scope
-
-The source includes the browser lifecycle, HEEx/static adapters, shared search,
-Pagefind adapter, native modal mobile navigation, tabs/contents disclosures,
-bounded request execution and local
-optional syntax/diagram assets. Unit tests cover the upstream corpus, unsafe
-inputs, stale DOM work, deterministic IDs, capability admission and optional
-dependency isolation. Producer-generated capability cases include accepted
-fallback hashes, stale/missing proofs, unsupported essential features and invalid
-requirements.
-
-The browser qualification includes five projected pages: home, directive guide,
-module reference, long code/tables and Arabic content. It compares JavaScript-disabled
-text, headings, ordinary links, navigation, accessible names, landmarks and
-page/cohort digests across static HEEx, Svelte SSR and hosted LiveView. DocShell's
-public semantic-surface validator checks the observed output. The upstream
-conformance vocabulary drives the directive and locale fixtures. Standalone
-OpenAPI and 404 fixtures retain their native-link and inert-request checks.
-
-JSON and real Pagefind searches replay the producer's fixed query/filter cases
-in static HEEx, Svelte and connected LiveView. They cover section targets, all
-seven facets, English/Swedish indexes, private-content exclusion, lazy loading,
-focus restoration and three successive LiveView subtree replacements. Screenshots
-cover the page inventory, search and mobile navigation at the recorded viewports
-and themes. This describes the workflow's assertions; each candidate's receipt
-records which assertions actually passed.
-
-PHA-P10 closes only for the exact receipt that passes the release process,
-including separate review of retained screenshots. Source status alone is not
-release qualification. Host routes, branding, translation catalogues, backend
-authorization and deployment remain outside this fixture cohort.
-
-The retained fixed-corpus receipt predates the selector, brand/footer,
-hero/banner, SEO, navigation metadata and hosted-pair additions recorded below.
-It does not qualify those new surfaces. Its zoom check uses an equivalent viewport; selected contrast
-and keyboard assertions do not close a complete accessibility assessment.
-These gaps remain open under PHA.01 instead of being inferred from a passing receipt.
-Portable-artifact rendering and the expanded evidence assigned in PHA-P14–P16
-remain open.
-
-## Prior executed source checks (2026-10-29)
-
-These results predate the coordinated tracker/ownership update. That update
-uses source/reference/tracking checks only; it does not requalify archives,
-the full runtime matrix or future features.
-
-`mix check --no-retry --no-parallel` passes on Elixir 1.20.4 / OTP 29.0.4,
-Node 24.21.0 and pnpm 12.15.0: 425 backend checks (18 doctests, 407 tests),
-92.1% backend line coverage, 374 frontend tests and 17 release-script tests.
-All configured required checks pass, including both Hex audits, the production
-npm audit, package exports, optional-free Hex and HTTP consumers, and the
-DocShell offline/story checks. Optional absent-package tools remain skipped.
-
-The source audit added real Vite regressions for the default generated directory,
-first generation after a stub import, and updates with default/custom paths.
-The path and first-boot tests failed before their fixes. DocShell admission now
-participates in its coverage gate: 141 DocShell tests pass with 93.93% package
-line coverage and 98.27% admission line coverage.
-
-Earlier on the same date, warnings-as-errors library compilation and the 425
-backend checks passed on Elixir 1.18.4 / OTP 27.3.4.15 with separate dev/test build
-directories. That floor leg was not rerun for the Vite fixes and prose audit.
-The clean dependency compile emits Mint's optional `CAStore.file_path/0` warning;
-this is not a warning-free claim for every dependency. Archive receipts and
-screenshot review remain separate from these source results.
-
-The optional ELK chunk emitted by Mermaid 12 measures approximately 1.47 MiB raw
-and 460 KiB gzip with the selected dependency graph. Its explicit per-file budget
-is 2 MiB raw / 640 KiB gzip; highlighting is 192 KiB / 64 KiB. These optional
-chunks load on use in the HEEx output. The base browser and CSS budgets remain
-48 KiB / 16 KiB and 48 KiB / 12 KiB respectively. `Assets.validate/0` checks each
-packaged file and local module references. Bundled third-party notices are
-retained with the Hex assets.
-
-## Build order rules
-
-- Changes to shared site or fixture shapes land in DocShell first.
-- Browser-core extraction keeps the existing Svelte API operational while the
-  LiveView adapter is built.
-- Each HEEx component lands with its DocShell fixture, Svelte comparison, and
-  JavaScript-disabled assertion.
-- Static rendering uses the component implementation already accepted for
-  LiveView; it does not introduce another template tree.
-- Visual snapshots are reviewed inputs. A test command cannot regenerate and
-  accept new baselines in one step.
-- Generated npm and Hex release artifacts remain outside source status checks
-  and are validated from fresh package archives.
-
-## Bundle budgets
-
-`Assets.budgets/0` declares per-file raw/gzip limits for CSS, browser core,
-highlighting and Mermaid chunks. Search and request controllers ship in the
-base browser core; Pagefind indexes, syntax highlighting and Mermaid assets
-load on use. Request controls remain inert until explicitly enabled and mounted.
-Budget changes require a measured fixture and an explicit review in the same change.
-
-### Coordinated settings evidence
-
-Upstream `doc_shell` at `72b46cd` provides settings validation, context propagation
-and hosted pair admission. Its full `mix check` passed on Elixir 1.20.4/OTP 29.0.4:
-403 checks (16 doctests, 32 properties, 355 tests), 95.4% line coverage, Dialyzer,
-documentation coverage and no-optional compilation. This is checkout evidence.
-
-Downstream settings adoption passes 17 targeted HEEx checks against that sibling
-candidate. The full `mix check --no-retry --no-parallel` also passes with the locked
-producer: 427 backend checks (18 doctests, 409 tests), 92.0% line coverage, and 390
-frontend tests (37 Vite, 157 DocShell, 186 Svelte, 10 lint). DocShell frontend line
-coverage is 94.2%; the settings validator has 98.18%. Exports, audits, release tests,
-HTTP-only and extracted Hex consumers, including supported older DocShell releases,
-passed. A narrow absent-module annotation prevents compiler warnings when an older
-producer lacks the new settings API; nonempty unsupported settings still refuse.
-Fresh coordinated archive receipts and browser screenshots remain pending; the
-previous retained qualification receipt does not cover these edits.
-
-### JSON attribute regression
-
-The upstream AST accepts JSON attribute values. Svelte's old declaration assumed
-strings, and both code-fence renderers called string functions on arbitrary
-class values. The regression uses numeric, boolean, null, array and object
-attributes accepted by `DocShell.Ast.valid?/1`. Before the fix, all five Svelte
-cases fail at `class.replace`, and HEEx fails at `String.replace_prefix/3`.
-Supported string attributes still render; other values are ignored, unsafe
-links/media retain visible fallbacks and code remains plain readable text.
-
-After this correction, the full current-runtime `mix check --no-retry --no-parallel`
-passes: 428 backend checks (18 doctests, 410 tests), 92.1% line coverage and
-395 frontend tests (including 162 DocShell tests). Exports, audits and extracted
-consumer checks passed again. This source evidence does not replace the pending
-coordinated archive/browser receipt.
-
-### Hosted pair consumption evidence
-
-Svelte and HEEx now consume the host's expected publication before rendering
-narrative/API content. Svelte's comparator is intentionally a binding/top-level
-wire check; hosts validate source contracts before handing data to the renderer.
-HEEx delegates complete pair/source checks to upstream `HostedPair.validate/3`.
-The exact shared fixture is pinned at SHA-256
-`398e2712d5d734afd69eb4d030867d272426efb2b1ee984f9daf3a13d650b066`.
-Matching, missing, stale, malformed and cross-surface cases pass in targeted tests,
-including refusal before DOM content. Candidate HEEx checks pass against upstream
-`506b839`; older producers explicitly refuse the new pair capability. The full current downstream gate passes: 429 backend checks (18 doctests,
-411 tests), 91.6% line coverage and 406 frontend tests (173 DocShell tests).
-The 19 candidate HEEx checks exercise the new upstream path; the full gate's
-packaged consumers also retain older-producer behavior. The upstream fixture has
-a formatter-only exemption to retain exact bytes, alongside the published v2
-fixture; JSON parsing and the checksum assertion remain required. Fresh archive
-and browser qualification remain open.
-
-### Projected page presentation evidence
-
-Both renderers now consume the upstream hero/banner and reserved SEO fields.
-Projected sites enable badge/collapse metadata; legacy graph sidebars keep it
-opaque. Locale current markers follow a matching page/context locale without
-inventing destinations. Static renderer asset options accept explicit local
-Asset values through the existing exporter, including hashed image bytes and
-rollback when an unsafe asset path is supplied. Missing hero images keep alt text.
-
-Targeted tests cover splash content, full banner links, hero text/actions/images,
-SEO precedence, native selector links, collapse/current behavior, legacy opacity,
-malformed records and local asset integrity. HEEx navigation now uses the same
-URL policy as AST links; its regression fails against the previous component,
-which emitted an executable href. Generic navigation also avoids treating an
-empty group path as the current route. The full current-runtime gate passes: 431 backend checks (18 doctests,
-413 tests), 91.0% line coverage and 412 frontend tests (179 DocShell tests).
-The candidate path passes 21 targeted HEEx checks. The full gate also passes
-compiler, Dialyzer, exports, audits, packaged older-producer consumers and HTTP-only
-isolation. Fresh expanded browser and coordinated archive qualification remain open.
-
-### Control label completion and current CI
-
-Recursive Svelte controls inherit host labels from the projected shell or
-standalone AST/API/hosted/legacy shell. HEEx AST rendering accepts the same label
-map, API components carry settings into their controls, and browser controllers
-read current labels from the nearest shell/control scope. Copy outcomes,
-diagram/source disclosures, tabs, generic directive titles, schema headings and
-request controls/statuses preserve authored content and existing request policy.
-Tests cover separate catalogues in simultaneous hosts, escaped labels, nested
-inheritance, copy success/refusal, failed/successful enhancements and unknown
-request outcomes. The fixture comparison now defaults only an absent empty
-`presentation` field, preserving old/new producer compatibility and all other
-projection comparisons.
-
-The full current-runtime gate passes: 433 backend checks (18 doctests, 415 tests),
-91.1% line coverage, 417 frontend tests (184 DocShell), all 25 required checks,
-17 release-script tests and the extracted/optional-free/HTTP-only consumers.
-The sibling producer at `2a00216` passes 25 renderer/projection/conformance tests;
-the published producer also passes the two projection checks. These results do
-not replace expanded browser or fresh coordinated archive qualification.
-
-GitHub was checked again on 2026-10-29. The latest
-[Phoenix Assets CI](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/40860204683)
-succeeded for `9190de09d6dfdf691d3d237e498ddf2c2ea0c7b3`; the latest
-[DocShell CI](https://github.com/futhr/doc_shell/actions/runs/40842385182) succeeded
-for `84e11cb8cce130f45e604b4439e04c09b1dd7ae6`. Neither run includes this local
-buildout. Repository policy reserves all pushes for the user; no refs were pushed.
-
-### Passive artifact media foundation
-
-The matching Elixir/TypeScript media checks admit a closed passive SVG subset
-and bounded PNG headers/chunks with CRCs. Sixty-four shared synthetic vectors
-cover drawing/chart stills, plain UTF-8 text, shapes, transforms, PNG, malformed
-XML, DTD/entities, scripts/styles/events, external references, namespace/foreign
-content, header faults, CRCs and exact/one-over dimension/depth/attribute/transform/
-chunk limits. Separate checks cover SVG bytes and element counts. The helpers
-preserve bytes and perform no I/O, geometry calculation or pixel decode.
-
-The full current-runtime gate passes: 498 backend checks (18 doctests, 480 tests),
-91.3% coverage, 482 frontend tests (249 DocShell), all required package/export/
-audit checks and 17 release-script tests. The module also loads and accepts a
-plain SVG on Elixir 1.18.4 / OTP 27.3.4.15; that is a scoped module check, not a
-new full floor qualification. A later TypeScript regression checks a PNG byte
-view at a nonzero offset and verifies that it preserves the original bytes.
-Receipt views, preview, expanded browsers and fresh archives remain pending.
-
-### Canonical byte consumption
-
-Svelte fallback admission now uses a bounded original-byte proof reader. Native
-safe-integer data reproduces Jason's uppercase control escapes; optional
-`canonicalContent` preserves original float, negative-zero and large-integer
-spelling after JavaScript decoding. The reader compares decoded values, retains
-raw subtrees for hashes, checks UTF-8 key order, duplicate keys, byte/value/depth
-limits, and rejects accessors without calling them. It neither changes producer
-numbers nor authenticates a source. SiteShell accepts the same original-content
-prop as `admitPage(page, canonicalContent)`.
-
-The exact canonical corpus from DocShell `6870369` is pinned at SHA-256
-`518036dca115b22ac603b786c0d77c40a40855d474ffbaa220dc579fb7567950`.
-The formatter-only exemption preserves those bytes while tests still parse
-and hash them. Two regressions fail against the previous admission helper:
-capital-escaped control metadata and retained float bytes. The corrected helper
-passes both without changing the v1 digest definition. Tests also cover large
-integer lexemes, negative zero, UTF-8 ordering, stale/malformed proofs, duplicate
-keys, inert prototype keys, getters, sparse data and finite value/depth budgets.
-
-The full current-runtime gate passes: 498 backend checks (18 doctests, 480 tests),
-91.3% coverage and 511 frontend tests (278 DocShell). All required audits,
-exports, optional-free/older-producer/HTTP-only consumers and release checks pass.
-DocShell source also passes its full gate with the expanded canonical corpus:
-437 checks and 95.5% coverage. Receipt views/preview and expanded target/archive
-qualification remain open; the exact byte binding is not source authentication.
-
-### Complete inline anchors and mixed code content
-
-Both renderers now preserve admitted inline `span` IDs. Svelte enhances only
-an exact single-code-child pre block; mixed pre content keeps all siblings.
-The old renderer omitted span IDs, and the old Svelte helper rendered `source`
-where the regression expects `sourceRequired warning`. The corrected source
-passes DOM assertions and native HTML checks while continuing to ignore inert
-non-text IDs. Upstream `a055500` separately refuses ghost array-valued anchors
-and child content under a void `br`; its full gate passes 439 checks at 95.6%.
-
-The downstream full current-runtime gate passes 499 backend checks (18 doctests,
-481 tests), 91.4% coverage, 513 frontend tests (280 DocShell), all package/export/
-audit checks and 17 release-script tests. Targeted DOM checks also pass after
-reordering the regression to assert the missing warning in rendered HTML.
-Artifact receipt views and fresh browser/archive qualification remain open.
-
-
-### Verified artifact document and preview source
-
-The shared chart/drawing corpus now exercises the same passive selection in
-Svelte, HEEx and static page paths. New receipt helpers check exact identities,
-fallbacks, checked subject membership, runtime declarations and original media
-before rendering. Both renderers retain caption, description, locale, complete
-fallback and source anchors. Projected IDs also survive specialized code,
-diagram, tabs and directive wrappers, including binding targets outside fallback.
-
-The local diagnostic preview adds read-only receipt/constraint/projection and
-anchor data in light/dark/monochrome/enlarged modes. It has no approval workflow,
-producer discovery, geometry or semantic calculations. Static/HEEx passive pages
-omit import maps, browser modules and enhancement-only controls; navigation is
-native and unavailable search is disclosed. The native helper explicitly refuses
-portable artifacts with older installed producer APIs. Ordinary documents keep
-their existing compatibility path.
-
-The corpus is an exact copy from upstream `20e9425`, SHA-256
-`2d812d1849126f20d6aaea583037e94c11e9c83d1f4a011410b01ac104c05e37`.
-Candidate producer tests exercise actual receipt admission independently of pure
-HTML formatting fixtures. Browser/print/offline targets, supplied comparison
-images, independent native observations and fresh archives remain open.
-
-
-The full current-runtime gate passes: 505 backend checks (18 doctests, 487 tests),
-87.5% coverage, 555 frontend tests (322 DocShell), all 25 required checks,
-17 release-script tests and the optional-free/older-producer/HTTP consumers.
-The actual sibling producer at `a055500` passes 37 native integration/projection/
-conformance tests, including 11 artifact checks. The baseline producer also
-passes ordinary-document and explicit unavailable-API checks. The optional API
-is dispatched only after availability validation; no broad compiler or Dialyzer
-suppression is used.
-
-Live GitHub checks on 2026-10-29 still show the previously recorded successful
-remote revisions. The root job log confirms that all three Codecov uploads
-returned `Repository not found`; their configured `fail_ci_if_error: false`
-left the job green. The log establishes upload failure, not whether repository
-activation, app access or the upload credential caused it. The maintainer must
-verify the current repository's Codecov access/credential configuration; see
-[Codecov connection guidance](https://docs.codecov.com/v4.6/docs/video-guide-connecting-codecov-to-github).
-No repository visibility or remote refs were changed. New local commits still
-need the maintainer's push before remote CI can verify them.
-
-
-### Static export and passive reader observations
-
-The actual native exporter now passes both frozen profiles across `/` and
-`/review/` in web/file modes. Selected image bytes resolve from their emitted
-URLs. Changed bytes and an unexpected JavaScript asset refuse while preserving
-the prior manifest and HTML. The fixture adapters accept only the complete frozen
-synthetic producer input; they do not implement external producer semantics.
-
-`scripts/artifact-fixture.exs` checks its corpus against the selected producer's
-packaged contract and writes native documents, previews and canonical witnesses.
-`scripts/artifact-qualification.mjs` renders the same receipts through Svelte SSR
-and observes both independent readers in Chromium. The checkout run passes 120
-cases on Chromium 156.0.8078.4: JavaScript disabled, actual SVG paint, exact
-caption/description/locale/selection/fallback/anchor parity, HTTP and offline
-file loading, root/subpath output, 360/1280-pixel reflow and print visibility.
-
-Twenty screenshots were inspected. The four preview modes retain the media,
-complete fallback and readable diagnostic data; enlarged mode scales text and
-images. Native/Svelte preview screenshot pairs have identical bytes in this
-fixture. The standalone Svelte document now also carries the scoped shell class.
-The retained checkout run is `/tmp/phoenix-artifact-browser-source`; these
-observations await a fresh archive-bound run and do not close native applications,
-human assistive tasks, producer comparison images or the broader site matrix.
-
-
-The subsequent full gate passes all 25 required checks, 505 backend checks at
-87.5% coverage and 555 frontend tests. The published-producer lane passes six
-artifact/compatibility tests; the candidate lane passes twelve artifact tests,
-including the complete static export matrix. The browser runner also exercises
-native keyboard disclosure and semantic-anchor links with JavaScript disabled.
-`Canonical.encode/1` examples now explicitly unwrap its `{:ok, binary}` result.
-
-
-### Elixir 1.20 support policy
-
-The maintainer requested that both projects use Elixir 1.20. The package
-requirement is now `~> 1.20`; both checkouts already pin 1.20.4/OTP 29. CI and
-release guidance cover Elixir 1.20 on OTP 28 and 29. Older Elixir qualification
-records above are historical and no longer define the supported matrix. No new
-older-Elixir test result is claimed by this policy change.
-
-
-Both Elixir 1.20.4 lanes pass: OTP 28.5.0.7 compiles with warnings as errors and
-passes 505 backend checks; OTP 29.0.4 passes the full gate, both coverage floors
-and all 25 required checks. Workflow YAML parses and the matrix contains only
-Elixir 1.20. Historical earlier-Elixir results were preserved as observations.
-
-
-### Extracted SSR runtime regression
-
-The first fresh `c50c500` archive consumer failed at Svelte's
-`lifecycle_outside_component` while rendering SiteShell. Its SSR qualification
-bundle had included a second Svelte context runtime while the caller used the
-installed server renderer. The qualification config now keeps the Svelte peer
-and its subpaths external. Rebuilding the same extracted npm consumer and
-running its real `render-ssr.mjs` succeeds for document, missing-page and API
-output. No library context checks were bypassed. The full local gate also passes;
-the failed archive cohort remains distinct from the subsequent qualified cut.
-
+The [upstream checklist](https://github.com/futhr/doc_shell/blob/main/docs/plans/documentation-sites.md#coordinated-completion)
+owns shared contracts, projection and export. Phoenix Assets owns Svelte/HEEx
+rendering, browser controls, scoped CSS and diagnostic previews. Hosts retain
+source selection, identity/labels, routing, authorization, product state and
+producer/native implementations. No consumer-specific runtime feature to move
+out was found in the reviewed library paths; the boundary text gate supplements
+that API ownership review.
 
 ## Requirement evidence map
 
 This maps each PHA.01 requirement to its owning implementation and executable
-proof. A source test is not an archive, native-application or human result. Fresh
+proof. Source tests and extracted-package executions are distinct. Fresh
 archive receipts retain their own exact source/producer/peer identities.
 
 | Requirement | Owner and executable proof | Qualification boundary |
@@ -465,9 +47,9 @@ archive receipts retain their own exact source/producer/peer identities.
 | PHA-S02 | `src/browser/*`; `browser.test.ts`, lifecycle and request tests; `Assets.validate/0` and export checks | Extracted browser import/bundle proof belongs to the release lane |
 | PHA-S03 | Conditional `DocShell.Components`, `Ast`, `ApiReference`, `Settings`; `doc_shell_test.exs` and candidate integration suites | New upstream APIs explicitly refuse on older producers |
 | PHA-S04 | `StaticRenderer` and the same `Components.page/1`; `doc_shell_conformance_test.exs`, exporter tests and `mix run --no-start` fixtures | Hosted endpoint proof is separate from no-start output |
-| PHA-S05 | Closed AST/fallback paths and passive receipt context; `components.svelte.test.ts` and `ast-regressions.svelte.test.ts`, artifact DOM/native tests and no-JavaScript browser lanes | Native application reading remains external |
+| PHA-S05 | Closed AST/fallback paths and passive receipt context; `components.svelte.test.ts` and `ast-regressions.svelte.test.ts`, artifact DOM/native tests and no-JavaScript browser lanes | Native applications stay consumer-owned |
 | PHA-S06 | Shared browser controllers, JSON/Pagefind, directives and OpenAPI adapters; browser/search/conformance qualification scripts | Expanded host settings are also checked by the artifact/site reader lane |
-| PHA-S07 | Semantic shell, native links/disclosures, focus and responsive/theme CSS; browser/conformance keyboard, contrast, reflow and RTL cases | Human assistive tasks and actual device/native observations remain unverified |
+| PHA-S07 | Semantic shell, native links/disclosures, focus and responsive/theme CSS; browser/conformance keyboard, contrast, reflow and RTL cases | Automated keyboard, focus, reflow and contrast checks; host deployment stays consumer-owned |
 | PHA-S08 | `Assets` and `build-browser.mjs`; local-import, no-map, size/gzip, content-hash and offline checks | Archived assets must be measured again for each cut |
 | PHA-S09 | Upstream `Conformance` corpus and capability fixtures; source/native tests plus `conformance-qualification.mjs` | Independent extracted/hosted reader observations are archive-specific |
 | PHA-S10 | Module guards, runtime API guards and browser subpath; `package_test.exs`, `smoke-hex`, exports and fresh consumer checks | Optional-free and selected-producer modes are distinct |
@@ -476,8 +58,8 @@ archive receipts retain their own exact source/producer/peer identities.
 | PHA-V02 | Browser entry/import checks, shared controller tests and packaged `Assets.validate/0` | No Svelte dependency is introduced through the browser entry |
 | PHA-V03 | `doc_shell_conformance_test.exs`, upstream frozen cohort and extracted Svelte/static/hosted surface comparisons | The expanded settings/artifact observations extend the baseline corpus |
 | PHA-V04 | Shared HEEx page body, source digest assertions, hosted fixture and surface validator | Byte-identical framework HTML is not required |
-| PHA-V05 | Browser/search/conformance keyboard tests; passive reader disclosure, selector and anchor tasks | Automated interaction does not replace a human screen-reader task |
-| PHA-V06 | Browser/conformance 320/768/1280 layouts, reduced motion, themes, RTL and zoom-equivalent reflow; passive preview modes | Actual high-zoom/device observations retain their own status |
+| PHA-V05 | Browser/search/conformance keyboard tests; passive reader disclosure, selector and anchor tasks | Automated interaction does not replace a deployment accessibility assessment |
+| PHA-V06 | Browser/conformance 320/768/1280 layouts, reduced motion, themes, RTL and zoom-equivalent reflow; passive preview modes | 400%-equivalent reflow is exercised in Chromium |
 | PHA-V07 | JavaScript-disabled SSR/HEEx cases, API fallback and offline file artifact reader | Svelte SiteShell is hosted HTTP HTML; the HEEx exporter owns file URL rewriting |
 | PHA-V08 | AST/URL/OpenAPI refusal suites, original canonical proofs, stale pair/receipt cases and shared SVG/PNG vectors | Media structure checks do not qualify producer geometry or PNG pixels |
 | PHA-V09 | `search-qualification.mjs`, lazy Pagefind requests and equivalent JSON/Pagefind filter tasks in all three surfaces | Archive/producer/locale identities must match the receipt |
@@ -487,86 +69,52 @@ archive receipts retain their own exact source/producer/peer identities.
 | PHA-V13 | Ownership review, scoped CSS, customization and boundary checks | Host-owned arbitrary CSS and product policy remain outside this renderer |
 
 
-### Passive 404 and expanded settings qualification
+## Executed automated evidence
 
-A DOM regression first failed because a missing Svelte page exposed a search
-button despite the admitted site's no-JavaScript restriction. SiteShell now
-retains that restriction on 404 output without loading inactive page assets.
-Ordinary legacy sites keep their existing controls. The full gate passes 505
-backend checks at 87.5% coverage and 556 frontend tests (323 DocShell).
+- DocShell full gate: 441 checks (16 doctests, 35 properties, 390 tests), 95.6%
+  line coverage; compiler, optional-free compile, strict lint, docs/spec coverage,
+  audits and Dialyzer pass on Elixir 1.20.4/OTP 29.0.4.
+- Phoenix Assets full gate: 507 backend checks at 87.6% coverage. The full gate
+  against the current sibling passes 514 checks at 92.5%. Both pass 557 frontend
+  tests (324 DocShell), all 25 required checks, frontend coverage floors,
+  17 release-script tests and packaged optional consumers.
+- New regressions first failed on undeclared profile media/subject acceptance,
+  a hidden nested receipt requirement and duplicate shell/source IDs. Corrected
+  owners pass; Chromium also reproduces duplicate IDs against the previous archives.
+- Earlier coordinated archives passed 166 baseline and 152 expanded reader cases,
+  with 158 reviewed screenshots. Fresh evidence for the current source belongs
+  to its own archive receipt; old receipts are not relabelled.
+- Five checkout notebooks executed 64 cells; six benchmark reports identify their
+  source/runtime cohort. These records do not claim fresh Livebook installation
+  of unreleased APIs or a performance guarantee.
 
-The reader runner now includes emitted Svelte component CSS and asserts the
-actual desktop grid before testing behavior. Earlier shared-stylesheet-only
-screenshots do not qualify the complete Svelte shell layout. The expanded run
-passes 152 cases with real component CSS and 26 reviewed screenshots, covering
-brand/footer data, badge/collapse navigation, keyboard locale/release links,
-an actual Swedish destination, hero/banner/media, canonical/description/robots
-metadata, passive 404 and the existing artifact/preview tasks. Eighteen changed
-images were inspected; eight byte-identical HEEx preview images retain their
-previous image review. This remains checkout evidence until repeated against
-the coordinated archive cohort.
+## Package and CI evidence
 
+`phoenix-assets/dist/release/spec-completion/qualification.json` and
+`doc-shell-cohort/coordinated-proof.json` in that directory are local lookup
+paths for the current archived cohort. Verify those content-addressed receipts
+against their source revisions, locks, package hashes and browser output.
+Generated release artifacts remain ignored by Git. Neither repository has been
+published by this buildout.
 
-## Coordinated archive qualification — 2026-10-29
+The maintainer's pushed revisions passed
+[Phoenix Assets 41008416945](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41008416945)
+(`fc6e8f2`) and [DocShell 41008380235](https://github.com/futhr/doc_shell/actions/runs/41008380235)
+(`64e92b1`), including DocShell's Elixir 1.20/OTP 28 and 29 lanes. That Phoenix
+Assets run used the older candidate pin. CI now pins upstream `846b67f`, runs
+the full current gate on main pushes and has a regression that prevents silent
+receipt-API omission. New local commits need another maintainer push for CI.
+Codecov uploads reported `Repository not found`; the workflow tolerates that
+optional service failure. Coverage floors are enforced by the passing local gates.
 
-The local cohort pairs Phoenix Assets
-`2e9a9e086e433807b62a7a6d84b3fd08a65ff547` with DocShell
-`b9987b9a0ed0ca1a4a3c43bf30200cf9b13c0acb`. These are unpublished archives;
-no remote refs or repository visibility were changed. The retained directory is
-`phoenix-assets/dist/release/coordinated-2e9a9e0` in the two-repository workspace.
+## Ownership and history
 
-| Evidence | Executed result |
-| --- | --- |
-| Phoenix Assets full gate, Elixir 1.20.4/OTP 29.0.4 | All 25 required checks; 505 backend checks, 87.5% coverage; 556 frontend tests, both coverage floors; 17 release-script tests |
-| DocShell full gate, same runtime | 439 checks (16 doctests, 35 properties, 388 tests), 95.6% coverage; strict compiler/lint/docs/audits/Dialyzer and no-optional compilation |
-| Elixir 1.20.4/OTP 28.5.0.7 | Both warnings-as-errors compiles and backend suites pass; DocShell no-optional compile also passes |
-| Independent archived baseline renderers | 166 browser cases; Svelte, static HEEx and hosted LiveView observations pass upstream surface/conformance comparison; JSON/Pagefind, keyboard/focus, no-JavaScript, themes, RTL, reflow and offline cases |
-| Fresh extracted Hex pair and separately installed npm renderer | 152 settings/artifact/preview browser cases; exact receipt/media/fallback/anchor parity, passive controls/404, actual locale links, SEO, HTTP/file/root/subpath, print and reflow |
-| Screenshot review | All 132 baseline and 26 expanded screenshots reviewed; changed images inspected, unchanged images matched by SHA-256 to explicitly reviewed images; component CSS is included |
-| Hosted pair package checks | Extracted HEEx and installed Svelte SSR each render the matching fixture and refuse 21 missing/mismatched/stale cases; checks use the packaged upstream fixture |
-| Producer consumers | Nine fresh core/Plug/Ash combinations pass across locked, unlocked and minimum dependencies; AshOaskit 0.4.5 remains the released adapter baseline |
-| Notebooks and benchmarks | Five checkout notebooks, 64 executable cells; full non-CI benchmark suite and all six refreshed reports; ExDoc warnings-as-errors |
+AshOaskit 0.4.5 remains the released adapter baseline in DocShell's development/
+test lock; core users do not acquire it. Phoenix Assets has no direct dependency
+on the adapter. PHA.03 admits no shared extension without its separate build-only
+reuse evidence; it is not a source implementation prerequisite.
 
-The reviewed baseline receipt is
-`qualification-74449d8e5f00499641cf605d68dd0c11d368fa51195af78e3b2d8bfb587d2088.json`.
-Its SHA-256 is
-`74449d8e5f00499641cf605d68dd0c11d368fa51195af78e3b2d8bfb587d2088`.
-The separate joined proof is
-`doc-shell-cohort/coordinated-proof-fd0932bcc11013e195e40c61e715b6e27a9ba5482042f1d322e3665716933f31.json`,
-SHA-256 `fd0932bcc11013e195e40c61e715b6e27a9ba5482042f1d322e3665716933f31`.
-It binds the archive/source identities, expanded reader output/screenshots,
-paired Hex/npm consumer locks and retained gate/consumer/notebook/benchmark logs.
-The hosted-pair checks were executed subsequently against the same extracted
-packages; their scripts/logs are retained with the final documentation cohort.
-
-The nine producer smoke consumers delete their temporary locks; their retained
-logs prove execution, not retention of all nine resolved lockfiles. The separate
-paired Hex/npm consumer locks are retained. Some optional upstream dependency
-warnings were printed; successful consumers do not establish warning-free
-upstream dependencies. Notebook checkout execution does not prove fresh Livebook
-installation of unreleased APIs. Benchmark allocations are not peak RSS or
-performance guarantees. Earlier failed or narrower cohorts retain their original
-scope and are superseded only where the current evidence names the same task.
-
-This closes the recorded local automated archive/browser work for the synthetic
-profiles. It does not close actual external producer semantics/geometry and
-comparison images, a named native application's reading/paint/lifecycle behavior,
-or human assistive-task/device observations. The repository boundary review found
-no consumer-specific runtime feature to relocate in the reviewed paths. Hosts and
-producers retain those implementations and authorization/product policy.
-
-New local commits have no GitHub Actions result until the maintainer pushes them.
-The last observed successful remote runs remain
-[Phoenix Assets 40860204683](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/40860204683)
-and [DocShell 40842385182](https://github.com/futhr/doc_shell/actions/runs/40842385182)
-at their earlier source revisions. Phoenix Assets' three Codecov uploads returned
-`Repository not found` despite the green job; repository activation/app access/
-credential configuration remains unverified. No full specification-completion or
-publication claim is made while the required external evidence is absent.
-
-The final documentation commit changes tracked inputs. A subsequent archive run
-must have its own source-bound receipt; the immutable results above continue to
-refer to their exact named cuts. `dist/release/coordinated-final/qualification.json`
-and `doc-shell-cohort/coordinated-proof.json` in that directory are the local
-lookup paths for a subsequent final cut, if present and verified. They are ignored
-release artifacts rather than published or Git-tracked evidence.
+Earlier measurements, exact archive/fixture hashes and intermediate failures
+remain in the [prior committed record](https://github.com/ghostshift-assembly/phoenix-assets/blob/fc6e8f2/docs/plans/doc-shell-renderers.md)
+and retained archive receipts. The current table and automated evidence above
+define this tracker; historical pending prose does not override them.

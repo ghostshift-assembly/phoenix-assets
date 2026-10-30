@@ -202,8 +202,10 @@ presentation settings, hosted publication pairing and artifact profiles land
 upstream before renderer adoption here. Phoenix Assets owns visual controls,
 slots/snippets, scoped CSS and diagnostic previews. Consumers/producers retain
 source selection, route/brand/translation content, authorization, product task
-state, native readers and geometry/semantic algorithms. Completion requires the
-named cross-repository and external target evidence, not a green baseline alone.
+state, native readers and geometry/semantic algorithms. Library completion
+requires the specified automated contract, regression, browser and extracted
+package checks across both repositories. Human verification and qualification
+of a consumer's producer/native application are not library completion gates.
 
 Code changes require `mix check` green end-to-end (Elixir, frontend, and both
 coverage floors), and any new public module needs a `@moduledoc`.

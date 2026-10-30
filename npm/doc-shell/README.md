@@ -29,7 +29,7 @@ for that integration's dependencies and conformance scope.
 
 The [coordinated tracker](https://github.com/ghostshift-assembly/phoenix-assets/blob/main/docs/plans/doc-shell-renderers.md#coordinated-completion)
 records implemented settings, page metadata, publication-pair and artifact
-rendering, with exact local archive/browser results and remaining external checks.
+rendering, with automated contract, regression, browser and package checks.
 Shared contracts land in DocShell first; this package owns rendering and visual
 preview. Hosts supply brand content, labels and routes, and retain authorization
 and product state. Native readers and producer algorithms are separate owners.
@@ -226,8 +226,8 @@ responsible for serving the checked bytes at any supplied local URLs.
 These source paths use the two exact synthetic producer profiles from the
 upstream conformance corpus. Fresh coordinated archives pass the automated
 Svelte/HEEx browser, print and offline/file tasks recorded in the tracker.
-These results do not qualify an external producer, native application or human
-assistive task; the additions remain unreleased.
+Producer algorithms and native applications remain consumer-owned; the
+checkout additions are unreleased.
 
 ### Artifact media checks in the current checkout
 
