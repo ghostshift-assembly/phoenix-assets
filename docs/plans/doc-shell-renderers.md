@@ -73,9 +73,9 @@ archive receipts retain their own exact source/producer/peer identities.
 - DocShell full gate: 441 checks (16 doctests, 35 properties, 390 tests), 95.6%
   line coverage; compiler, optional-free compile, strict lint, docs/spec coverage,
   audits and Dialyzer pass on Elixir 1.20.4/OTP 29.0.4.
-- Phoenix Assets 3.0.0 full gate with released DocShell 2.0.0: 514 backend checks
+- Phoenix Assets 3.0 full gate with released DocShell 2.0.0: 514 backend checks
   at 92.5% coverage, 557 frontend tests (324 DocShell), all 25 required checks,
-  frontend coverage floors, 17 release-script tests and packaged optional consumers.
+  frontend coverage floors, 19 release-script tests and packaged optional consumers.
   The Elixir 1.20/OTP 28 compile and 514 backend checks also pass.
 - New regressions first failed on undeclared profile media/subject acceptance,
   a hidden nested receipt requirement, shell/search/code/tab ID collisions and
@@ -90,19 +90,22 @@ archive receipts retain their own exact source/producer/peer identities.
 
 ## Package and CI evidence
 
-`phoenix-assets/dist/release/v3.0.0/qualification.json` and
+`phoenix-assets/dist/release/v3.0.1/qualification.json` and
 `doc-shell-cohort/coordinated-proof.json` in that directory are local lookup
 paths for the current archived cohort. Verify those content-addressed receipts
 against their source revisions, locks, package hashes and browser output.
 Generated release artifacts remain ignored by Git. Registry publication is verified against the exact release archives.
 
-The maintainer's pushed revisions passed
-[Phoenix Assets 41008416945](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41008416945)
-(`fc6e8f2`) and [DocShell 41008380235](https://github.com/futhr/doc_shell/actions/runs/41008380235)
-(`64e92b1`), including DocShell's Elixir 1.20/OTP 28 and 29 lanes. That Phoenix
-Assets run used the older candidate pin. CI now resolves the published DocShell
-2.0 dependency from its lock, runs the full gate on main pushes and verifies
-receipt support without a candidate-only test condition. New local commits need another maintainer push for CI.
+The release-preparation revisions passed
+[Phoenix Assets 41021355490](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41021355490)
+(`ca2cf2f`) and [DocShell 41017938352](https://github.com/futhr/doc_shell/actions/runs/41017938352)
+(`faea92a`). DocShell 2.0.0 was published by
+[41018477890](https://github.com/futhr/doc_shell/actions/runs/41018477890).
+Phoenix Assets resolves that published dependency from its lock and verifies
+receipt support unconditionally. Its first 3.0.0 archive qualification passed,
+but GitHub rejected a colon in a retained evidence filename before publication.
+The 3.0.1 correction hashes conformance filenames and adds a regression that
+rejects non-portable retained paths. The 3.0.0 tag is preserved and unpublished.
 Codecov uploads reported `Repository not found`; the workflow tolerates that
 optional service failure. Coverage floors are enforced by the passing local gates.
 

@@ -42,7 +42,7 @@ native path requires the current upstream receipt API.
 DocShell owns the shared contracts and validation. The tracker maps them to
 automated regressions, browser checks and extracted package consumers.
 Producer algorithms, native applications and deployment policy stay with their
-consumers. Phoenix Assets 3.0.0 consumes the DocShell 2.0 contracts.
+consumers. Phoenix Assets 3.0 consumes the DocShell 2.0 contracts.
 
 ## What it provides
 
@@ -117,11 +117,11 @@ The full Svelte stack is the default, so no preset module is required.
 
 ```elixir
 # mix.exs
-{:phoenix_assets, "~> 3.0.0"}
+{:phoenix_assets, "~> 3.0.1"}
 ```
 
 ```bash
-cd assets && pnpm add -D --save-exact @phoenix-assets/vite@3.0.0 @phoenix-assets/svelte@3.0.0 @phoenix-assets/lint@3.0.0
+cd assets && pnpm add -D --save-exact @phoenix-assets/vite@3.0.1 @phoenix-assets/svelte@3.0.1 @phoenix-assets/lint@3.0.1
 ```
 
 ### PostgreSQL 18 and Electric

@@ -5,6 +5,15 @@ See [Conventional Commits](Https://conventionalcommits.org) for commit guideline
 
 <!-- changelog -->
 
+## [v3.0.1](https://github.com/ghostshift-assembly/phoenix-assets/compare/v3.0.0...v3.0.1) (2026-10-30)
+
+
+
+
+### Bug Fixes:
+
+* retain portable conformance evidence filenames by futhr
+
 ## [v3.0.0](https://github.com/ghostshift-assembly/phoenix-assets/compare/v2.0.1...v3.0.0) (2026-10-30)
 ### Breaking Changes:
 
