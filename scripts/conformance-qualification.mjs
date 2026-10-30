@@ -2,6 +2,7 @@ import assert from "node:assert/strict"
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
 import { assertShellContrast } from "./browser-contrast.mjs"
+import { conformancePageFilename } from "./qualification.mjs"
 
 /** Normalize actual document output, retaining admitted text, routes and names. */
 async function surface(page) {
@@ -88,7 +89,7 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
         page.setDefaultTimeout(15_000)
         const url =
           renderer === "svelte"
-            ? `${origin}/conformance-ssr/${encodeURIComponent(id)}.html`
+            ? `${origin}/conformance-ssr/${conformancePageFilename(id)}`
             : renderer === "liveview"
               ? `${hostedOrigin}/conformance?page=${encodeURIComponent(id)}`
               : origin + source.route

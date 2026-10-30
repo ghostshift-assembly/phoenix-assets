@@ -16,6 +16,7 @@ import { chromium } from "@playwright/test"
 import { assertShellContrast } from "./browser-contrast.mjs"
 import { qualifyConformance } from "./conformance-qualification.mjs"
 import { startHosted } from "./hosted-qualification.mjs"
+import { conformancePageFilename } from "./qualification.mjs"
 import { qualifySearch } from "./search-qualification.mjs"
 
 /** Exercises the installed renderer and public producer corpus in Chromium. */
@@ -116,9 +117,14 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
     `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import { writeFileSync } from "node:fs"; const html = (result) => '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + result.head + '</head><body style="margin:0">' + result.body + '</body></html>'; writeFileSync("browser-dist/ssr.html", html(render(Fixture))); writeFileSync("browser-dist/ssr404.html", html(render(Fixture, { props: { pageId: "missing" } }))); writeFileSync("browser-dist/api-ssr.html", html(render(Fixture, { props: { api: true } })));`,
   )
   execFileSync("node", ["render-ssr.mjs"], { cwd: root, stdio: "inherit" })
+  const conformanceFiles = Object.fromEntries(
+    Object.keys(JSON.parse(readFileSync(join(root, "corpus-site.json"), "utf8")).pages).map(
+      (pageId) => [pageId, conformancePageFilename(pageId)],
+    ),
+  )
   writeFileSync(
     join(root, "render-corpus.mjs"),
-    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import { mkdirSync, writeFileSync } from "node:fs"; mkdirSync("browser-dist/conformance-ssr", { recursive: true }); for (const pageId of Object.keys(site.pages)) { const result = render(Fixture, { props: { pageId, corpus: true } }); writeFileSync("browser-dist/conformance-ssr/" + pageId + ".html", '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + '</head><body style="margin:0">' + result.body + '</body></html>'); }`,
+    `import { render } from "svelte/server"; import Fixture from "./ssr-dist/ssrfixture.js"; import site from "./corpus-site.json" with { type: "json" }; import { mkdirSync, writeFileSync } from "node:fs"; mkdirSync("browser-dist/conformance-ssr", { recursive: true }); const files = ${JSON.stringify(conformanceFiles)}; for (const pageId of Object.keys(site.pages)) { const result = render(Fixture, { props: { pageId, corpus: true } }); writeFileSync("browser-dist/conformance-ssr/" + files[pageId], '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' + ${JSON.stringify(css.map((file) => `<link rel="stylesheet" href="/assets/${file}">`).join(""))} + '</head><body style="margin:0">' + result.body + '</body></html>'); }`,
   )
   execFileSync("node", ["render-corpus.mjs"], { cwd: root, stdio: "inherit" })
   writeFileSync(

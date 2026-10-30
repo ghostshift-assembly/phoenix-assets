@@ -6,6 +6,8 @@ import { basename, join } from "node:path"
 const digest = (bytes) => createHash("sha256").update(bytes).digest("hex")
 const fileDigest = (path) => digest(readFileSync(path))
 
+export const conformancePageFilename = (pageId) => `page-${digest(pageId)}.html`
+
 export const treeMeasurements = (root) => {
   let files = 0
   let bytes = 0
@@ -50,6 +52,8 @@ const retainedEvidence = (output) => {
     "browser-screenshots",
   ])
     visit(join(output, name), name)
+  for (const path of Object.keys(files))
+    if (/["<>:|*?\r\n\\]/.test(path)) throw new Error(`non-portable evidence path: ${path}`)
   return files
 }
 

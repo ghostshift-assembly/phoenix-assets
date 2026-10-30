@@ -6,6 +6,7 @@ import { tmpdir } from "node:os"
 import { join } from "node:path"
 import test from "node:test"
 import {
+  conformancePageFilename,
   recordBuildInputs,
   reviewQualification,
   verifyQualification,
@@ -273,6 +274,33 @@ test("rejects artifact byte tampering", () => {
   withArtifacts(({ output, verify }) => {
     writeFileSync(join(output, "phoenix_assets-1.2.3.tar"), "changed")
     assert.throws(verify, /checksum mismatch/)
+  })
+})
+
+test("conformance page IDs produce distinct portable filenames", () => {
+  const ids = [
+    "renderer:guide",
+    "renderer/guide",
+    "renderer?guide",
+    "renderer%3Aguide",
+    "CON",
+    "دليل",
+  ]
+  const names = ids.map(conformancePageFilename)
+  assert.equal(new Set(names).size, ids.length)
+  for (const name of names) assert.match(name, /^page-[a-f0-9]{64}\.html$/)
+  assert.equal(conformancePageFilename("renderer:guide"), names[0])
+})
+
+test("qualification rejects retained filenames that GitHub artifacts cannot upload", () => {
+  withArtifacts(({ root, output }) => {
+    recordBuildInputs(root, output)
+    mkdirSync(join(output, "consumer-browser-dist/conformance-ssr"), { recursive: true })
+    writeFileSync(
+      join(output, "consumer-browser-dist/conformance-ssr/renderer:guide.html"),
+      "guide",
+    )
+    assert.throws(() => writeQualification(root, output, {}), /non-portable evidence path/)
   })
 })
 
