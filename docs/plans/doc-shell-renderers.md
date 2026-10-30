@@ -85,8 +85,8 @@ archive receipts retain their own exact source/producer/peer identities.
   with 158 reviewed screenshots. Fresh evidence for the current source belongs
   to its own archive receipt; old receipts are not relabelled.
 - Five checkout notebooks executed 64 cells; six benchmark reports identify their
-  source/runtime cohort. These records do not claim fresh Livebook installation
-  of unreleased APIs or a performance guarantee.
+  source/runtime cohort. These checkout runs do not prove hosted
+  Livebook installation or a performance guarantee.
 
 ## Package and CI evidence
 
@@ -96,27 +96,23 @@ paths for the current archived cohort. Verify those content-addressed receipts
 against their source revisions, locks, package hashes and browser output.
 Generated release artifacts remain ignored by Git. Registry publication is verified against the exact release archives.
 
-The release-preparation revisions passed
-[Phoenix Assets 41021355490](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41021355490)
-(`ca2cf2f`) and [DocShell 41017938352](https://github.com/futhr/doc_shell/actions/runs/41017938352)
-(`faea92a`). DocShell 2.0.0 was published by
-[41018477890](https://github.com/futhr/doc_shell/actions/runs/41018477890).
-Phoenix Assets resolves that published dependency from its lock and verifies
-receipt support unconditionally. Its first 3.0.0 archive qualification passed,
-but GitHub rejected a colon in a retained evidence filename before publication.
-The 3.0.1 correction hashes conformance filenames and adds a regression that
-rejects non-portable retained paths. The 3.0.0 tag is preserved and unpublished.
-Codecov uploads reported `Repository not found`; the workflow tolerates that
-optional service failure. Coverage floors are enforced by the passing local gates.
+DocShell [2.0.0](https://github.com/futhr/doc_shell/releases/tag/v2.0.0) was
+published from `faea92a`, with passing [release CI](https://github.com/futhr/doc_shell/actions/runs/41017938352)
+and [publication](https://github.com/futhr/doc_shell/actions/runs/41018477890).
+Phoenix Assets [3.0.1](https://github.com/ghostshift-assembly/phoenix-assets/releases/tag/v3.0.1)
+was built from `931aefa` against that published dependency. Its
+[main CI](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41023640979),
+[archive build](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41023678088)
+and [publisher](https://github.com/ghostshift-assembly/phoenix-assets/actions/runs/41025105343)
+passed, including both Elixir 1.20 runtime lanes. The release retains all five
+archives, the baseline receipt and `doc-shell-cohort-v3.0.1.tar.gz` with 152
+expanded reader cases, 26 additional captures and paired consumer locks. Together
+with the baseline this is 318 browser cases and 158 captures inspected by Codex.
+These receipts bind the released revisions; later tracker edits do not become
+part of those source subjects.
 
-## Ownership and history
-
-AshOaskit 0.4.5 remains the released adapter baseline in DocShell's development/
-test lock; core users do not acquire it. Phoenix Assets has no direct dependency
-on the adapter. PHA.03 admits no shared extension without its separate build-only
-reuse evidence; it is not a source implementation prerequisite.
-
-Earlier measurements, exact archive/fixture hashes and intermediate failures
-remain in the [prior committed record](https://github.com/ghostshift-assembly/phoenix-assets/blob/fc6e8f2/docs/plans/doc-shell-renderers.md)
-and retained archive receipts. The current table and automated evidence above
-define this tracker; historical pending prose does not override them.
+The unpublished 3.0.0 tag is preserved: archive qualification passed, but GitHub
+rejected a colon in a retained evidence filename. Version 3.0.1 hashes those
+filenames and adds a failing-before/passing-after portability regression.
+Optional Codecov uploads fail without a repository token; the enforced coverage
+floors pass independently.
