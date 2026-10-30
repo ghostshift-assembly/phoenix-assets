@@ -30,6 +30,13 @@ defmodule PhoenixAssets.DocShellArtifactsTest do
            })
   end
 
+  test "an untyped artifact wrapper cannot hide a nested block that requires a receipt" do
+    for tag <- ["artifact", "unknown", "section"] do
+      wrapper = %{"tag" => tag, "attrs" => %{}, "meta" => %{}, "content" => hd(@cases)["content"]}
+      assert {:error, :artifact_receipt_required} = Artifacts.admit([wrapper], nil)
+    end
+  end
+
   test "HEEx formatting preserves both frozen profiles, complete fallback and anchors" do
     for input <- @cases do
       page = formatting_view(input)
@@ -117,6 +124,17 @@ defmodule PhoenixAssets.DocShellArtifactsTest do
       render_component(&Components.artifact_document/1,
         nodes: hd(@cases)["content"]
       )
+    end
+  end
+
+  if System.get_env("DOC_SHELL_CANDIDATE") do
+    test "a configured candidate cannot silently omit receipt verification" do
+      for input <- @cases do
+        assert {:ok, %Artifacts.Page{receipt: receipt}} =
+                 Artifacts.admit(input["content"], input["receipt"], assets(input))
+
+        assert receipt == input["receipt"]
+      end
     end
   end
 

@@ -252,6 +252,44 @@ defmodule PhoenixAssets.DocShellTest do
     end
   end
 
+  test "shell controls cannot capture authored document anchors" do
+    site = site_fixture()
+    page = site.pages["guide"]
+
+    ids =
+      ~w(doc-main doc-main-1 doc-navigation doc-search-query doc-search-results doc-search-1-query)
+
+    content = page.content ++ Enum.map(ids, &node("span", [&1], %{"id" => &1}))
+    page = %{page | content: content, content_digest: digest!(content)}
+
+    context = %DocShell.Presentation.Renderer.Context{
+      site_title: site.title,
+      cohort_digest: site.cohort_digest,
+      base_path: site.base_path,
+      current_route: page.route,
+      locale: page.locale,
+      navigation: site.navigation,
+      search: %{"records" => site.search},
+      assets: %{}
+    }
+
+    html = render_component(&Components.page/1, page: page, context: context)
+
+    rendered_ids =
+      Regex.scan(~r/(?<![\w-])id="([^"]+)"/, html, capture: :all_but_first) |> List.flatten()
+
+    assert length(rendered_ids) == length(Enum.uniq(rendered_ids))
+    for id <- ids, do: assert(html =~ ~s(<span id="#{id}">#{id}</span>))
+    assert html =~ ~s(href="#doc-main-2")
+    assert html =~ ~s(<main id="doc-main-2")
+    assert html =~ ~s(aria-controls="doc-navigation-1")
+    assert html =~ ~s(id="doc-navigation-1")
+    assert html =~ ~s(for="doc-search-2-query")
+    assert html =~ ~s(id="doc-search-2-query")
+    assert html =~ ~s(aria-controls="doc-search-2-results")
+    assert html =~ ~s(id="doc-search-2-results")
+  end
+
   test "current producer settings reach static pages, not-found output and document metadata" do
     settings = %{
       "brand" => %{"label" => "Example brand", "href" => "/docs/guide/"},

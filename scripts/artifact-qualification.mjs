@@ -172,6 +172,24 @@ export const document = (fixture, mode) => {
                     ? pathToFileURL(join(output, path)).href
                     : `${origin}/${path}`
                 await page.goto(url)
+                const ids = await page
+                  .locator("[id]")
+                  .evaluateAll((nodes) => nodes.map((node) => node.id))
+                assert.equal(new Set(ids).size, ids.length, `${path}: duplicate HTML IDs`)
+                if (mode === "site" || (mode === "document" && reader === "heex")) {
+                  for (const id of [
+                    "doc-main",
+                    "doc-main-1",
+                    "doc-navigation",
+                    "doc-search-query",
+                    "doc-search-results",
+                    "doc-search-1-query",
+                  ])
+                    assert.equal(await page.locator(`article span[id="${id}"]`).count(), 1)
+                  const main = page.locator("main")
+                  assert.equal(await main.getAttribute("id"), "doc-main-2")
+                  assert.equal(await page.locator('a[href="#doc-main-2"]').count(), 1)
+                }
                 if (mode === "site" || mode === "missing") {
                   assert.equal(
                     await page

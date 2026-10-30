@@ -13,6 +13,7 @@ import {
 import { createServer } from "node:http"
 import { extname, join, resolve, sep } from "node:path"
 import { chromium } from "@playwright/test"
+import { assertShellContrast } from "./browser-contrast.mjs"
 import { qualifyConformance } from "./conformance-qualification.mjs"
 import { startHosted } from "./hosted-qualification.mjs"
 import { qualifySearch } from "./search-qualification.mjs"
@@ -239,6 +240,7 @@ const corpusPage = new URLSearchParams(window.location.search).get("corpus")
               exact: true,
             })
             .click()
+          await assertShellContrast(page, `${renderer}/${theme}/${width}`)
           assert.equal(
             await page.locator("[data-pa-doc-shell]").last().getAttribute("data-doc-theme"),
             theme,

@@ -55,6 +55,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       assigns =
         assigns
         |> assign(:passive?, artifact_page.passive?)
+        |> assign(:shell_ids, shell_ids(assigns.page.content))
         |> assign_new(:nonce, fn -> nil end)
         |> assign(:settings, Settings.get(assigns.context))
         |> assign(
@@ -85,8 +86,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
         dir={@direction}
       >
         <script :if={!@passive?} type="importmap" nonce={@nonce}><%= Phoenix.HTML.raw(@import_map) %></script>
-        <a class="doc-skip-link" href="#doc-main">{Settings.label(@settings, "skip", "Skip to documentation")}</a>
-        <.header context={@context} passive?={@passive?}>
+        <a class="doc-skip-link" href={"#" <> @shell_ids.main}>{Settings.label(@settings, "skip", "Skip to documentation")}</a>
+        <.header context={@context} passive?={@passive?} search_id={@shell_ids.search}>
           <:brand :for={brand <- @brand}>{render_slot(brand)}</:brand>
         </.header>
         <button
@@ -94,18 +95,18 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           type="button"
           class="pa-button doc-mobile-nav"
           data-doc-nav-toggle
-          aria-controls="doc-navigation"
+          aria-controls={@shell_ids.navigation}
           aria-expanded="false"
         >{Settings.label(@settings, "browse", "Browse documentation")}</button>
         <div class="doc-layout">
-          <aside :if={@passive?} id="doc-navigation" class="doc-sidebar" aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+          <aside :if={@passive?} id={@shell_ids.navigation} class="doc-sidebar" aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} presentation_metadata? />
           </aside>
-          <dialog :if={!@passive?} id="doc-navigation" class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
+          <dialog :if={!@passive?} id={@shell_ids.navigation} class="doc-sidebar" data-doc-nav open aria-label={Settings.label(@settings, "navigation", "Documentation navigation")}>
             <button type="button" class="pa-button" data-doc-nav-close hidden>{Settings.label(@settings, "close_navigation", "Close navigation")}</button>
             <.navigation items={@context.navigation} current_route={@page.route} settings={@settings} presentation_metadata? />
           </dialog>
-          <main id="doc-main" tabindex="-1" data-pagefind-body data-doc-template={@page.template}>
+          <main id={@shell_ids.main} tabindex="-1" data-pagefind-body data-doc-template={@page.template}>
             <.announcement :if={@page.banner} banner={@page.banner} />
             <.breadcrumbs items={@page.breadcrumbs} settings={@settings} />
             <header class="doc-page-header">
@@ -216,6 +217,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
 
     attr(:context, :any, required: true)
     attr(:passive?, :boolean, default: false)
+    attr(:search_id, :string, default: "doc-search")
     slot(:brand)
 
     @doc "Renders site identity, search, and reader theme controls."
@@ -236,7 +238,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
           {render_slot(@brand)}
         </div>
         <p :if={@passive?}>{Settings.label(@settings, "search_requires_js", "Search requires JavaScript; use navigation links.")}</p>
-        <.search :if={!@passive?} search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
+        <.search :if={!@passive?} id={@search_id} search={@context.search} label={Settings.label(@settings, "search", search_label(Map.get(@context, :locale)))} labels={Map.get(@settings, "labels", %{})} />
         <.destinations choices={Map.get(@settings, "locales", [])} label={Settings.label(@settings, "language", "Language")} locale? current_id={Map.get(@context, :locale)} />
         <.destinations choices={Map.get(@settings, "releases", [])} label={Settings.label(@settings, "release", "Version")} />
         <div :if={!@passive?} class="doc-theme-controls" aria-label={Settings.label(@settings, "reader_preferences", "Reader preferences")}>
@@ -343,6 +345,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     end
 
     attr(:search, :map, required: true)
+    attr(:id, :string, default: "doc-search")
     attr(:presentation, :atom, values: [:dialog, :inline], default: :dialog)
     attr(:trigger, :boolean, default: true)
     attr(:filter_values, :map, default: %{})
@@ -404,8 +407,8 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
       ~H"""
           <header :if={@header == []}><h2>{@label}</h2><button type="button" class="pa-button" data-doc-search-close>{@labels["close"] || "Close"}</button></header>
           {render_slot(@header)}
-          <label for="doc-search-query">{@label}</label>
-          <input id="doc-search-query" class="pa-field" type="search" role="combobox" autocomplete="off" aria-controls="doc-search-results" aria-expanded="true" data-doc-search-input />
+          <label for={@id <> "-query"}>{@label}</label>
+          <input id={@id <> "-query"} class="pa-field" type="search" role="combobox" autocomplete="off" aria-controls={@id <> "-results"} aria-expanded="true" data-doc-search-input />
           {render_slot(@controls)}
           <details class="doc-search-filters"><summary>{@labels["filters"] || "Filters"}</summary><div aria-label={@labels["search_filters"] || "Search filters"}>
             <label :for={{name, values} <- @filters}>
@@ -416,7 +419,7 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
             </label>
           </div></details>
           <p role="status" data-doc-search-status></p>
-          <ul id="doc-search-results" role="listbox" data-doc-search-results></ul>
+          <ul id={@id <> "-results"} role="listbox" data-doc-search-results></ul>
       """
     end
 
@@ -600,6 +603,33 @@ if Code.ensure_loaded?(DocShell.Presentation.Site) and Code.ensure_loaded?(Phoen
     defp current_branch?(item, route) do
       (item.path != "" and item.path == route) or
         Enum.any?(item.children, &current_branch?(&1, route))
+    end
+
+    defp shell_ids(nodes) do
+      occupied = nodes |> source_ids() |> MapSet.new()
+
+      %{
+        main: available_id("doc-main", occupied, [""]),
+        navigation: available_id("doc-navigation", occupied, [""]),
+        search: available_id("doc-search", occupied, ["-query", "-results"])
+      }
+    end
+
+    defp source_ids(nodes) when is_list(nodes), do: Enum.flat_map(nodes, &source_ids/1)
+
+    defp source_ids(%{"attrs" => attrs, "content" => content}) do
+      ids = if is_binary(attrs["id"]), do: [attrs["id"]], else: []
+      ids ++ source_ids(content)
+    end
+
+    defp source_ids(_), do: []
+
+    defp available_id(base, occupied, suffixes, attempt \\ 0) do
+      candidate = if attempt == 0, do: base, else: "#{base}-#{attempt}"
+
+      if Enum.any?(suffixes, &MapSet.member?(occupied, candidate <> &1)),
+        do: available_id(base, occupied, suffixes, attempt + 1),
+        else: candidate
     end
 
     defp search_filters(records, explicit) do

@@ -1,6 +1,7 @@
 import { createRawSnippet, flushSync, mount, tick, unmount } from "svelte"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import ApiReference from "../src/api-reference.svelte"
+import { jsonDigest, jsonProof } from "../src/artifact-json.js"
 import DocShell from "../src/doc-shell.svelte"
 import HostedReference from "../src/hosted-reference.svelte"
 import Search from "../src/search.svelte"
@@ -228,6 +229,50 @@ describe("rendered heading targets", () => {
 })
 
 describe("SiteShell browser controller ownership", () => {
+  it("keeps shell controls distinct from authored anchors, including suffix collisions", () => {
+    const element = target()
+    const page = site.pages["anchors:guide"]
+    if (!page) throw new Error("guide fixture missing")
+    const anchors = [
+      "doc-main",
+      "doc-main-1",
+      "doc-navigation",
+      "doc-search-query",
+      "doc-search-results",
+      "doc-search-1-query",
+    ]
+    const content = anchors.map((id) => ({ tag: "span", attrs: { id }, content: [id], meta: {} }))
+    const decorated = {
+      ...site,
+      pages: {
+        ...site.pages,
+        [page.id]: {
+          ...page,
+          content,
+          content_digest: jsonDigest(jsonProof(content)),
+          requirements: [],
+        },
+      },
+    }
+    mounted.push(mount(SiteShell, { target: element, props: { site: decorated, pageId: page.id } }))
+    flushSync()
+    const ids = [...element.querySelectorAll("[id]")].map((node) => node.id)
+    expect(new Set(ids).size).toBe(ids.length)
+    for (const anchor of anchors)
+      expect(element.querySelector(`article span[id="${anchor}"]`)?.textContent).toBe(anchor)
+    expect(element.querySelector(".skip-link")?.getAttribute("href")).toBe("#doc-main-2")
+    expect(element.querySelector("main")?.id).toBe("doc-main-2")
+    expect(element.querySelector("[data-doc-nav-toggle]")?.getAttribute("aria-controls")).toBe(
+      element.querySelector("[data-doc-nav]")?.id,
+    )
+    expect(element.querySelector("[data-doc-nav]")?.id).toBe("doc-navigation-1")
+    const query = element.querySelector<HTMLInputElement>("[data-doc-search-input]")
+    expect(query?.id).toBe("doc-search-2-query")
+    expect(element.querySelector(`label[for="${query?.id}"]`)).not.toBeNull()
+    expect(query?.getAttribute("aria-controls")).toBe(
+      element.querySelector("[data-doc-search-results]")?.id,
+    )
+  })
   it("renders splash hero, full banner, navigation metadata and page SEO without requiring controls", () => {
     const element = target()
     const page = site.pages["anchors:guide"]

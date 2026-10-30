@@ -15,6 +15,15 @@ true =
   Code.ensure_loaded?(ArtifactBlock) and function_exported?(ArtifactBlock, :verify_receipt, 2)
 
 inputs = producer_fixture |> File.read!() |> Jason.decode!() |> Map.fetch!("cases")
+
+collision_anchors =
+  Enum.map(
+    ~w(doc-main doc-main-1 doc-navigation doc-search-query doc-search-results doc-search-1-query),
+    fn id ->
+      %{"tag" => "span", "attrs" => %{"id" => id}, "content" => [], "meta" => %{}}
+    end
+  )
+
 destination = System.argv() |> List.last() |> Path.expand()
 File.mkdir_p!(destination)
 
@@ -44,12 +53,13 @@ fixtures =
           locale: input["observations"]["locale"],
           audience: "public",
           template: :document,
-          content: input["content"],
+          content: input["content"] ++ collision_anchors,
           content_digest: input["receipt"]["page_digest"],
           package_version: "1.0.0"
         }
 
-        {page.id, page}
+        {:ok, content_digest} = Canonical.digest(page.content)
+        {page.id, %{page | content_digest: content_digest}}
       end)
 
     chart_route = pages["chart"].route

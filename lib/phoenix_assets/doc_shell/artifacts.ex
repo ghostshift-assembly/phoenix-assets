@@ -130,8 +130,7 @@ defmodule PhoenixAssets.DocShell.Artifacts do
   defp profile?(_), do: false
   defp typed?(nodes) when is_list(nodes), do: Enum.any?(nodes, &typed?/1)
 
-  defp typed?(%{"tag" => "artifact", "meta" => meta}) when is_map(meta),
-    do: Map.has_key?(meta, "artifact")
+  defp typed?(%{"tag" => "artifact", "meta" => %{"artifact" => _}}), do: true
 
   defp typed?(%{"content" => content}), do: typed?(content)
   defp typed?(_), do: false

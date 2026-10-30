@@ -20,6 +20,7 @@ import {
 } from "./page-presentation.js"
 import { admitPresentation, presentationLabel } from "./presentation.js"
 import Search from "./search.svelte"
+import { shellIds } from "./shell-ids.js"
 import Sidebar from "./sidebar.svelte"
 import type { DocShellSite, PresentationDestination } from "./types.js"
 import { safeLinkTarget } from "./url.js"
@@ -97,6 +98,7 @@ const localeCurrent = (choice: PresentationDestination) => {
     ? choice.id === locale
     : choice.current
 }
+const ids = $derived(shellIds(page?.content ?? []))
 const metadata = $derived(pageMetadata(page, settings))
 const description = $derived(metadata.description)
 const homePath = $derived(
@@ -136,11 +138,11 @@ $effect(() => {
   dir={/^(ar|fa|he|ur)(?:[-_]|$)/i.test(page?.locale ?? site.default_locale) ? "rtl" : "ltr"}
   lang={page?.locale ?? site.default_locale}
 >
-  <a class="skip-link" href="#doc-main">{label("skip", "Skip to documentation")}</a>
+  <a class="skip-link" href={`#${ids.main}`}>{label("skip", "Skip to documentation")}</a>
   <header class="site-header">
     {#if brand}{@render brand(site)}{:else}<a href={settings.brand?.href ?? homePath} class="brand">{#if brandLogo && settings.brand?.logo}<img src={brandLogo} alt={settings.brand.logo.alt} />{/if}{settings.brand?.label ?? site.title}</a>{/if}
     {#if artifactPage.passive}<p data-doc-search-disabled>{label("search_requires_js", "Search requires JavaScript; use the navigation links.")}</p>{:else}
-    <Search entries={site.search} {navigate} contract={searchContract} label={label("search", searchLabel(page?.locale ?? site.default_locale))} labels={settings.labels} />
+    <Search id={ids.search} entries={site.search} {navigate} contract={searchContract} label={label("search", searchLabel(page?.locale ?? site.default_locale))} labels={settings.labels} />
     {/if}
     {#each [["locales", "language", "Language"], ["releases", "release", "Version"]] as [key, name, fallback]}
       {#if (key === "locales" ? settings.locales : settings.releases)?.length}<nav class="site-selector" aria-label={label(name ?? "", fallback ?? "")}><ul>{#each (key === "locales" ? settings.locales : settings.releases) ?? [] as choice (choice.id)}<li><a href={choice.href} aria-current={(key === "locales" ? localeCurrent(choice) : choice.current) ? "true" : undefined} hreflang={key === "locales" ? choice.id : undefined}>{choice.label}</a></li>{/each}</ul></nav>{/if}
@@ -151,12 +153,12 @@ $effect(() => {
       {/each}
     </div>{/if}
   </header>
-  {#if !artifactPage.passive}<button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls="doc-navigation" aria-expanded="false">{label("browse", "Browse documentation")}</button>{/if}
+  {#if !artifactPage.passive}<button type="button" class="pa-button mobile-nav" data-doc-nav-toggle aria-controls={ids.navigation} aria-expanded="false">{label("browse", "Browse documentation")}</button>{/if}
   <div class="site-layout">
-    {#if artifactPage.passive}<aside id="doc-navigation" class="sidebar" data-doc-passive><details open><summary>{label("navigation", "Documentation navigation")}</summary><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} label={label("documentation", "Documentation")} /></details></aside>{:else}
-    <dialog id="doc-navigation" class="sidebar" data-doc-nav open aria-label={label("navigation", "Documentation navigation")}><button type="button" class="pa-button" data-doc-nav-close hidden>{label("close_navigation", "Close navigation")}</button><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} {navigate} label={label("documentation", "Documentation")} /></dialog>
+    {#if artifactPage.passive}<aside id={ids.navigation} class="sidebar" data-doc-passive><details open><summary>{label("navigation", "Documentation navigation")}</summary><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} label={label("documentation", "Documentation")} /></details></aside>{:else}
+    <dialog id={ids.navigation} class="sidebar" data-doc-nav open aria-label={label("navigation", "Documentation navigation")}><button type="button" class="pa-button" data-doc-nav-close hidden>{label("close_navigation", "Close navigation")}</button><Sidebar presentationMetadata items={site.navigation} currentPath={page?.route ?? ""} {navigate} label={label("documentation", "Documentation")} /></dialog>
     {/if}
-    <main id="doc-main" tabindex="-1" data-pagefind-body data-doc-template={page?.template}>
+    <main id={ids.main} tabindex="-1" data-pagefind-body data-doc-template={page?.template}>
       {#if page}
         {#if page.banner}
           {#snippet bannerContent()}{#if page.banner?.label}<strong>{page.banner.label}</strong>{/if}{#if page.banner?.text}<p>{page.banner.text}</p>{/if}{/snippet}

@@ -104,6 +104,12 @@ describe("producer-admitted artifact receipts", () => {
   })
   it("refuses typed content with no receipt and leaves ordinary legacy AST alone", () => {
     expect(() => admitArtifactPage(fixture().content as DocAstNode[])).toThrow("receipt required")
+    for (const tag of ["artifact", "unknown", "section"])
+      expect(() =>
+        admitArtifactPage([
+          { tag, attrs: {}, meta: {}, content: fixture().content },
+        ] as DocAstNode[]),
+      ).toThrow("receipt required")
     expect(
       admitArtifactPage(["ordinary", { tag: "unknown", content: ["legacy"] }]).blocks.size,
     ).toBe(0)

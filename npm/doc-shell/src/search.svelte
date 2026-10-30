@@ -5,6 +5,7 @@ import type { SearchRecord } from "./browser/types.js"
 import type { SearchEntry, SiteSearchEntry } from "./types.js"
 
 interface Props {
+  id?: string
   entries: Array<SearchEntry | SiteSearchEntry>
   navigate?: (path: string) => void
   search?: (
@@ -16,7 +17,9 @@ interface Props {
   label?: string
   labels?: Record<string, string>
 }
+const uid = $props.id()
 const {
+  id = uid,
   entries,
   navigate,
   search,
@@ -25,7 +28,6 @@ const {
   label = "Search documentation",
   labels = {},
 }: Props = $props()
-const id = $props.id()
 let root = $state<HTMLElement>()
 const facets = $derived(
   (["locale", "collection", "version", "audience", "kind", "tag", "status"] as const)

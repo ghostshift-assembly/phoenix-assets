@@ -1,6 +1,7 @@
 import assert from "node:assert/strict"
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import { assertShellContrast } from "./browser-contrast.mjs"
 
 /** Normalize actual document output, retaining admitted text, routes and names. */
 async function surface(page) {
@@ -169,32 +170,7 @@ export async function qualifyConformance(browser, origin, output, hostedOrigin) 
               canvas && canvas.height >= 900,
               `${renderer}/${id}/${width}: short-page canvas must fill the viewport`,
             )
-            const contrast = await page
-              .getByRole("link", { name: "View source", exact: true })
-              .evaluate((link) => {
-                const luminance = (color) =>
-                  color
-                    .match(/[\d.]+/g)
-                    .slice(0, 3)
-                    .map(Number)
-                    .map((channel) => {
-                      const value = channel / 255
-                      return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4
-                    })
-                    .reduce((sum, value, index) => sum + value * [0.2126, 0.7152, 0.0722][index], 0)
-                const foreground = luminance(getComputedStyle(link).color)
-                const background = luminance(
-                  getComputedStyle(link.closest("[data-content-digest]")).backgroundColor,
-                )
-                return (
-                  (Math.max(foreground, background) + 0.05) /
-                  (Math.min(foreground, background) + 0.05)
-                )
-              })
-            assert.ok(
-              contrast >= 4.5,
-              `${renderer}/${id}/${theme}: source-link text contrast is ${contrast}`,
-            )
+            await assertShellContrast(page, `${renderer}/${id}/${theme}/${width}`)
             assert.ok(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
               `${renderer}/${id}/${width}: overflow`,
