@@ -15,6 +15,7 @@ export interface TryItTarget {
 }
 
 const CONTROL_OR_SPACE = /[\u0000-\u0020\u007f-\u009f]/g
+const ASCII_CONTROL = /[\u0000-\u001f\u007f]/
 const SCHEME = /^([a-z][a-z\d+.-]*):/i
 const NUMERIC_ENTITY = /&#(?:x([\da-f]+)|(\d+));?/gi
 
@@ -84,7 +85,8 @@ export function safeLinkTarget(
 
 /**
  * Resolves a try-it request without allowing an operation path to replace the
- * configured API origin. OpenAPI path keys are root-relative by contract.
+ * configured API origin. OpenAPI path keys are root-relative by contract;
+ * ASCII controls are refused before parsing and the parsed origin is checked.
  */
 export function resolveTryItTarget(
   baseUrl: string,
@@ -92,7 +94,12 @@ export function resolveTryItTarget(
   currentHref = browserHref(),
 ): TryItTarget {
   const path = operationPath.trim()
-  if (!path.startsWith("/") || hasSchemeRelativePrefix(path) || path.includes("\\")) {
+  if (
+    !path.startsWith("/") ||
+    hasSchemeRelativePrefix(path) ||
+    path.includes("\\") ||
+    ASCII_CONTROL.test(path)
+  ) {
     throw new Error("Try-it operation paths must be root-relative URLs")
   }
 
@@ -109,6 +116,9 @@ export function resolveTryItTarget(
 
   const prefix = base.pathname === "/" ? "" : base.pathname.replace(/\/$/, "")
   const destination = new URL(`${prefix}${path}`, base.origin)
+  if (destination.origin !== base.origin) {
+    throw new Error("Try-it operation paths must preserve the configured API origin")
+  }
 
   return {
     url: destination.href,

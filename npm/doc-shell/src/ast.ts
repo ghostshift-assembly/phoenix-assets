@@ -44,7 +44,7 @@ export const safeMediaTarget = (value: unknown): string | undefined => {
   return src?.startsWith("/") &&
     !src.startsWith("//") &&
     !src.includes("\\") &&
-    !src.includes("\u0000")
+    !/[\u0000-\u001f\u007f]/.test(src)
     ? src
     : undefined
 }

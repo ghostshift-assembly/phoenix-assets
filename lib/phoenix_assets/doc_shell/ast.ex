@@ -7,6 +7,12 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     labelled with `data-doc-shell-unknown`; they never become arbitrary HTML.
     Heading identifiers are accepted only from the projected AST and are not
     recalculated by the renderer.
+
+    Inline images accept root-relative URLs without backslashes or ASCII control
+    characters. This prevents browser URL normalization from turning a local
+    media path into an external request. Verified artifact media uses its own
+    receipt and byte-validation boundary. Hosts admit the documentation and own
+    authorization before invoking this renderer.
     """
 
     @elements ~w(p span ul ol li blockquote strong em b i table thead tbody tfoot tr th td code
@@ -547,9 +553,10 @@ if Code.ensure_loaded?(DocShell.Ast) and Code.ensure_loaded?(Phoenix.HTML) do
     defp safe_link(_), do: :error
 
     defp safe_media("/" <> _ = value) do
-      if String.starts_with?(value, "//") or String.contains?(value, ["\\", <<0>>]),
-        do: :error,
-        else: {:ok, value}
+      if String.starts_with?(value, "//") or String.contains?(value, "\\") or
+           Regex.match?(~r/[\x00-\x1f\x7f]/, value),
+         do: :error,
+         else: {:ok, value}
     end
 
     defp safe_media(_), do: :error

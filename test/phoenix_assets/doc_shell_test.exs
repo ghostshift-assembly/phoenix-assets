@@ -489,6 +489,20 @@ defmodule PhoenixAssets.DocShellTest do
     end
   end
 
+  test "browser-stripped controls cannot turn local media into an external request" do
+    for control <- ["\t", "\n", "\r"] do
+      nodes = [
+        node("img", [], %{"src" => "/#{control}/tracker.example.test/pixel", "alt" => "Diagram"})
+      ]
+
+      assert DocShell.Ast.valid?(nodes)
+      html = nodes |> Ast.render() |> HTML.safe_to_string()
+      assert html =~ "data-unsafe-media"
+      assert html =~ "Diagram"
+      refute html =~ "<img"
+    end
+  end
+
   test "repeated code and tab groups have deterministic unique identifiers and SSR panels" do
     code = node("pre", [node("code", ["same source"], %{"class" => "language-elixir"})])
 

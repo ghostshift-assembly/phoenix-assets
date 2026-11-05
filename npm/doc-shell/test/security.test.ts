@@ -125,6 +125,32 @@ describe("dynamic link policy", () => {
   })
 })
 
+describe("local media policy", () => {
+  it.each(["\t", "\n", "\r"])(
+    "refuses media paths that URL parsing can turn into another origin (%j)",
+    (control) => {
+      const element = target()
+      mounted.push(
+        mount(AstRenderer, {
+          target: element,
+          props: {
+            nodes: [
+              {
+                tag: "img",
+                attrs: { src: `/${control}/tracker.example.test/pixel`, alt: "Diagram" },
+                content: [],
+              },
+            ],
+          },
+        }),
+      )
+      flushSync()
+      expect(element.querySelector("img")).toBeNull()
+      expect(element.querySelector("[data-unsafe-media]")?.textContent).toBe("Diagram")
+    },
+  )
+})
+
 describe("try-it origin policy", () => {
   it.each([undefined, "", "   "])(
     "keeps request execution unavailable for an empty API base (%s)",
@@ -161,6 +187,45 @@ describe("try-it origin policy", () => {
     expect(isAllowedTryItOrigin("https://evil.example.test", ["https://api.example.test"])).toBe(
       false,
     )
+  })
+
+  it.each(["\t", "\n", "\r"])(
+    "rejects operation paths containing a browser-stripped control character (%j)",
+    (control) => {
+      for (const host of ["attacker.example.test", "docs.example.test"]) {
+        expect(() =>
+          resolveTryItTarget(
+            "https://api.example.test",
+            `/${control}/${host}/session-action`,
+            "https://docs.example.test/reference",
+          ),
+        ).toThrow(/root-relative/)
+      }
+    },
+  )
+
+  it("cannot turn a cross-origin API operation into a same-origin session request", () => {
+    const request = vi.fn()
+    const page = new URL(window.location.href)
+    const element = target()
+    mounted.push(
+      mount(TryIt, {
+        target: element,
+        props: {
+          entry: { ...operation(`/\t/${page.host}/session-action`), method: "POST" },
+          baseUrl: `${page.protocol}//api.example.test`,
+          allowedOrigins: [`${page.protocol}//api.example.test`],
+          request,
+        },
+      }),
+    )
+    openTryIt(element)
+
+    const send = element.querySelector<HTMLButtonElement>(".form > button")
+    expect(send?.disabled).toBe(true)
+    expect(element.querySelector('[role="alert"]')).not.toBeNull()
+    send?.click()
+    expect(request).not.toHaveBeenCalled()
   })
 
   it("sends same-origin requests without cross-origin credentials", async () => {
