@@ -18,7 +18,13 @@ it("reloads an imported catalog outside the Vite root after an edit", async () =
     root,
     logLevel: "silent",
     plugins: [poLoaderPlugin()],
-    server: { port: 0, hmr: false, fs: { allow: [directory] } },
+    // Exercise plugin invalidation with the same native fs.watch backend across platforms.
+    server: {
+      port: 0,
+      hmr: false,
+      watch: { useFsEvents: false, usePolling: false },
+      fs: { allow: [directory] },
+    },
   })
 
   try {

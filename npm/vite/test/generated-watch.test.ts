@@ -1,9 +1,13 @@
+import { once } from "node:events"
 import { mkdir, mkdtemp, realpath, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import path from "node:path"
 import { createServer } from "vite"
 import { expect, it, vi } from "vitest"
 import { phoenixAssets } from "../src/plugin"
+
+// Exercise plugin invalidation with the same native fs.watch backend across platforms.
+const watch = { useFsEvents: false, usePolling: false }
 
 it("boots with missing contracts and loads them after the first generation", async () => {
   const root = await realpath(await mkdtemp(path.join(tmpdir(), "pa-generated-boot-")))
@@ -16,11 +20,13 @@ it("boots with missing contracts and loads them after the first generation", asy
     root,
     logLevel: "silent",
     plugins: phoenixAssets(),
-    server: { port: 0, hmr: false },
+    server: { port: 0, hmr: false, watch },
   })
+  const ready = once(server.watcher, "ready")
 
   try {
     await server.listen()
+    await ready
     const initial = await server.ssrLoadModule("/main.js")
     expect(initial.routes).toEqual({})
     expect(initial.sessionRoute).toBeNull()
@@ -64,7 +70,7 @@ it.each([
     root,
     logLevel: "silent",
     plugins: phoenixAssets(options),
-    server: { port: 0, hmr: false },
+    server: { port: 0, hmr: false, watch },
   })
 
   try {
