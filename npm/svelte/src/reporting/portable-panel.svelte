@@ -1,5 +1,6 @@
 <script lang="ts">
-import { AreaChart, BarChart, LineChart, ScatterChart } from "layerchart"
+import { AreaChart, BarChart, LineChart, ScatterChart } from "layerchart/svg"
+import ChartAxes, { chartPadding } from "./chart-axes.svelte"
 import { type ChartDatum, compilePanel } from "./compile.js"
 import {
   DEFAULT_REPORTING_MESSAGES,
@@ -93,6 +94,12 @@ const toggleTable = () => {
 }
 </script>
 
+<!-- An empty axis snippet keeps LayerChart's baseline rule enabled. -->
+{#snippet svgAxis()}{/snippet}
+{#snippet abovePlot()}
+  <ChartAxes />
+{/snippet}
+
 <section class="pa-report-panel" aria-labelledby={titleId} aria-describedby={summaryId}>
   <header>
     <div>
@@ -126,14 +133,14 @@ const toggleTable = () => {
       </div>
     {:else if compiled.chartable && compiled.x && compiled.y && (compiled.kind === "line" || compiled.kind === "sparkline")}
       <div class:pa-report-sparkline={compiled.kind === "sparkline"} class="pa-report-chart" aria-hidden="true">
-        <LineChart data={compiled.data} x={compiled.x} y={compiled.y} {series} motion="none" />
+        <LineChart data={compiled.data} x={compiled.x} y={compiled.y} {series} axis={svgAxis} aboveContext={abovePlot} padding={chartPadding} motion="none" />
       </div>
     {:else if compiled.chartable && compiled.x && compiled.y && compiled.kind === "area"}
-      <div class="pa-report-chart" aria-hidden="true"><AreaChart data={compiled.data} x={compiled.x} y={compiled.y} {series} motion="none" /></div>
+      <div class="pa-report-chart" aria-hidden="true"><AreaChart data={compiled.data} x={compiled.x} y={compiled.y} {series} axis={svgAxis} aboveContext={abovePlot} padding={chartPadding} motion="none" /></div>
     {:else if compiled.chartable && compiled.x && compiled.y && compiled.kind === "bar"}
-      <div class="pa-report-chart" aria-hidden="true"><BarChart data={compiled.data} x={compiled.x} y={compiled.y} {series} seriesLayout={panel.visualization.stack === "normalized" ? "stackExpand" : panel.visualization.stack === "normal" ? "stack" : compiled.series ? "group" : "overlap"} motion="none" /></div>
+      <div class="pa-report-chart" aria-hidden="true"><BarChart data={compiled.data} x={compiled.x} y={compiled.y} {series} axis={svgAxis} aboveContext={abovePlot} padding={chartPadding} seriesLayout={panel.visualization.stack === "normalized" ? "stackExpand" : panel.visualization.stack === "normal" ? "stack" : compiled.series ? "group" : "overlap"} motion="none" /></div>
     {:else if compiled.chartable && compiled.x && compiled.y && compiled.kind === "scatter"}
-      <div class="pa-report-chart" aria-hidden="true"><ScatterChart data={compiled.data} x={compiled.x} y={compiled.y} {series} motion="none" /></div>
+      <div class="pa-report-chart" aria-hidden="true"><ScatterChart data={compiled.data} x={compiled.x} y={compiled.y} {series} axis={svgAxis} aboveContext={abovePlot} padding={chartPadding} motion="none" /></div>
     {:else if compiled.chartable && compiled.x && compiled.y && compiled.value && compiled.kind === "heatmap"}
       <div class="pa-report-chart" aria-hidden="true"><HeatmapChart {compiled} /></div>
     {:else if compiled.kind === "table"}
@@ -156,7 +163,7 @@ const toggleTable = () => {
 </section>
 
 <style>
-  .pa-report-panel { display: grid; gap: 1rem; min-width: 0; padding: var(--pa-report-panel-padding, 1rem); border: 1px solid var(--pa-report-border, color-mix(in srgb, currentColor 20%, transparent)); border-radius: var(--pa-report-radius, 0.75rem); background: var(--pa-report-surface, transparent); color: var(--pa-report-foreground, currentColor); }
+  .pa-report-panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 1rem; min-width: 0; overflow-wrap: anywhere; padding: var(--pa-report-panel-padding, 1rem); border: 1px solid var(--pa-report-border, color-mix(in srgb, currentColor 20%, transparent)); border-radius: var(--pa-report-radius, 0.75rem); background: var(--pa-report-surface, transparent); color: var(--pa-report-foreground, currentColor); }
   header { display: flex; align-items: start; justify-content: space-between; gap: 1rem; }
   h2, p { margin: 0; } h2 { font-size: 1rem; } header p { margin-block-start: 0.25rem; color: var(--pa-report-muted, color-mix(in srgb, currentColor 70%, transparent)); }
   .pa-report-summary { color: var(--pa-report-muted, color-mix(in srgb, currentColor 70%, transparent)); }

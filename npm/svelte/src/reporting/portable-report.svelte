@@ -62,11 +62,5 @@ const orderedPanels = $derived.by(() => {
   .pa-report-grid-panel { min-width: 0; grid-column: span var(--pa-report-panel-span, 6); }
   .pa-report-warning { padding: 0.75rem; border-inline-start: 0.25rem solid var(--pa-report-warning, currentColor); background: var(--pa-report-state-surface, color-mix(in srgb, currentColor 8%, transparent)); }
   @container (max-width: 48rem) { .pa-report-grid-panel { grid-column: 1 / -1; } }
-  @media (max-width: 48rem) {
-    .pa-report-grid-panel {
-      grid-column: 1 / -1;
-      content-visibility: auto;
-      contain-intrinsic-block-size: auto 24rem;
-    }
-  }
+  @media (max-width: 48rem) { .pa-report-grid-panel { grid-column: 1 / -1; } }
 </style>

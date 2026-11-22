@@ -77,14 +77,14 @@ const fieldIndexes = $derived(
 </div>
 
 <style>
-  .pa-report-table-wrap { max-width: 100%; overflow: auto; }
+  .pa-report-table-wrap { max-inline-size: 100%; overflow: auto; overflow-wrap: anywhere; }
   .pa-report-table { width: 100%; border-collapse: collapse; color: var(--pa-report-foreground, currentColor); font: inherit; }
   caption { padding: 0.5rem; text-align: start; font-weight: 600; }
-  th, td { padding: 0.5rem 0.75rem; border-block-end: 1px solid var(--pa-report-border, color-mix(in srgb, currentColor 20%, transparent)); text-align: start; white-space: nowrap; }
+  th, td { padding: 0.5rem 0.75rem; border-block-end: 1px solid var(--pa-report-border, color-mix(in srgb, currentColor 20%, transparent)); text-align: start; }
   th { font-weight: 600; }
-  button { min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--pa-report-border, currentColor); border-radius: 0.5rem; background: var(--pa-report-control, transparent); color: inherit; font: inherit; white-space: nowrap; }
+  button { min-height: 2.75rem; padding: 0.5rem 0.75rem; border: 1px solid var(--pa-report-border, currentColor); border-radius: 0.5rem; background: var(--pa-report-control, transparent); color: inherit; font: inherit; }
   button:focus-visible { outline: 2px solid var(--pa-report-focus, currentColor); outline-offset: 2px; }
   button:disabled { opacity: 0.5; }
-  .pa-report-pagination { display: flex; align-items: center; justify-content: flex-end; gap: 0.75rem; padding: 0.75rem; }
+  .pa-report-pagination { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 0.75rem; padding: 0.75rem; }
   .pa-report-table-wrap:focus-visible { outline: 2px solid var(--pa-report-focus, currentColor); outline-offset: 2px; }
 </style>

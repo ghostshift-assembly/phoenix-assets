@@ -1,5 +1,6 @@
 <script lang="ts">
-import { Chart, Rect } from "layerchart"
+import { Chart, Rect } from "layerchart/svg"
+import ChartAxes, { chartPadding } from "./chart-axes.svelte"
 import type { ChartDatum, CompiledPanel } from "./compile.js"
 
 let { compiled }: { compiled: CompiledPanel } = $props()
@@ -36,8 +37,13 @@ function heatColor(datum: ChartDatum): string {
       grid={false}
       rule={false}
       pointerEvents={false}
+      padding={chartPadding}
       motion="none"
     >
+      {#snippet axis()}{/snippet}
+      {#snippet aboveContext()}
+        <ChartAxes />
+      {/snippet}
       {#snippet marks({ context })}
         <Rect
           data={compiled.data}

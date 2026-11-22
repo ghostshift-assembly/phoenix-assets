@@ -15,6 +15,9 @@ describe("portable report components", () => {
 
     expect(target.innerHTML).toContain("<table")
     expect(target.querySelector("caption")?.textContent).toBe("Revenue")
+    const scrollRegion = target.querySelector<HTMLElement>('[role="region"]')
+    expect(scrollRegion?.getAttribute("aria-label")).toBe("Revenue data table")
+    expect(scrollRegion?.tabIndex).toBe(0)
     expect(target.textContent).toContain("12.50 SEK")
     expect(target.textContent).not.toContain("evaluated_at")
     unmount(component)
@@ -75,14 +78,19 @@ describe("portable report components", () => {
     unmount(failed)
   })
 
-  it("mounts the canonical LayerChart renderer for a valid line panel", () => {
+  it("mounts the SVG plot, HTML tick labels, and table fallback for a valid line panel", async () => {
     const target = document.createElement("div")
     const component = mount(PortablePanel, {
       target,
       props: { panel: panelFixture(), result: { state: "ok", frame: frameFixture() } },
     })
 
-    expect(target.querySelector(".pa-report-chart")).not.toBeNull()
+    await tick()
+    const chart = target.querySelector('.pa-report-chart[aria-hidden="true"]')
+    expect(chart?.querySelector("svg.lc-layout-svg")).not.toBeNull()
+    expect(chart?.querySelector(".pa-report-chart-axes div.lc-axis-tick-label")).not.toBeNull()
+    expect(chart?.querySelector("svg .lc-axis-tick-label")).toBeNull()
+    expect(target.querySelector("[hidden] table caption")?.textContent).toBe("Revenue")
     expect(target.textContent).not.toContain("A safe chart is unavailable")
     const panel = target.querySelector("section")
     const summaryId = panel?.getAttribute("aria-describedby")
