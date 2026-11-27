@@ -51,8 +51,8 @@ defmodule PhoenixAssets.MixProject do
 
   defp deps do
     [
-      {:phoenix, "~> 1.8"},
-      {:plug, "~> 1.14"},
+      {:phoenix, "~> 1.8 and >= 1.8.17"},
+      {:plug, "~> 1.20 and >= 1.20.4"},
       {:telemetry, "~> 1.1"},
       {:file_system, "~> 1.0"},
       # MuonTrap 2 replaces cgroup v1 with cgroup v2. We use only the stable
@@ -60,9 +60,9 @@ defmodule PhoenixAssets.MixProject do
       # both maintained majors while allowing new locks to select v2.
       {:muontrap, ">= 1.8.0 and < 3.0.0"},
       {:nimble_options, "~> 1.1"},
-      {:phoenix_live_view, "~> 1.1", optional: true},
+      {:phoenix_live_view, "~> 1.1.34 or ~> 1.2 and >= 1.2.14", optional: true},
       doc_shell_dependency(),
-      {:ash, "~> 3.37 and >= 3.37.2", optional: true},
+      {:ash, "~> 3.38 and >= 3.38.1", optional: true},
       # Ash TypeScript remains an optional generator integration. The host owns
       # its sync backend; qualification must not impose a production backend pin.
       {:ash_typescript, "~> 0.17", optional: true},

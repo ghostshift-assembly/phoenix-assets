@@ -100,7 +100,10 @@ runtime helpers, the documentation shell, and shared frontend lint tooling.
 
 ## Requirements
 
-- Elixir 1.20+ and Phoenix 1.8+.
+- Elixir 1.20+, Phoenix 1.8.17+, and Plug 1.20.4+.
+- The optional LiveView integration requires 1.1.34 or later in the 1.1 series,
+  or 1.2.14 or later in the 1.x series. The optional Ash integration requires
+  Ash 3.38.1 or later in the 3.x series.
 - Development supervision uses MuonTrap and requires macOS, Linux, or WSL2.
   Linux cgroups stop the whole process tree; macOS stops the immediate child.
   Production
